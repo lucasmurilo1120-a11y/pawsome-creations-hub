@@ -38,7 +38,7 @@ export function useInView<T extends HTMLElement = HTMLDivElement>(threshold = 0.
   useEffect(() => {
     const el = ref.current;
     if (!el || typeof IntersectionObserver === "undefined") return;
-    const io = new IntersectionObserver((entries) => setInView(entries[0].isIntersecting), {
+    const io = new IntersectionObserver((entries) => setInView(!!entries[0]?.isIntersecting), {
       threshold,
     });
     io.observe(el);
