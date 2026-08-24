@@ -85,7 +85,7 @@ export function Oferta() {
               <Cta
                 asChild
                 size="lg"
-                className={cn("mt-6 w-full", glow && "cta-glow")}
+                className={cn("mt-6 w-full", glow && "cta-sheen cta-sheen-play")}
                 onClick={() => track("checkout_clicked", { location: "oferta" })}
               >
                 <a href={CHECKOUT_URL}>{CTA_VARIANTS[ACTIVE_CTA]}</a>
