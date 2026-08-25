@@ -90,13 +90,16 @@ export function StickyCta() {
       <div className="flex items-center justify-between gap-3 px-4 py-2.5">
         <p className="text-[0.8rem] leading-tight font-semibold">
           100 Recetas <span className="text-muted-foreground">·</span> US$15
+          <span className="block text-[0.68rem] font-medium text-muted-foreground">
+            Pago único · Acceso inmediato
+          </span>
         </p>
         <Cta
           asChild
           size="sm"
           onClick={() => track("checkout_clicked", { location: "sticky_mobile" })}
         >
-          <a href={CHECKOUT_URL}>QUIERO ACCEDER</a>
+          <a href={CHECKOUT_URL}>Quiero acceso</a>
         </Cta>
       </div>
     </div>

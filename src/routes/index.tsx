@@ -73,11 +73,14 @@ function Index() {
         <Faq />
         <FinalCta />
       </main>
-      <footer className="border-t border-border px-5 py-10 text-center text-xs text-muted-foreground">
-        <p>Pastelería Canina · 100 Recetas</p>
-        <p className="mt-2">
-          Contenido informativo. No sustituye la orientación de un médico veterinario.
+      <footer className="border-t border-border px-5 py-12 text-center text-xs text-muted-foreground">
+        <p className="font-display text-base text-foreground">Pastelería Canina</p>
+        <p className="mt-1">Recetario digital · 100 recetas caseras</p>
+        <p className="mx-auto mt-4 max-w-md leading-relaxed">
+          Contenido informativo con fines educativos. No sustituye la orientación de un médico
+          veterinario.
         </p>
+        <p className="mt-4">© {new Date().getFullYear()} Pastelería Canina</p>
       </footer>
       <StickyCta />
       <TrueToasts />
