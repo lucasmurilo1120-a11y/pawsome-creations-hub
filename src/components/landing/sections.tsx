@@ -4,7 +4,14 @@ import finalImg from "@/assets/final-cta.jpg";
 import { cn } from "@/lib/utils";
 import { Cta, Reveal, SectionLabel } from "./primitives";
 import { CATEGORY_GRID, FAQS, HERO_CATEGORIES } from "./data";
-import { CHECKOUT_URL, REGULAR_PRICE, REVIEWS, track } from "@/lib/site-config";
+import {
+  ACTIVE_CTA,
+  CHECKOUT_URL,
+  CTA_VARIANTS,
+  REGULAR_PRICE,
+  REVIEWS,
+  track,
+} from "@/lib/site-config";
 
 export function Identificacion() {
   const cards = [
@@ -143,7 +150,7 @@ export function EligeReceta() {
             className="mt-4"
             onClick={() => track("checkout_clicked", { location: "elige_receta" })}
           >
-            <a href={CHECKOUT_URL}>Desbloquear las 100</a>
+            <a href={CHECKOUT_URL}>{CTA_VARIANTS[ACTIVE_CTA]}</a>
           </Cta>
         </div>
       </div>
@@ -300,10 +307,63 @@ export function FinalCta() {
               track("checkout_clicked", { location: "final" });
             }}
           >
-            <a href={CHECKOUT_URL}>QUIERO LAS 100 RECETAS</a>
+            <a href={CHECKOUT_URL}>{CTA_VARIANTS[ACTIVE_CTA]}</a>
           </Cta>
           <p className="mt-4 text-sm text-cream/85">{REGULAR_PRICE} · Pago único</p>
           <p className="text-xs text-cream/70">Acceso inmediato</p>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+/** Claridad de encaje: reduce fricción del tráfico frío. */
+export function ParaQuien() {
+  const si = [
+    "Amas a tu perro y quieres prepararle algo con tus propias manos",
+    "Quieres saber exactamente qué ingredientes le estás dando",
+    "Buscas ideas para su cumpleaños o momentos especiales",
+    "Prefieres recetas simples, con ingredientes de supermercado",
+  ];
+  const no = [
+    "Buscas un plan de alimentación completo o dieta veterinaria",
+    "Esperas recetas industriales con equipos profesionales",
+    "No tienes horno ni ganas de cocinar nunca",
+  ];
+  return (
+    <section className="mx-auto max-w-5xl px-5 py-16 md:px-8 md:py-24">
+      <Reveal>
+        <SectionLabel>Claridad</SectionLabel>
+        <h2 className="text-balance-tight mt-4 text-2xl sm:text-4xl">
+          Para que sepas exactamente qué estás recibiendo.
+        </h2>
+      </Reveal>
+      <div className="mt-9 grid gap-4 md:grid-cols-2">
+        <Reveal>
+          <div className="surface h-full rounded-3xl p-6">
+            <h3 className="text-base">Es para ti si…</h3>
+            <ul className="mt-4 space-y-3 text-sm leading-relaxed">
+              {si.map((t) => (
+                <li key={t} className="flex gap-3">
+                  <span className="text-primary">✓</span>
+                  <span>{t}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Reveal>
+        <Reveal delay={80}>
+          <div className="h-full rounded-3xl border border-border bg-muted/40 p-6">
+            <h3 className="text-base">No es para ti si…</h3>
+            <ul className="mt-4 space-y-3 text-sm leading-relaxed text-muted-foreground">
+              {no.map((t) => (
+                <li key={t} className="flex gap-3">
+                  <span>—</span>
+                  <span>{t}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </Reveal>
       </div>
     </section>

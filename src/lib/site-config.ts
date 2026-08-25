@@ -20,7 +20,6 @@ export const GUARANTEE_DAYS = 0;
 export const CHECKOUT_URL = "#oferta";
 
 export const RECIPE_COUNT = 100;
-export const PER_RECIPE_PRICE = "US$0,15";
 
 /** Prueba social: solo se muestra con datos reales del producto. */
 export const REVIEWS = {

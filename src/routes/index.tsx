@@ -11,6 +11,7 @@ import {
   Faq,
   FinalCta,
   Identificacion,
+  ParaQuien,
   PruebaSocial,
 } from "@/components/landing/sections";
 
@@ -65,6 +66,7 @@ function Index() {
         <RecetaDemo />
         <ComoFunciona />
         <EligeReceta />
+        <ParaQuien />
         <Confianza />
         <PruebaSocial />
         <Oferta />
