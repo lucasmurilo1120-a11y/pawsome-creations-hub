@@ -10,7 +10,6 @@ import {
   CHECKOUT_URL,
   CTA_VARIANTS,
   HEADLINE_VARIANTS,
-  PER_RECIPE_PRICE,
   REGULAR_PRICE,
   track,
 } from "@/lib/site-config";
@@ -70,7 +69,8 @@ export function Hero() {
           <div>
             <Reveal>
               <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card/80 px-3.5 py-1.5 text-xs font-medium text-muted-foreground">
-                <span className="tabular-nums">{count}</span> recetas fáciles de explorar
+                <span className="size-1.5 rounded-full bg-primary" />
+                Recetario digital · {count} recetas caseras
               </span>
             </Reveal>
 
@@ -118,9 +118,6 @@ export function Hero() {
                 </Cta>
                 <p className="mt-3 text-xs text-muted-foreground">Acceso completo · Pago único</p>
                 <p className="mt-4 font-display text-3xl">{REGULAR_PRICE}</p>
-                <p className="text-sm font-semibold text-primary">
-                  Solo {PER_RECIPE_PRICE} por receta
-                </p>
               </div>
             </Reveal>
           </div>

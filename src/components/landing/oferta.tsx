@@ -9,7 +9,6 @@ import {
   CTA_VARIANTS,
   GUARANTEE_DAYS,
   INSTALLMENT_TEXT,
-  PER_RECIPE_PRICE,
   PROMO_ACTIVE,
   PROMO_PRICE,
   RECIPE_COUNT,
@@ -66,7 +65,7 @@ export function Oferta() {
 
               <div className="mt-7 rounded-2xl bg-muted/60 p-5 text-center">
                 <p className="text-sm text-muted-foreground">
-                  {RECIPE_COUNT} recetas × {PER_RECIPE_PRICE} =
+                  Acceso completo a las {RECIPE_COUNT} recetas
                 </p>
                 <p className="mt-1 flex items-baseline justify-center gap-3">
                   {PROMO_ACTIVE && PROMO_PRICE && (
