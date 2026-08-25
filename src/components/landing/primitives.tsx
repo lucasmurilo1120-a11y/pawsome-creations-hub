@@ -11,7 +11,9 @@ export const ctaVariants = cva(
     variants: {
       variant: {
         primary:
-          "bg-[image:var(--gradient-cta)] text-primary-foreground shadow-[var(--shadow-cta)] hover:scale-[1.025] hover:shadow-[0_16px_38px_-14px_oklch(0.585_0.145_47/0.62)]",
+          "bg-[image:var(--gradient-cta)] text-primary-foreground shadow-[var(--shadow-cta)] hover:scale-[1.025] hover:shadow-[0_16px_38px_-14px_oklch(0.36_0.062_155/0.6)]",
+        honey:
+          "bg-[image:var(--gradient-honey)] text-cocoa shadow-[var(--shadow-cta)] hover:scale-[1.025]",
         soft: "surface text-foreground hover:scale-[1.02] hover:shadow-[var(--shadow-lift)]",
         ghost: "text-primary hover:bg-accent/60",
       },

@@ -20,7 +20,6 @@ export const GUARANTEE_DAYS = 0;
 export const CHECKOUT_URL = "#oferta";
 
 export const RECIPE_COUNT = 100;
-export const PER_RECIPE_PRICE = "US$0,15";
 
 /** Prueba social: solo se muestra con datos reales del producto. */
 export const REVIEWS = {
@@ -35,7 +34,7 @@ export const REALTIME_PURCHASES_ENABLED = false;
 
 /** Variantes de headline para pruebas A/B futuras. Activa: "A". */
 export const HEADLINE_VARIANTS = {
-  A: "100 formas de preparar algo especial para tu perro.",
+  A: "100 recetas caseras para preparar, con tus manos, algo que él nunca olvida.",
   B: "Prepara algo especial para tu perro, hecho por ti.",
   C: "Convierte ingredientes simples en momentos especiales para tu perro.",
 } as const;
@@ -43,7 +42,7 @@ export const HEADLINE_VARIANTS = {
 export const ACTIVE_HEADLINE: keyof typeof HEADLINE_VARIANTS = "A";
 
 export const CTA_VARIANTS = {
-  A: "QUIERO LAS 100 RECETAS",
+  A: "QUIERO ACCESO A LAS 100 RECETAS",
   B: "QUIERO ACCEDER AHORA",
 } as const;
 

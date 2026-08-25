@@ -28,9 +28,9 @@ const SAMPLE = {
 };
 
 const PORTIONS = [
-  { label: "Perro pequeño", factor: 0.5 },
-  { label: "Perro mediano", factor: 1 },
-  { label: "Perro grande", factor: 1.5 },
+  { label: "Media tanda", factor: 0.5 },
+  { label: "Tanda completa", factor: 1 },
+  { label: "Tanda doble", factor: 2 },
 ];
 
 /** Demostración del producto: tabs de receta + ajuste de cantidades. */
@@ -137,7 +137,7 @@ export function RecetaDemo() {
                       ))}
                     </ul>
                     <p className="mt-3 text-xs text-muted-foreground">
-                      Las cantidades se ajustan según el tamaño de tu perro.
+                      Cambia la tanda y las cantidades se recalculan solas.
                     </p>
                   </div>
                 )}
