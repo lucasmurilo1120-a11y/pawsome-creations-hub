@@ -10,14 +10,12 @@ export type CategoryKey = "galletas" | "snacks" | "cupcakes" | "pasteles" | "cum
 
 export const HERO_CATEGORIES: {
   key: CategoryKey;
-  emoji: string;
   label: string;
   image: string;
   examples: string[];
 }[] = [
   {
     key: "galletas",
-    emoji: "🍪",
     label: "Galletas",
     image: galletas,
     examples: [
@@ -28,7 +26,6 @@ export const HERO_CATEGORIES: {
   },
   {
     key: "snacks",
-    emoji: "🦴",
     label: "Snacks",
     image: snacks,
     examples: [
@@ -39,7 +36,6 @@ export const HERO_CATEGORIES: {
   },
   {
     key: "cupcakes",
-    emoji: "🧁",
     label: "Cupcakes",
     image: cupcakes,
     examples: [
@@ -50,14 +46,12 @@ export const HERO_CATEGORIES: {
   },
   {
     key: "pasteles",
-    emoji: "🎂",
     label: "Pasteles",
     image: pasteles,
     examples: ["Pastel de Carne y Avena", "Pastel de Banana", "Pastel de Zanahoria y Yogur"],
   },
   {
     key: "cumple",
-    emoji: "🎉",
     label: "Cumpleaños",
     image: cumple,
     examples: [
@@ -69,35 +63,75 @@ export const HERO_CATEGORIES: {
 ];
 
 export const CATEGORY_GRID: { name: string; hint: string; image: string }[] = [
-  { name: "Galletas", hint: "Calabaza, banana, pollo, avena", image: galletas },
-  { name: "Snacks y premios", hint: "Bocaditos para entrenar y consentir", image: snacks },
-  { name: "Cupcakes", hint: "Porciones pequeñas para ocasiones", image: cupcakes },
-  { name: "Pasteles", hint: "Preparaciones para compartir el momento", image: pasteles },
-  { name: "Cumpleaños", hint: "Para su día especial", image: cumple },
-  { name: "Recetas fáciles", hint: "Pocos ingredientes, pocos pasos", image: galletas },
-  { name: "Premium", hint: "Preparaciones más elaboradas", image: pasteles },
-  { name: "Especiales", hint: "Fechas, visitas y momentos únicos", image: cumple },
+  { name: "Galletas", hint: "Para tener un premio casero listo cuando quieras.", image: galletas },
+  {
+    name: "Snacks y premios",
+    hint: "Pequeñas preparaciones para variar los momentos del día.",
+    image: snacks,
+  },
+  {
+    name: "Cupcakes",
+    hint: "Porciones pequeñas que convierten cualquier momento en algo especial.",
+    image: cupcakes,
+  },
+  {
+    name: "Pasteles",
+    hint: "Cuando quieres preparar algo que se vea tan especial como se siente.",
+    image: pasteles,
+  },
+  {
+    name: "Cumpleaños",
+    hint: "Para celebrar el día en que también celebras que está contigo.",
+    image: cumple,
+  },
+  { name: "Fáciles", hint: "Cuando quieres empezar con algo simple.", image: galletas },
+  {
+    name: "Premium",
+    hint: "Preparaciones para cuando quieres ir un paso más allá.",
+    image: pasteles,
+  },
+  { name: "Especiales", hint: "Ideas para fechas y momentos diferentes.", image: cumple },
 ];
 
 export const FAQS = [
   {
     q: "¿Necesito saber cocinar?",
-    a: "No. Cada receta muestra los ingredientes, cantidades y preparación paso a paso.",
+    a: "No. Cada receta incluye ingredientes, cantidades y una preparación organizada paso a paso.",
   },
   {
-    q: "¿Son comidas completas para sustituir su alimentación habitual?",
-    a: "No. El producto está centrado en premios y preparaciones complementarias.",
+    q: "¿Son comidas completas?",
+    a: "No. Están planteadas como premios y preparaciones complementarias para perros adultos sanos. No sustituyen una alimentación completa y equilibrada.",
   },
   {
-    q: "¿Y si mi perro tiene alergia o alguna enfermedad?",
-    a: "Consulta con su veterinario antes de introducir nuevos ingredientes.",
+    q: "¿Qué pasa si mi perro tiene alergias o una enfermedad?",
+    a: "Consulta con su veterinario antes de introducir nuevos alimentos.",
   },
   {
-    q: "¿Dónde recibo las recetas?",
-    a: "Tendrás acceso digital a la plataforma después de la compra.",
+    q: "¿Puedo utilizarlo desde mi celular?",
+    a: "Sí. La plataforma está diseñada para celular, tablet y computadora.",
   },
   {
-    q: "¿El pago es mensual?",
-    a: "No. El precio indicado de US$15 corresponde a un pago único.",
+    q: "¿Puedo cambiar cuánto quiero preparar?",
+    a: "Sí. El ajustador recalcula las cantidades de los ingredientes según el rendimiento que elijas.",
+  },
+  {
+    q: "¿Puedo guardar mis favoritas?",
+    a: "Sí. Puedes marcar tus recetas favoritas para volver a ellas cuando quieras.",
+  },
+  {
+    q: "¿Puedo crear mi lista de compras?",
+    a: "Sí. La lista de compras agrupa los ingredientes de las recetas que elegiste.",
+  },
+  {
+    q: "¿Puedo calcular cuánto cuesta preparar una receta?",
+    a: "Sí. Registra el precio de tus ingredientes y la calculadora de costos estima el valor de cada preparación.",
+  },
+  {
+    q: "¿Dónde recibo mi acceso?",
+    a: "Después de la confirmación del pago recibes tu acceso digital para entrar a la plataforma.",
+  },
+  {
+    q: "¿Tengo que pagar cada mes?",
+    a: "No. US$15 es un único pago para el acceso incluido en esta oferta.",
   },
 ];
