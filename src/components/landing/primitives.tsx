@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { useReveal } from "@/hooks/use-reveal";
 
 export const ctaVariants = cva(
-  "relative inline-flex items-center justify-center overflow-hidden rounded-full font-semibold tracking-wide transition-all duration-300 ease-out select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.985] motion-reduce:transform-none",
+  "relative inline-flex items-center justify-center overflow-hidden rounded-[0.95rem] font-semibold tracking-wide transition-all duration-300 ease-out select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terracotta focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.985] motion-reduce:transform-none",
   {
     variants: {
       variant: {
@@ -18,9 +18,9 @@ export const ctaVariants = cva(
         ghost: "text-primary hover:bg-accent/60",
       },
       size: {
-        sm: "px-5 py-2.5 text-sm",
-        md: "px-7 py-3.5 text-[0.95rem]",
-        lg: "px-8 py-4 text-base sm:text-lg",
+        sm: "min-h-11 px-5 py-2.5 text-sm",
+        md: "min-h-[3.25rem] px-7 py-3.5 text-[0.95rem]",
+        lg: "min-h-[3.5rem] px-8 py-4 text-base sm:text-lg",
       },
     },
     defaultVariants: { variant: "primary", size: "md" },
