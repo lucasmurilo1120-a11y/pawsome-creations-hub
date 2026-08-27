@@ -1,23 +1,34 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { Hero } from "@/components/landing/hero";
-import { PromoBanner, ReadingProgress, StickyCta, TrueToasts } from "@/components/landing/chrome";
-import { ComoFunciona, RecetaDemo } from "@/components/landing/demo";
+import { ExplorarCategorias, Hero, TrustStrip } from "@/components/landing/hero";
+import {
+  Header,
+  PromoBanner,
+  ReadingProgress,
+  ScrollDepth,
+  StickyCta,
+  TrueToasts,
+} from "@/components/landing/chrome";
+import { RecetaDemo } from "@/components/landing/demo";
 import { Oferta } from "@/components/landing/oferta";
 import {
   Categorias,
+  Comparacion,
+  ComoFunciona,
   Confianza,
-  EligeReceta,
   Faq,
   FinalCta,
-  Identificacion,
+  Herramientas,
   ParaQuien,
+  PlataformaReveal,
+  Problema,
   PruebaSocial,
+  PuenteEmocional,
 } from "@/components/landing/sections";
 
 const TITLE = "Pastelería Canina — 100 Recetas Caseras para tu Perro";
 const DESCRIPTION =
-  "100 recetas caseras de galletas, snacks, cupcakes y pasteles para perros: ingredientes claros, cantidades exactas y paso a paso. Pago único de US$15.";
+  "Plataforma interactiva con 100 recetas caseras para perros: elige, ajusta las cantidades y prepara paso a paso desde el celular. Pago único de US$15.";
 const URL = "https://pawsome-creations-hub.lovable.app/";
 
 export const Route = createFileRoute("/")({
@@ -58,16 +69,23 @@ function Index() {
   return (
     <>
       <ReadingProgress />
+      <ScrollDepth />
       <PromoBanner />
+      <Header />
       <main>
         <Hero />
-        <Identificacion />
-        <Categorias />
+        <TrustStrip />
+        <ExplorarCategorias />
+        <PuenteEmocional />
+        <Problema />
+        <PlataformaReveal />
         <RecetaDemo />
         <ComoFunciona />
-        <EligeReceta />
-        <ParaQuien />
+        <Herramientas />
+        <Categorias />
+        <Comparacion />
         <Confianza />
+        <ParaQuien />
         <PruebaSocial />
         <Oferta />
         <Faq />
@@ -75,7 +93,7 @@ function Index() {
       </main>
       <footer className="border-t border-border px-5 py-12 text-center text-xs text-muted-foreground">
         <p className="font-display text-base text-foreground">Pastelería Canina</p>
-        <p className="mt-1">Recetario digital · 100 recetas caseras</p>
+        <p className="mt-1">Hecho por ti. Para quien siempre está contigo.</p>
         <p className="mx-auto mt-4 max-w-md leading-relaxed">
           Contenido informativo con fines educativos. No sustituye la orientación de un médico
           veterinario.

@@ -4,9 +4,8 @@ import { cn } from "@/lib/utils";
 import { Cta, Reveal, SectionLabel } from "./primitives";
 import { useInView } from "@/hooks/use-reveal";
 import {
-  ACTIVE_CTA,
   CHECKOUT_URL,
-  CTA_VARIANTS,
+  CTA_TEXT,
   GUARANTEE_DAYS,
   INSTALLMENT_TEXT,
   PROMO_ACTIVE,
@@ -19,9 +18,9 @@ import {
 const INCLUDED = [
   "100 recetas caseras organizadas por categoría",
   "Galletas, snacks, cupcakes, pasteles y especiales de cumpleaños",
-  "Ingredientes y cantidades exactas en cada receta",
-  "Preparación paso a paso, sin términos técnicos",
-  "Indicaciones de conservación y avisos cuando corresponde",
+  "Ajustador de cantidades según cuánto quieras preparar",
+  "Favoritas y lista de compras automática",
+  "Calculadora de costos por preparación",
   "Acceso digital inmediato desde el celular, tablet o computadora",
 ];
 
@@ -45,9 +44,9 @@ export function Oferta() {
     <section id="oferta" className="border-y border-border bg-cream">
       <div ref={ref} className="mx-auto max-w-3xl px-5 py-16 md:px-8 md:py-24">
         <Reveal>
-          <SectionLabel>La oferta</SectionLabel>
+          <SectionLabel>Tu acceso</SectionLabel>
           <h2 className="text-balance-tight mt-4 text-2xl sm:text-4xl">
-            {RECIPE_COUNT} recetas por el precio de un capricho cualquiera.
+            Todo esto está dentro de tu acceso.
           </h2>
         </Reveal>
 
@@ -75,7 +74,7 @@ export function Oferta() {
                   )}
                   <span className="font-display text-5xl">{price}</span>
                 </p>
-                <p className="mt-1 text-sm font-semibold">Pago único · Acceso inmediato</p>
+                <p className="mt-1 text-sm font-semibold">Pago único · Sin mensualidad</p>
                 {INSTALLMENT_TEXT && (
                   <p className="mt-1 text-xs text-muted-foreground">{INSTALLMENT_TEXT}</p>
                 )}
@@ -87,7 +86,7 @@ export function Oferta() {
                 className={cn("mt-6 w-full", glow && "cta-sheen cta-sheen-play")}
                 onClick={() => track("checkout_clicked", { location: "oferta" })}
               >
-                <a href={CHECKOUT_URL}>{CTA_VARIANTS[ACTIVE_CTA]}</a>
+                <a href={CHECKOUT_URL}>{CTA_TEXT}</a>
               </Cta>
 
               {GUARANTEE_DAYS > 0 && (
