@@ -1,49 +1,182 @@
 import { useState } from "react";
 
 import finalImg from "@/assets/final-cta.jpg";
+import emocionImg from "@/assets/emocion.jpg";
 import { cn } from "@/lib/utils";
 import { Cta, Reveal, SectionLabel } from "./primitives";
-import { CATEGORY_GRID, FAQS, HERO_CATEGORIES } from "./data";
+import { CATEGORY_GRID, FAQS } from "./data";
 import {
-  ACTIVE_CTA,
+  BRAND_SIGNATURE,
   CHECKOUT_URL,
-  CTA_VARIANTS,
+  CTA_TEXT,
+  RECIPE_COUNT,
   REGULAR_PRICE,
   REVIEWS,
   track,
 } from "@/lib/site-config";
 
-export function Identificacion() {
+/** Puente emocional: por qué preparar algo con tus manos importa. */
+export function PuenteEmocional() {
+  return (
+    <section className="border-y border-border bg-cream">
+      <div className="mx-auto grid max-w-6xl gap-8 px-5 py-16 md:grid-cols-2 md:items-center md:px-8 md:py-24">
+        <Reveal>
+          <img
+            src={emocionImg}
+            alt="Manos sirviendo galletas caseras a un perro en la cocina"
+            width={1200}
+            height={900}
+            loading="lazy"
+            decoding="async"
+            className="aspect-[4/3] w-full rounded-3xl object-cover shadow-[var(--shadow-lift)]"
+          />
+        </Reveal>
+        <Reveal delay={80}>
+          <SectionLabel>Por qué importa</SectionLabel>
+          <h2 className="text-balance-tight mt-4 text-2xl leading-snug sm:text-4xl">
+            Él no entiende de recetas. Entiende que te tomaste el tiempo.
+          </h2>
+          <p className="mt-5 leading-relaxed text-muted-foreground">
+            Te sigue a la cocina, se sienta y espera. No sabe qué estás preparando, pero sabe que
+            es para él. Ese momento no se compra hecho: se prepara.
+          </p>
+          <p className="mt-4 font-medium">{BRAND_SIGNATURE}</p>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+/** Problema real del tráfico frío. */
+export function Problema() {
   const cards = [
-    { t: "Sabes qué necesitas", d: "Ingredientes y cantidades claras." },
-    { t: "Sabes qué hacer", d: "Preparación organizada paso a paso." },
-    { t: "Sabes cómo guardarlo", d: "Información de conservación dentro de cada receta." },
+    {
+      t: "Recetas sueltas por todos lados",
+      d: "Guardadas en redes, imposibles de encontrar cuando de verdad quieres preparar algo.",
+    },
+    {
+      t: "Cantidades que no cuadran",
+      d: "Una dice tazas, otra gramos, y ninguna explica cuánto rinde realmente.",
+    },
+    {
+      t: "Dudas que frenan",
+      d: "¿Puede comer esto? ¿Cuánto dura? ¿Cómo lo guardo? Sin respuesta, no se prepara nada.",
+    },
+  ];
+  return (
+    <section className="mx-auto max-w-6xl px-5 py-16 md:px-8 md:py-24">
+      <Reveal>
+        <SectionLabel>El problema</SectionLabel>
+        <h2 className="text-balance-tight mt-4 text-2xl sm:text-4xl">
+          El problema nunca fue la falta de recetas.
+        </h2>
+        <p className="mt-3 text-muted-foreground">Fue la falta de claridad.</p>
+      </Reveal>
+      <div className="mt-9 grid gap-4 sm:grid-cols-3">
+        {cards.map((c, i) => (
+          <Reveal key={c.t} delay={i * 70}>
+            <div className="surface h-full rounded-2xl p-5">
+              <h3 className="text-base">{c.t}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{c.d}</p>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** Reveal verde profundo: no es otro libro de recetas. */
+export function PlataformaReveal() {
+  const acciones = [
+    "Elegir por categoría o por lo que tienes en casa",
+    "Ajustar cuánto quieres preparar y ver las cantidades cambiar",
+    "Seguir la preparación paso a paso desde el celular",
+    "Guardar tus recetas favoritas",
+    "Armar tu lista de compras automáticamente",
+    "Calcular cuánto te cuesta cada preparación",
+  ];
+  return (
+    <section className="bg-forest text-cream">
+      <div className="mx-auto max-w-5xl px-5 py-20 md:px-8 md:py-28">
+        <Reveal>
+          <p className="text-xs tracking-[0.18em] text-cream/60 uppercase">La diferencia</p>
+          <h2 className="text-balance-tight mt-4 text-2xl leading-snug sm:text-4xl">
+            No creamos otro libro de recetas. Creamos el lugar donde preparar deja de ser
+            complicado.
+          </h2>
+          <p className="mt-5 max-w-2xl leading-relaxed text-cream/80">
+            No es un PDF que abres una vez y olvidas. Es una plataforma que usas cada vez que
+            quieres prepararle algo.
+          </p>
+        </Reveal>
+        <div className="mt-10 grid gap-3 sm:grid-cols-2">
+          {acciones.map((a, i) => (
+            <Reveal key={a} delay={i * 50}>
+              <div className="flex gap-3 rounded-2xl border border-cream/15 bg-cream/5 p-4 text-sm leading-relaxed">
+                <span className="text-honey">✓</span>
+                <span>{a}</span>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/** Mecanismo simple en 3 pasos. */
+export function ComoFunciona() {
+  const steps = [
+    { n: "01", t: "Elige", d: "Entra, filtra por categoría y abre la receta que quieras hacer." },
+    { n: "02", t: "Ajusta", d: "Define cuánto quieres preparar y las cantidades se recalculan." },
+    { n: "03", t: "Prepara", d: "Sigue el paso a paso desde el celular, sin adivinar nada." },
+  ];
+  return (
+    <section className="mx-auto max-w-5xl px-5 py-16 md:px-8 md:py-24">
+      <Reveal>
+        <SectionLabel>Cómo funciona</SectionLabel>
+        <h2 className="text-balance-tight mt-4 text-2xl sm:text-4xl">Elige. Ajusta. Prepara.</h2>
+      </Reveal>
+      <div className="mt-9 grid gap-4 sm:grid-cols-3">
+        {steps.map((s, i) => (
+          <Reveal key={s.n} delay={i * 70}>
+            <div className="surface h-full rounded-2xl p-6">
+              <span className="font-display text-honey text-3xl">{s.n}</span>
+              <h3 className="mt-3 text-base">{s.t}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.d}</p>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** Herramientas incluidas dentro de la plataforma. */
+export function Herramientas() {
+  const tools = [
+    { t: "Ajustador de cantidades", d: "Cambia el rendimiento y los ingredientes se recalculan." },
+    { t: "Favoritas", d: "Marca lo que quieres volver a preparar." },
+    { t: "Lista de compras", d: "Agrupa los ingredientes de las recetas que elegiste." },
+    { t: "Calculadora de costos", d: "Registra precios y estima cuánto cuesta cada preparación." },
+    { t: "Búsqueda por categoría", d: "Galletas, snacks, cupcakes, pasteles y cumpleaños." },
   ];
   return (
     <section className="border-y border-border bg-cream">
-      <div className="mx-auto max-w-4xl px-5 py-16 md:px-8 md:py-24">
+      <div className="mx-auto max-w-6xl px-5 py-16 md:px-8 md:py-24">
         <Reveal>
-          <h2 className="text-balance-tight text-2xl leading-snug sm:text-4xl">
-            Si es parte de tu familia, sabes que a veces quieres darle algo más que “lo de
-            siempre”.
+          <SectionLabel>Herramientas</SectionLabel>
+          <h2 className="text-balance-tight mt-4 text-2xl sm:text-4xl">
+            Todo lo que necesitas, dentro de la misma plataforma.
           </h2>
         </Reveal>
-        <Reveal delay={80}>
-          <p className="mt-6 leading-relaxed text-muted-foreground">
-            Tal vez ya buscaste recetas para perros en internet. Una dice una cantidad, otra no
-            explica cómo conservarla y otra te hace preguntarte si realmente puedes utilizar ese
-            ingrediente.
-          </p>
-        </Reveal>
-        <Reveal delay={120}>
-          <p className="mt-4 font-medium">Por eso reunimos todo de una forma mucho más simple.</p>
-        </Reveal>
-        <div className="mt-10 grid gap-4 sm:grid-cols-3">
-          {cards.map((c, i) => (
-            <Reveal key={c.t} delay={140 + i * 70}>
+        <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {tools.map((t, i) => (
+            <Reveal key={t.t} delay={i * 60}>
               <div className="surface h-full rounded-2xl p-5">
-                <h3 className="text-base">{c.t}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{c.d}</p>
+                <h3 className="text-base">{t.t}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t.d}</p>
               </div>
             </Reveal>
           ))}
@@ -89,70 +222,43 @@ export function Categorias() {
   );
 }
 
-/** Microcompromiso: elige una receta que harías hoy. */
-export function EligeReceta() {
-  const options = HERO_CATEGORIES.slice(0, 3).map((c) => ({
-    label: c.examples[0]!,
-    image: c.image,
-  }));
-  const [chosen, setChosen] = useState<string | null>(null);
-
+/** Comparación honesta frente a buscar gratis en internet. */
+export function Comparacion() {
+  const rows = [
+    ["Encontrar la receta", "Buscar entre decenas de páginas", "Categorías organizadas"],
+    ["Cantidades", "Medidas confusas o incompletas", "Ingredientes y cantidades exactas"],
+    ["Cuánto preparar", "Cálculos a mano", "Ajustador automático"],
+    ["Conservación", "Casi nunca aparece", "Incluida en cada receta"],
+    ["Organización", "Capturas y links perdidos", "Favoritas y lista de compras"],
+  ];
   return (
     <section className="border-y border-border bg-cream">
-      <div className="mx-auto max-w-4xl px-5 py-16 md:px-8 md:py-20">
+      <div className="mx-auto max-w-4xl px-5 py-16 md:px-8 md:py-24">
         <Reveal>
-          <h2 className="text-center text-2xl sm:text-3xl">Elige una receta que harías hoy</h2>
+          <SectionLabel>Comparación</SectionLabel>
+          <h2 className="text-balance-tight mt-4 text-2xl sm:text-4xl">
+            Sí, puedes buscar gratis. La pregunta es cuánto tiempo te toma.
+          </h2>
         </Reveal>
-        <div className="mt-8 grid gap-4 sm:grid-cols-3">
-          {options.map((o, i) => (
-            <Reveal key={o.label} delay={i * 60}>
-              <button
-                onClick={() => {
-                  setChosen(o.label);
-                  track("recipe_demo_interacted", { recipe: o.label, widget: "elige_receta" });
-                }}
-                className={cn(
-                  "surface relative w-full overflow-hidden rounded-2xl text-left transition-all duration-300 ease-out hover:-translate-y-1 motion-reduce:hover:translate-y-0",
-                  chosen === o.label && "ring-2 ring-primary",
-                )}
+        <Reveal delay={80}>
+          <div className="surface mt-8 overflow-hidden rounded-3xl">
+            <div className="grid grid-cols-3 gap-3 border-b border-border bg-muted/50 px-5 py-3 text-xs font-semibold tracking-wide uppercase">
+              <span />
+              <span className="text-muted-foreground">Buscar por tu cuenta</span>
+              <span className="text-primary">Con la plataforma</span>
+            </div>
+            {rows.map(([label, a, b]) => (
+              <div
+                key={label}
+                className="grid grid-cols-3 gap-3 border-b border-border px-5 py-4 text-sm last:border-b-0"
               >
-                <img
-                  src={o.image}
-                  alt={o.label}
-                  width={800}
-                  height={800}
-                  loading="lazy"
-                  decoding="async"
-                  className="aspect-[4/3] w-full object-cover"
-                />
-                <span className="block px-4 py-3 text-sm font-medium">{o.label}</span>
-                {chosen === o.label && (
-                  <span className="absolute top-3 right-3 rounded-full bg-card/90 px-2 py-1 text-sm">
-                    ❤️
-                  </span>
-                )}
-              </button>
-            </Reveal>
-          ))}
-        </div>
-        <div
-          className={cn(
-            "mt-7 text-center transition-all duration-500",
-            chosen ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-2 opacity-0",
-          )}
-        >
-          <p className="text-sm font-medium">
-            Buena elección. Esta está incluida dentro de las 100 recetas.
-          </p>
-          <Cta
-            asChild
-            size="md"
-            className="mt-4"
-            onClick={() => track("checkout_clicked", { location: "elige_receta" })}
-          >
-            <a href={CHECKOUT_URL}>{CTA_VARIANTS[ACTIVE_CTA]}</a>
-          </Cta>
-        </div>
+                <span className="font-medium">{label}</span>
+                <span className="text-muted-foreground">{a}</span>
+                <span>{b}</span>
+              </div>
+            ))}
+          </div>
+        </Reveal>
       </div>
     </section>
   );
@@ -195,38 +301,57 @@ export function Confianza() {
   );
 }
 
-/** Solo se renderiza si existen reseñas reales del producto. */
+/** Encaje positivo. */
+export function ParaQuien() {
+  const si = [
+    "Amas a tu perro y quieres prepararle algo con tus propias manos",
+    "Quieres saber exactamente qué ingredientes le estás dando",
+    "Buscas ideas para su cumpleaños o momentos especiales",
+    "Prefieres recetas simples, con ingredientes de supermercado",
+    "Quieres todo organizado en un solo lugar, desde el celular",
+  ];
+  return (
+    <section className="border-y border-border bg-cream">
+      <div className="mx-auto max-w-4xl px-5 py-16 md:px-8 md:py-24">
+        <Reveal>
+          <SectionLabel>Para ti</SectionLabel>
+          <h2 className="text-balance-tight mt-4 text-2xl sm:text-4xl">Esto es para ti si…</h2>
+        </Reveal>
+        <Reveal delay={80}>
+          <ul className="surface mt-8 space-y-3.5 rounded-3xl p-6 text-sm leading-relaxed">
+            {si.map((t) => (
+              <li key={t} className="flex gap-3">
+                <span className="text-primary">✓</span>
+                <span>{t}</span>
+              </li>
+            ))}
+          </ul>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
 export function PruebaSocial() {
   if (!REVIEWS.enabled || REVIEWS.items.length === 0) return null;
   return (
-    <section className="mx-auto max-w-6xl px-5 py-16 md:px-8">
+    <section className="mx-auto max-w-6xl px-5 py-16 md:px-8 md:py-24">
       <Reveal>
-        <h2 className="text-2xl sm:text-4xl">Mira lo que están preparando</h2>
-        {REVIEWS.average !== null && REVIEWS.count !== null && (
-          <p className="mt-2 text-sm text-muted-foreground">
-            {REVIEWS.average} ★ · {REVIEWS.count} opiniones verificadas
-          </p>
-        )}
+        <SectionLabel>Personas reales</SectionLabel>
+        <h2 className="text-balance-tight mt-4 text-2xl sm:text-4xl">
+          Lo que dicen quienes ya están preparando.
+        </h2>
       </Reveal>
-      <div className="mt-8 grid gap-4 sm:grid-cols-3">
-        {REVIEWS.items.map((r) => (
-          <figure key={r.name + r.comment} className="surface overflow-hidden rounded-2xl">
-            {r.image && (
-              <img
-                src={r.image}
-                alt=""
-                loading="lazy"
-                decoding="async"
-                className="aspect-[4/3] w-full object-cover"
-              />
-            )}
-            <figcaption className="p-4 text-sm">
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {REVIEWS.items.map((r, i) => (
+          <Reveal key={r.name + r.country} delay={(i % 3) * 60}>
+            <figure className="surface h-full rounded-2xl p-5 text-sm leading-relaxed">
               <p>{r.comment}</p>
-              <p className="mt-2 text-xs text-muted-foreground">
+              <figcaption className="mt-3 text-xs text-muted-foreground">
                 {r.name} · {r.country}
-              </p>
-            </figcaption>
-          </figure>
+              </figcaption>
+            </figure>
+          </Reveal>
         ))}
       </div>
     </section>
@@ -291,13 +416,13 @@ export function FinalCta() {
         decoding="async"
         className="absolute inset-0 h-full w-full object-cover"
       />
-      <div className="absolute inset-0 bg-[linear-gradient(100deg,oklch(0.26_0.031_55/0.92)_0%,oklch(0.26_0.031_55/0.72)_55%,oklch(0.26_0.031_55/0.35)_100%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(100deg,oklch(0.32_0.06_155/0.94)_0%,oklch(0.32_0.06_155/0.78)_55%,oklch(0.32_0.06_155/0.4)_100%)]" />
       <div className="relative mx-auto max-w-3xl px-5 py-24 md:px-8 md:py-32">
         <Reveal>
           <h2 className="text-balance-tight max-w-xl text-3xl leading-tight text-cream sm:text-4xl">
             Él no sabe que estás a un clic de preparar algo especial.
           </h2>
-          <p className="mt-3 text-lg font-medium text-cream/85">Pero tú sí.</p>
+          <p className="mt-3 text-lg font-medium text-cream/85">{BRAND_SIGNATURE}</p>
           <Cta
             asChild
             size="lg"
@@ -307,63 +432,12 @@ export function FinalCta() {
               track("checkout_clicked", { location: "final" });
             }}
           >
-            <a href={CHECKOUT_URL}>{CTA_VARIANTS[ACTIVE_CTA]}</a>
+            <a href={CHECKOUT_URL}>{CTA_TEXT}</a>
           </Cta>
-          <p className="mt-4 text-sm text-cream/85">{REGULAR_PRICE} · Pago único</p>
+          <p className="mt-4 text-sm text-cream/85">
+            {REGULAR_PRICE} · Pago único · {RECIPE_COUNT} recetas
+          </p>
           <p className="text-xs text-cream/70">Acceso inmediato</p>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
-/** Claridad de encaje: reduce fricción del tráfico frío. */
-export function ParaQuien() {
-  const si = [
-    "Amas a tu perro y quieres prepararle algo con tus propias manos",
-    "Quieres saber exactamente qué ingredientes le estás dando",
-    "Buscas ideas para su cumpleaños o momentos especiales",
-    "Prefieres recetas simples, con ingredientes de supermercado",
-  ];
-  const no = [
-    "Buscas un plan de alimentación completo o dieta veterinaria",
-    "Esperas recetas industriales con equipos profesionales",
-    "No tienes horno ni ganas de cocinar nunca",
-  ];
-  return (
-    <section className="mx-auto max-w-5xl px-5 py-16 md:px-8 md:py-24">
-      <Reveal>
-        <SectionLabel>Claridad</SectionLabel>
-        <h2 className="text-balance-tight mt-4 text-2xl sm:text-4xl">
-          Para que sepas exactamente qué estás recibiendo.
-        </h2>
-      </Reveal>
-      <div className="mt-9 grid gap-4 md:grid-cols-2">
-        <Reveal>
-          <div className="surface h-full rounded-3xl p-6">
-            <h3 className="text-base">Es para ti si…</h3>
-            <ul className="mt-4 space-y-3 text-sm leading-relaxed">
-              {si.map((t) => (
-                <li key={t} className="flex gap-3">
-                  <span className="text-primary">✓</span>
-                  <span>{t}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </Reveal>
-        <Reveal delay={80}>
-          <div className="h-full rounded-3xl border border-border bg-muted/40 p-6">
-            <h3 className="text-base">No es para ti si…</h3>
-            <ul className="mt-4 space-y-3 text-sm leading-relaxed text-muted-foreground">
-              {no.map((t) => (
-                <li key={t} className="flex gap-3">
-                  <span>—</span>
-                  <span>{t}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
         </Reveal>
       </div>
     </section>
