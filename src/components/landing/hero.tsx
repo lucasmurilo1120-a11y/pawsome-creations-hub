@@ -3,12 +3,11 @@ import { useState } from "react";
 import heroImg from "@/assets/hero.jpg";
 import { cn } from "@/lib/utils";
 import { Cta, Reveal } from "./primitives";
-import { HERO_CATEGORIES, type CategoryKey } from "./data";
+import { CATEGORIES, type CategoryKey } from "./data";
 import {
   BRAND_SIGNATURE,
   CTA_TEXT,
   RECIPE_COUNT,
-  REGULAR_PRICE,
   getCheckoutUrl,
   track,
 } from "@/lib/site-config";
@@ -21,6 +20,7 @@ const BENEFITS = [
 ];
 
 const HERO_TAGS = [`${RECIPE_COUNT} recetas`, "Paso a paso", "Ajusta cantidades"];
+
 
 export function Hero() {
   return (
