@@ -85,6 +85,15 @@
   --border: oklch(0.89 0.02 78);
   --input: oklch(0.89 0.02 78);
   --ring: var(--brand);
+
+  /* illustration-only tokens for the paper-doll character art (customizer) */
+  --skin: #f4cda3;
+  --skin-shade: #e8a26f;
+  --skin-ear: #f0c49a;
+  --hair-nino: #6b4326;
+  --hair-nina: #6b3a28;
+  --green: oklch(0.72 0.15 145);
+  --sky: oklch(0.75 0.11 220);
 }
 
 @layer base {
