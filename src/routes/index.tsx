@@ -81,7 +81,14 @@ type HeadKey =
   | "coroa"
   | "elmo-guerreiro";
 
-type HandKey = "ninguno" | "luneta-pirata" | "varinha-magica" | "espada-guerreiro" | "escudo-heroi";
+type HandKey =
+  | "ninguno"
+  | "luneta-pirata"
+  | "varinha-magica"
+  | "espada-guerreiro"
+  | "escudo-heroi"
+  | "cetro-real"
+  | "arma-astronauta";
 
 type CapeKey =
   | "ninguno"
@@ -113,6 +120,8 @@ const HAND_PIECES: Piece<HandKey>[] = [
   { key: "varinha-magica", label: "Varita mágica", img: "/piezas/varinha-magica.webp" },
   { key: "espada-guerreiro", label: "Espada", img: "/piezas/espada-guerreiro.webp" },
   { key: "escudo-heroi", label: "Escudo", img: "/piezas/escudo-heroi.webp" },
+  { key: "cetro-real", label: "Cetro real", img: "/piezas/cetro-real.webp" },
+  { key: "arma-astronauta", label: "Arma espacial", img: "/piezas/arma-astronauta.webp" },
 ];
 
 const CAPE_PIECES: Piece<CapeKey>[] = [
