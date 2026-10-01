@@ -25,13 +25,16 @@ export const Route = createFileRoute("/")({
 
 // ---------------------------------------------------------------------------
 // Option data — plan Básico: 2 personajes base x 4 temas ilustrados (+ "Sin
-// tema"). Cada combinación es una ilustración completa generada por IA
-// (pelo, ropa y accesorios ya combinados) — no un doll armado pieza por
-// pieza, así que no hay guardarropa modular acá.
+// tema"). Dos formas de jugar con la vista previa:
+//   1) "Looks completos": una ilustración entera por personaje x tema.
+//   2) "Armá tu combo": accesorios sueltos (cabeza / mano / capa) que se
+//      combinan libremente entre sí y entre personajes, superpuestos sobre
+//      el personaje base.
 // ---------------------------------------------------------------------------
 
 type Character = "nino" | "nina";
 type ThemeKey = "ninguno" | "superheroe" | "pirata" | "astronauta" | "mago";
+type Mode = "looks" | "combo";
 
 const CHARACTERS: { key: Character; label: string; emoji: string }[] = [
   { key: "nino", label: "Niño", emoji: "👦" },
@@ -65,6 +68,60 @@ const CHARACTER_IMAGES: Record<Character, Record<ThemeKey, string>> = {
 };
 
 // ---------------------------------------------------------------------------
+// Piezas sueltas — mismos accesorios sirven para niño y niña, y se pueden
+// mezclar sin importar de qué tema vinieron originalmente.
+// ---------------------------------------------------------------------------
+
+type HeadKey =
+  | "ninguno"
+  | "mascara-heroi"
+  | "bandana-pirata"
+  | "capacete-astronauta"
+  | "chapeu-mago"
+  | "coroa"
+  | "elmo-guerreiro"
+  | "orelhas-rabo-cachorro";
+
+type HandKey = "ninguno" | "luneta-pirata" | "varinha-magica" | "espada-guerreiro" | "escudo-heroi";
+
+type CapeKey = "ninguno" | "capa-heroi" | "colete-pirata" | "manto-mago" | "manto-gala";
+
+type Piece<K extends string> = { key: K; label: string; img?: string };
+
+const HEAD_PIECES: Piece<HeadKey>[] = [
+  { key: "ninguno", label: "Ninguno" },
+  { key: "mascara-heroi", label: "Máscara de héroe", img: "/piezas/mascara-heroi.webp" },
+  { key: "bandana-pirata", label: "Bandana pirata", img: "/piezas/bandana-pirata.webp" },
+  { key: "capacete-astronauta", label: "Casco espacial", img: "/piezas/capacete-astronauta.webp" },
+  { key: "chapeu-mago", label: "Sombrero de mago", img: "/piezas/chapeu-mago.webp" },
+  { key: "coroa", label: "Corona", img: "/piezas/coroa.webp" },
+  { key: "elmo-guerreiro", label: "Casco de guerrero", img: "/piezas/elmo-guerreiro.webp" },
+  { key: "orelhas-rabo-cachorro", label: "Orejas y cola", img: "/piezas/orelhas-rabo-cachorro.webp" },
+];
+
+const HAND_PIECES: Piece<HandKey>[] = [
+  { key: "ninguno", label: "Ninguno" },
+  { key: "luneta-pirata", label: "Catalejo", img: "/piezas/luneta-pirata.webp" },
+  { key: "varinha-magica", label: "Varita mágica", img: "/piezas/varinha-magica.webp" },
+  { key: "espada-guerreiro", label: "Espada", img: "/piezas/espada-guerreiro.webp" },
+  { key: "escudo-heroi", label: "Escudo", img: "/piezas/escudo-heroi.webp" },
+];
+
+const CAPE_PIECES: Piece<CapeKey>[] = [
+  { key: "ninguno", label: "Ninguno" },
+  { key: "capa-heroi", label: "Capa de héroe", img: "/piezas/capa-heroi.webp" },
+  { key: "colete-pirata", label: "Chaleco pirata", img: "/piezas/colete-pirata.webp" },
+  { key: "manto-mago", label: "Manto de mago", img: "/piezas/manto-mago.webp" },
+  { key: "manto-gala", label: "Manto de gala", img: "/piezas/manto-gala.webp" },
+];
+
+// Zonas de superposición (en % del escenario, que respeta la proporción de
+// la ilustración base) para cada categoría de pieza.
+const HEAD_ZONE = { top: "1%", left: "23%", width: "54%", height: "37%" };
+const HAND_ZONE = { top: "53%", left: "57%", width: "38%", height: "27%" };
+const CAPE_ZONE = { top: "21%", left: "11%", width: "78%", height: "64%" };
+
+// ---------------------------------------------------------------------------
 // Page
 // ---------------------------------------------------------------------------
 
@@ -90,15 +147,125 @@ function ThemePicker({ value, onChange }: { value: ThemeKey; onChange: (key: The
   );
 }
 
+function PieceSwatches<K extends string>({
+  options,
+  value,
+  onChange,
+}: {
+  options: Piece<K>[];
+  value: K;
+  onChange: (key: K) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map((opt) => (
+        <button
+          key={opt.key}
+          type="button"
+          onClick={() => onChange(opt.key)}
+          title={opt.label}
+          aria-label={opt.label}
+          aria-pressed={value === opt.key}
+          className={`flex size-14 shrink-0 items-center justify-center rounded-xl border-2 bg-surface p-1.5 transition-colors ${
+            value === opt.key ? "border-brand shadow-cta" : "border-border hover:bg-mist"
+          }`}
+        >
+          {opt.img ? (
+            <img src={opt.img} alt={opt.label} className="max-h-full max-w-full object-contain" />
+          ) : (
+            <span className="text-lg text-muted-foreground" aria-hidden>
+              ✕
+            </span>
+          )}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function ModeTabs({ value, onChange }: { value: Mode; onChange: (m: Mode) => void }) {
+  const tabs: { key: Mode; label: string }[] = [
+    { key: "looks", label: "Looks completos" },
+    { key: "combo", label: "Armá tu combo" },
+  ];
+  return (
+    <div className="inline-flex gap-1 rounded-full border border-border bg-surface p-1">
+      {tabs.map((t) => (
+        <button
+          key={t.key}
+          type="button"
+          onClick={() => onChange(t.key)}
+          className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
+            value === t.key ? "bg-brand text-primary-foreground shadow-cta" : "text-foreground hover:bg-mist"
+          }`}
+        >
+          {t.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function ComboStage({
+  character,
+  head,
+  hand,
+  cape,
+}: {
+  character: Character;
+  head: HeadKey;
+  hand: HandKey;
+  cape: CapeKey;
+}) {
+  const baseSrc = CHARACTER_IMAGES[character].ninguno;
+  const headPiece = HEAD_PIECES.find((p) => p.key === head);
+  const handPiece = HAND_PIECES.find((p) => p.key === hand);
+  const capePiece = CAPE_PIECES.find((p) => p.key === cape);
+
+  return (
+    <div className="relative aspect-[370/396] w-full">
+      <img src={baseSrc} alt="" className="absolute inset-0 h-full w-full object-contain" />
+      {capePiece?.img && (
+        <div className="absolute flex items-center justify-center" style={CAPE_ZONE}>
+          <img src={capePiece.img} alt={capePiece.label} className="max-h-full max-w-full object-contain" />
+        </div>
+      )}
+      {handPiece?.img && (
+        <div className="absolute flex items-center justify-center" style={HAND_ZONE}>
+          <img src={handPiece.img} alt={handPiece.label} className="max-h-full max-w-full object-contain" />
+        </div>
+      )}
+      {headPiece?.img && (
+        <div className="absolute flex items-center justify-center" style={HEAD_ZONE}>
+          <img src={headPiece.img} alt={headPiece.label} className="max-h-full max-w-full object-contain" />
+        </div>
+      )}
+    </div>
+  );
+}
+
 function CreatorApp() {
+  const [mode, setMode] = useState<Mode>("looks");
   const [character, setCharacter] = useState<Character>("nino");
   const [theme, setTheme] = useState<ThemeKey>("ninguno");
 
+  const [head, setHead] = useState<HeadKey>("ninguno");
+  const [hand, setHand] = useState<HandKey>("ninguno");
+  const [cape, setCape] = useState<CapeKey>("ninguno");
+
   const summary = useMemo(() => {
     const c = CHARACTERS.find((x) => x.key === character)!.label;
-    const t = THEMES.find((x) => x.key === theme)!.label;
-    return theme === "ninguno" ? c : `${c} · ${t}`;
-  }, [character, theme]);
+    if (mode === "looks") {
+      const t = THEMES.find((x) => x.key === theme)!.label;
+      return theme === "ninguno" ? c : `${c} · ${t}`;
+    }
+    const parts = [
+      HEAD_PIECES.find((p) => p.key === head)!.label,
+      HAND_PIECES.find((p) => p.key === hand)!.label,
+      CAPE_PIECES.find((p) => p.key === cape)!.label,
+    ].filter((label) => label !== "Ninguno");
+    return parts.length ? `${c} · ${parts.join(" + ")}` : c;
+  }, [mode, character, theme, head, hand, cape]);
 
   const imageSrc = CHARACTER_IMAGES[character][theme];
 
@@ -115,7 +282,7 @@ function CreatorApp() {
         <div className="mb-8 max-w-2xl">
           <p className="text-sm font-semibold text-brand">Tu kit, a tu manera</p>
           <h1 className="mt-2 font-display text-3xl font-semibold text-balance text-foreground sm:text-4xl">
-            Elegí el personaje y el tema — y mirá tu héroe cobrar vida
+            Elegí un look completo, o armá tu propia combinación
           </h1>
           <p className="mt-3 leading-relaxed text-muted-foreground">
             Esto es una vista previa interactiva. Tu kit para imprimir incluye los 2 personajes base, los 4 temas
@@ -123,15 +290,25 @@ function CreatorApp() {
           </p>
         </div>
 
+        <div className="mb-6">
+          <ModeTabs value={mode} onChange={setMode} />
+        </div>
+
         <div className="grid gap-8 md:grid-cols-[minmax(0,320px)_1fr] md:items-start">
           {/* Preview */}
           <div className="mx-auto w-full max-w-[280px] md:mx-0">
             <div className="flex aspect-[5/8] items-center justify-center rounded-3xl bg-surface p-4 shadow-lift">
-              <img
-                src={imageSrc}
-                alt={`Ilustración de ${summary}`}
-                className="max-h-full max-w-full object-contain"
-              />
+              {mode === "looks" ? (
+                <img
+                  src={imageSrc}
+                  alt={`Ilustración de ${summary}`}
+                  className="max-h-full max-w-full object-contain"
+                />
+              ) : (
+                <div className="w-full max-w-[220px]">
+                  <ComboStage character={character} head={head} hand={hand} cape={cape} />
+                </div>
+              )}
             </div>
             <p className="mt-3 text-center text-sm font-semibold text-brand-deep">{summary}</p>
           </div>
@@ -159,15 +336,41 @@ function CreatorApp() {
               </div>
             </div>
 
-            <div>
-              <p className="mb-2 text-sm font-semibold text-foreground">Tema</p>
-              <ThemePicker value={theme} onChange={setTheme} />
-            </div>
+            {mode === "looks" ? (
+              <>
+                <div>
+                  <p className="mb-2 text-sm font-semibold text-foreground">Tema</p>
+                  <ThemePicker value={theme} onChange={setTheme} />
+                </div>
 
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              Cada tema es una ilustración completa —pelo, ropa y accesorios ya combinados por nuestro equipo—
-              lista para imprimir y recortar.
-            </p>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  Cada tema es una ilustración completa —pelo, ropa y accesorios ya combinados por nuestro equipo—
+                  lista para imprimir y recortar.
+                </p>
+              </>
+            ) : (
+              <>
+                <div>
+                  <p className="mb-2 text-sm font-semibold text-foreground">Cabeza</p>
+                  <PieceSwatches options={HEAD_PIECES} value={head} onChange={setHead} />
+                </div>
+
+                <div>
+                  <p className="mb-2 text-sm font-semibold text-foreground">Mano</p>
+                  <PieceSwatches options={HAND_PIECES} value={hand} onChange={setHand} />
+                </div>
+
+                <div>
+                  <p className="mb-2 text-sm font-semibold text-foreground">Capa / Vestimenta</p>
+                  <PieceSwatches options={CAPE_PIECES} value={cape} onChange={setCape} />
+                </div>
+
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  Combiná cada accesorio como quieras: el sombrero de un tema con la capa de otro — ¡la combinación
+                  es toda tuya!
+                </p>
+              </>
+            )}
           </div>
         </div>
 
