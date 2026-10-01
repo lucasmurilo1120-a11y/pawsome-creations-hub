@@ -79,8 +79,7 @@ type HeadKey =
   | "capacete-astronauta"
   | "chapeu-mago"
   | "coroa"
-  | "elmo-guerreiro"
-  | "orelhas-rabo-cachorro";
+  | "elmo-guerreiro";
 
 type HandKey = "ninguno" | "luneta-pirata" | "varinha-magica" | "espada-guerreiro" | "escudo-heroi";
 
@@ -96,7 +95,6 @@ const HEAD_PIECES: Piece<HeadKey>[] = [
   { key: "chapeu-mago", label: "Sombrero de mago", img: "/piezas/chapeu-mago.webp" },
   { key: "coroa", label: "Corona", img: "/piezas/coroa.webp" },
   { key: "elmo-guerreiro", label: "Casco de guerrero", img: "/piezas/elmo-guerreiro.webp" },
-  { key: "orelhas-rabo-cachorro", label: "Orejas y cola", img: "/piezas/orelhas-rabo-cachorro.webp" },
 ];
 
 const HAND_PIECES: Piece<HandKey>[] = [
