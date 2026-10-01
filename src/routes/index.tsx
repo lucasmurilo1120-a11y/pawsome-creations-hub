@@ -121,6 +121,14 @@ const HEAD_ZONE = { top: "1%", left: "23%", width: "54%", height: "37%" };
 const HAND_ZONE = { top: "53%", left: "57%", width: "38%", height: "27%" };
 const CAPE_ZONE = { top: "21%", left: "11%", width: "78%", height: "64%" };
 
+// Tamaño natural de cada ilustración base — se usa como atributo width/height
+// del <img> para que el navegador reserve el alto correcto (vía su propio
+// aspect ratio) sin depender de la utilidad CSS aspect-ratio.
+const CHARACTER_NATURAL_SIZE: Record<Character, { w: number; h: number }> = {
+  nino: { w: 370, h: 396 },
+  nina: { w: 376, h: 398 },
+};
+
 // ---------------------------------------------------------------------------
 // Page
 // ---------------------------------------------------------------------------
@@ -218,25 +226,39 @@ function ComboStage({
   cape: CapeKey;
 }) {
   const baseSrc = CHARACTER_IMAGES[character].ninguno;
+  const { w: naturalW, h: naturalH } = CHARACTER_NATURAL_SIZE[character];
   const headPiece = HEAD_PIECES.find((p) => p.key === head);
   const handPiece = HAND_PIECES.find((p) => p.key === hand);
   const capePiece = CAPE_PIECES.find((p) => p.key === cape);
 
   return (
-    <div className="relative aspect-[370/396] w-full">
-      <img src={baseSrc} alt="" className="absolute inset-0 h-full w-full object-contain" />
+    // Sin aspect-ratio: el <img> base queda en flujo normal (width 100% +
+    // height auto), así que es ÉL quien define el alto real del contenedor
+    // según su proporción natural. Esto es más robusto que depender de la
+    // utilidad aspect-[w/h] combinada con hijos absolutos — las piezas
+    // superpuestas (absolute + %) ahora miden su posición contra un alto que
+    // siempre está resuelto.
+    <div className="relative w-full">
+      <img
+        src={baseSrc}
+        alt=""
+        width={naturalW}
+        height={naturalH}
+        className="block h-auto w-full select-none"
+        draggable={false}
+      />
       {capePiece?.img && (
-        <div className="absolute flex items-center justify-center" style={CAPE_ZONE}>
+        <div className="pointer-events-none absolute flex items-center justify-center" style={CAPE_ZONE}>
           <img src={capePiece.img} alt={capePiece.label} className="max-h-full max-w-full object-contain" />
         </div>
       )}
       {handPiece?.img && (
-        <div className="absolute flex items-center justify-center" style={HAND_ZONE}>
+        <div className="pointer-events-none absolute flex items-center justify-center" style={HAND_ZONE}>
           <img src={handPiece.img} alt={handPiece.label} className="max-h-full max-w-full object-contain" />
         </div>
       )}
       {headPiece?.img && (
-        <div className="absolute flex items-center justify-center" style={HEAD_ZONE}>
+        <div className="pointer-events-none absolute flex items-center justify-center" style={HEAD_ZONE}>
           <img src={headPiece.img} alt={headPiece.label} className="max-h-full max-w-full object-contain" />
         </div>
       )}
