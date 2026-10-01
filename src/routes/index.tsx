@@ -83,7 +83,17 @@ type HeadKey =
 
 type HandKey = "ninguno" | "luneta-pirata" | "varinha-magica" | "espada-guerreiro" | "escudo-heroi";
 
-type CapeKey = "ninguno" | "capa-heroi" | "colete-pirata" | "manto-mago" | "manto-gala";
+type CapeKey =
+  | "ninguno"
+  | "capa-heroi"
+  | "colete-pirata"
+  | "manto-mago"
+  | "manto-gala"
+  | "traje-espacial"
+  | "manto-heroi"
+  | "sobretudo-pirata"
+  | "armadura-guerreiro"
+  | "manto-real";
 
 type Piece<K extends string> = { key: K; label: string; img?: string };
 
@@ -108,9 +118,14 @@ const HAND_PIECES: Piece<HandKey>[] = [
 const CAPE_PIECES: Piece<CapeKey>[] = [
   { key: "ninguno", label: "Ninguno" },
   { key: "capa-heroi", label: "Capa de héroe", img: "/piezas/capa-heroi.webp" },
+  { key: "manto-heroi", label: "Traje de héroe", img: "/piezas/manto-heroi.webp" },
   { key: "colete-pirata", label: "Chaleco pirata", img: "/piezas/colete-pirata.webp" },
+  { key: "sobretudo-pirata", label: "Abrigo pirata", img: "/piezas/sobretudo-pirata.webp" },
   { key: "manto-mago", label: "Manto de mago", img: "/piezas/manto-mago.webp" },
   { key: "manto-gala", label: "Manto de gala", img: "/piezas/manto-gala.webp" },
+  { key: "traje-espacial", label: "Traje espacial", img: "/piezas/traje-espacial.webp" },
+  { key: "armadura-guerreiro", label: "Armadura de guerrero", img: "/piezas/armadura-guerreiro.webp" },
+  { key: "manto-real", label: "Manto real", img: "/piezas/manto-real.webp" },
 ];
 
 // Zonas de superposición (en % del escenario, que respeta la proporción de
