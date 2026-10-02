@@ -24,16 +24,17 @@ export const Route = createFileRoute("/")({
 });
 
 // ---------------------------------------------------------------------------
-// Option data — plan Básico: 2 personajes base x 4 temas ilustrados (+ "Sin
+// Option data — plan Básico: 2 personajes base x temas ilustrados (+ "Sin
 // tema"). Dos formas de jugar con la vista previa:
 //   1) "Looks completos": una ilustración entera por personaje x tema.
-//   2) "Armá tu combo": accesorios sueltos (cabeza / mano / capa) que se
-//      combinan libremente entre sí y entre personajes, superpuestos sobre
-//      el personaje base.
+//   2) "Armá tu combo": la cabeza, el torso y las piernas se eligen por
+//      separado, cada una de un tema distinto si se quiere. Cada pieza es el
+//      recorte real de esa ilustración (no un accesorio puesto encima de un
+//      cuerpo fijo), así que siempre encaja con el resto del cuerpo elegido.
 // ---------------------------------------------------------------------------
 
 type Character = "nino" | "nina";
-type ThemeKey = "ninguno" | "superheroe" | "pirata" | "astronauta" | "mago";
+type ThemeKey = "ninguno" | "superheroe" | "pirata" | "astronauta" | "mago" | "guerreiro" | "realeza";
 type Mode = "looks" | "combo";
 
 const CHARACTERS: { key: Character; label: string; emoji: string }[] = [
@@ -47,6 +48,8 @@ const THEMES: { key: ThemeKey; label: string; emoji: string }[] = [
   { key: "pirata", label: "Pirata", emoji: "🏴‍☠️" },
   { key: "astronauta", label: "Astronauta", emoji: "🚀" },
   { key: "mago", label: "Mago/Bruja", emoji: "🧙" },
+  { key: "guerreiro", label: "Guerrero", emoji: "🛡️" },
+  { key: "realeza", label: "Realeza", emoji: "👑" },
 ];
 
 // Un look ilustrado por personaje x tema.
@@ -57,6 +60,8 @@ const CHARACTER_IMAGES: Record<Character, Record<ThemeKey, string>> = {
     pirata: "/personajes/nino-pirata.webp",
     astronauta: "/personajes/nino-astronauta.webp",
     mago: "/personajes/nino-mago.webp",
+    guerreiro: "/personajes/nino-guerreiro.webp",
+    realeza: "/personajes/nino-realeza.webp",
   },
   nina: {
     ninguno: "/personajes/nina-base.webp",
@@ -64,92 +69,39 @@ const CHARACTER_IMAGES: Record<Character, Record<ThemeKey, string>> = {
     pirata: "/personajes/nina-pirata.webp",
     astronauta: "/personajes/nina-astronauta.webp",
     mago: "/personajes/nina-mago.webp",
+    guerreiro: "/personajes/nina-guerreiro.webp",
+    realeza: "/personajes/nina-realeza.webp",
   },
 };
 
 // ---------------------------------------------------------------------------
-// Piezas sueltas — mismos accesorios sirven para niño y niña, y se pueden
-// mezclar sin importar de qué tema vinieron originalmente.
+// Armá tu combo — cada ilustración está cortada en 3 franjas (cabeza / torso
+// / piernas) en el mismo punto relativo para todos los temas, así cualquier
+// cabeza encaja con cualquier torso y con cualquier par de piernas: lo que
+// cambia es la parte entera de esa ilustración, no un accesorio suelto.
+//
+// "astronauta" y "mago" quedan afuera de este modo por ahora: el casco y el
+// sombrero todavía salen más anchos que el hombro del cuerpo en algunas
+// combinaciones (medido, no es una sospecha) — entran en cuanto la nueva
+// versión pase la misma prueba que los demás temas.
 // ---------------------------------------------------------------------------
 
-type HeadKey =
-  | "ninguno"
-  | "mascara-heroi"
-  | "bandana-pirata"
-  | "capacete-astronauta"
-  | "chapeu-mago"
-  | "coroa"
-  | "elmo-guerreiro";
+type PartKey = "cabeza" | "torso" | "piernas";
+type PartThemeKey = "base" | "superheroe" | "pirata" | "astronauta" | "mago" | "guerreiro" | "realeza";
 
-type HandKey =
-  | "ninguno"
-  | "luneta-pirata"
-  | "varinha-magica"
-  | "espada-guerreiro"
-  | "escudo-heroi"
-  | "cetro-real"
-  | "arma-astronauta";
-
-type CapeKey =
-  | "ninguno"
-  | "capa-heroi"
-  | "colete-pirata"
-  | "manto-mago"
-  | "manto-gala"
-  | "traje-espacial"
-  | "manto-heroi"
-  | "sobretudo-pirata"
-  | "armadura-guerreiro"
-  | "manto-real";
-
-type Piece<K extends string> = { key: K; label: string; img?: string };
-
-const HEAD_PIECES: Piece<HeadKey>[] = [
-  { key: "ninguno", label: "Ninguno" },
-  { key: "mascara-heroi", label: "Máscara de héroe", img: "/piezas/mascara-heroi.webp" },
-  { key: "bandana-pirata", label: "Bandana pirata", img: "/piezas/bandana-pirata.webp" },
-  { key: "capacete-astronauta", label: "Casco espacial", img: "/piezas/capacete-astronauta.webp" },
-  { key: "chapeu-mago", label: "Sombrero de mago", img: "/piezas/chapeu-mago.webp" },
-  { key: "coroa", label: "Corona", img: "/piezas/coroa.webp" },
-  { key: "elmo-guerreiro", label: "Casco de guerrero", img: "/piezas/elmo-guerreiro.webp" },
+const PART_THEMES: { key: PartThemeKey; label: string; emoji: string; enabled: boolean }[] = [
+  { key: "base", label: "Normal", emoji: "✨", enabled: true },
+  { key: "superheroe", label: "Superhéroe", emoji: "🦸", enabled: true },
+  { key: "pirata", label: "Pirata", emoji: "🏴‍☠️", enabled: true },
+  { key: "guerreiro", label: "Guerrero", emoji: "🛡️", enabled: true },
+  { key: "realeza", label: "Realeza", emoji: "👑", enabled: true },
+  { key: "astronauta", label: "Astronauta", emoji: "🚀", enabled: false },
+  { key: "mago", label: "Mago/Bruja", emoji: "🧙", enabled: false },
 ];
 
-const HAND_PIECES: Piece<HandKey>[] = [
-  { key: "ninguno", label: "Ninguno" },
-  { key: "luneta-pirata", label: "Catalejo", img: "/piezas/luneta-pirata.webp" },
-  { key: "varinha-magica", label: "Varita mágica", img: "/piezas/varinha-magica.webp" },
-  { key: "espada-guerreiro", label: "Espada", img: "/piezas/espada-guerreiro.webp" },
-  { key: "escudo-heroi", label: "Escudo", img: "/piezas/escudo-heroi.webp" },
-  { key: "cetro-real", label: "Cetro real", img: "/piezas/cetro-real.webp" },
-  { key: "arma-astronauta", label: "Arma espacial", img: "/piezas/arma-astronauta.webp" },
-];
-
-const CAPE_PIECES: Piece<CapeKey>[] = [
-  { key: "ninguno", label: "Ninguno" },
-  { key: "capa-heroi", label: "Capa de héroe", img: "/piezas/capa-heroi.webp" },
-  { key: "manto-heroi", label: "Traje de héroe", img: "/piezas/manto-heroi.webp" },
-  { key: "colete-pirata", label: "Chaleco pirata", img: "/piezas/colete-pirata.webp" },
-  { key: "sobretudo-pirata", label: "Abrigo pirata", img: "/piezas/sobretudo-pirata.webp" },
-  { key: "manto-mago", label: "Manto de mago", img: "/piezas/manto-mago.webp" },
-  { key: "manto-gala", label: "Manto de gala", img: "/piezas/manto-gala.webp" },
-  { key: "traje-espacial", label: "Traje espacial", img: "/piezas/traje-espacial.webp" },
-  { key: "armadura-guerreiro", label: "Armadura de guerrero", img: "/piezas/armadura-guerreiro.webp" },
-  { key: "manto-real", label: "Manto real", img: "/piezas/manto-real.webp" },
-];
-
-// Zonas de superposición (en % del escenario, que respeta la proporción de
-// la ilustración base) para cada categoría de pieza.
-const HEAD_ZONE = { top: "1%", left: "23%", width: "54%", height: "37%" };
-const HAND_ZONE = { top: "53%", left: "57%", width: "38%", height: "27%" };
-const CAPE_ZONE = { top: "21%", left: "11%", width: "78%", height: "64%" };
-
-// Tamaño natural de cada ilustración base — se usa como atributo width/height
-// del <img> para que el navegador reserve el alto correcto (vía su propio
-// aspect ratio) sin depender de la utilidad CSS aspect-ratio.
-const CHARACTER_NATURAL_SIZE: Record<Character, { w: number; h: number }> = {
-  nino: { w: 370, h: 396 },
-  nina: { w: 376, h: 398 },
-};
+function partImg(character: Character, theme: PartThemeKey, part: PartKey) {
+  return `/partes/${character}-${theme}-${part}.webp`;
+}
 
 // ---------------------------------------------------------------------------
 // Page
@@ -177,36 +129,37 @@ function ThemePicker({ value, onChange }: { value: ThemeKey; onChange: (key: The
   );
 }
 
-function PieceSwatches<K extends string>({
-  options,
+function PartPicker({
+  character,
+  part,
   value,
   onChange,
 }: {
-  options: Piece<K>[];
-  value: K;
-  onChange: (key: K) => void;
+  character: Character;
+  part: PartKey;
+  value: PartThemeKey;
+  onChange: (key: PartThemeKey) => void;
 }) {
+  const options = PART_THEMES.filter((t) => t.enabled);
   return (
     <div className="flex flex-wrap gap-2">
-      {options.map((opt) => (
+      {options.map((t) => (
         <button
-          key={opt.key}
+          key={t.key}
           type="button"
-          onClick={() => onChange(opt.key)}
-          title={opt.label}
-          aria-label={opt.label}
-          aria-pressed={value === opt.key}
+          onClick={() => onChange(t.key)}
+          title={t.label}
+          aria-label={t.label}
+          aria-pressed={value === t.key}
           className={`flex size-14 shrink-0 items-center justify-center rounded-xl border-2 bg-surface p-1.5 transition-colors ${
-            value === opt.key ? "border-brand shadow-cta" : "border-border hover:bg-mist"
+            value === t.key ? "border-brand shadow-cta" : "border-border hover:bg-mist"
           }`}
         >
-          {opt.img ? (
-            <img src={opt.img} alt={opt.label} className="max-h-full max-w-full object-contain" />
-          ) : (
-            <span className="text-lg text-muted-foreground" aria-hidden>
-              ✕
-            </span>
-          )}
+          <img
+            src={partImg(character, t.key, part)}
+            alt={t.label}
+            className="max-h-full max-w-full object-contain"
+          />
         </button>
       ))}
     </div>
@@ -236,54 +189,39 @@ function ModeTabs({ value, onChange }: { value: Mode; onChange: (m: Mode) => voi
   );
 }
 
-function ComboStage({
+function PartsStage({
   character,
-  head,
-  hand,
-  cape,
+  headTheme,
+  torsoTheme,
+  legsTheme,
+  label,
 }: {
   character: Character;
-  head: HeadKey;
-  hand: HandKey;
-  cape: CapeKey;
+  headTheme: PartThemeKey;
+  torsoTheme: PartThemeKey;
+  legsTheme: PartThemeKey;
+  label: string;
 }) {
-  const baseSrc = CHARACTER_IMAGES[character].ninguno;
-  const { w: naturalW, h: naturalH } = CHARACTER_NATURAL_SIZE[character];
-  const headPiece = HEAD_PIECES.find((p) => p.key === head);
-  const handPiece = HAND_PIECES.find((p) => p.key === hand);
-  const capePiece = CAPE_PIECES.find((p) => p.key === cape);
-
   return (
-    // Sin aspect-ratio: el <img> base queda en flujo normal (width 100% +
-    // height auto), así que es ÉL quien define el alto real del contenedor
-    // según su proporción natural. Esto es más robusto que depender de la
-    // utilidad aspect-[w/h] combinada con hijos absolutos — las piezas
-    // superpuestas (absolute + %) ahora miden su posición contra un alto que
-    // siempre está resuelto.
-    <div className="relative w-full">
+    <div className="flex w-full flex-col" role="img" aria-label={`Ilustración de ${label}`}>
       <img
-        src={baseSrc}
+        src={partImg(character, headTheme, "cabeza")}
         alt=""
-        width={naturalW}
-        height={naturalH}
-        className="block h-auto w-full select-none"
+        className="block w-full select-none"
         draggable={false}
       />
-      {capePiece?.img && (
-        <div className="pointer-events-none absolute flex items-center justify-center" style={CAPE_ZONE}>
-          <img src={capePiece.img} alt={capePiece.label} className="max-h-full max-w-full object-contain" />
-        </div>
-      )}
-      {handPiece?.img && (
-        <div className="pointer-events-none absolute flex items-center justify-center" style={HAND_ZONE}>
-          <img src={handPiece.img} alt={handPiece.label} className="max-h-full max-w-full object-contain" />
-        </div>
-      )}
-      {headPiece?.img && (
-        <div className="pointer-events-none absolute flex items-center justify-center" style={HEAD_ZONE}>
-          <img src={headPiece.img} alt={headPiece.label} className="max-h-full max-w-full object-contain" />
-        </div>
-      )}
+      <img
+        src={partImg(character, torsoTheme, "torso")}
+        alt=""
+        className="block w-full select-none"
+        draggable={false}
+      />
+      <img
+        src={partImg(character, legsTheme, "piernas")}
+        alt=""
+        className="block w-full select-none"
+        draggable={false}
+      />
     </div>
   );
 }
@@ -293,9 +231,9 @@ function CreatorApp() {
   const [character, setCharacter] = useState<Character>("nino");
   const [theme, setTheme] = useState<ThemeKey>("ninguno");
 
-  const [head, setHead] = useState<HeadKey>("ninguno");
-  const [hand, setHand] = useState<HandKey>("ninguno");
-  const [cape, setCape] = useState<CapeKey>("ninguno");
+  const [headTheme, setHeadTheme] = useState<PartThemeKey>("base");
+  const [torsoTheme, setTorsoTheme] = useState<PartThemeKey>("base");
+  const [legsTheme, setLegsTheme] = useState<PartThemeKey>("base");
 
   const summary = useMemo(() => {
     const c = CHARACTERS.find((x) => x.key === character)!.label;
@@ -303,13 +241,14 @@ function CreatorApp() {
       const t = THEMES.find((x) => x.key === theme)!.label;
       return theme === "ninguno" ? c : `${c} · ${t}`;
     }
+    const partLabel = (key: PartThemeKey) => PART_THEMES.find((p) => p.key === key)!.label;
     const parts = [
-      HEAD_PIECES.find((p) => p.key === head)!.label,
-      HAND_PIECES.find((p) => p.key === hand)!.label,
-      CAPE_PIECES.find((p) => p.key === cape)!.label,
-    ].filter((label) => label !== "Ninguno");
+      headTheme !== "base" ? `Cabeza ${partLabel(headTheme)}` : null,
+      torsoTheme !== "base" ? `Torso ${partLabel(torsoTheme)}` : null,
+      legsTheme !== "base" ? `Piernas ${partLabel(legsTheme)}` : null,
+    ].filter((label): label is string => label !== null);
     return parts.length ? `${c} · ${parts.join(" + ")}` : c;
-  }, [mode, character, theme, head, hand, cape]);
+  }, [mode, character, theme, headTheme, torsoTheme, legsTheme]);
 
   const imageSrc = CHARACTER_IMAGES[character][theme];
 
@@ -350,7 +289,13 @@ function CreatorApp() {
                 />
               ) : (
                 <div className="w-full max-w-[220px]">
-                  <ComboStage character={character} head={head} hand={hand} cape={cape} />
+                  <PartsStage
+                    character={character}
+                    headTheme={headTheme}
+                    torsoTheme={torsoTheme}
+                    legsTheme={legsTheme}
+                    label={summary}
+                  />
                 </div>
               )}
             </div>
@@ -396,22 +341,23 @@ function CreatorApp() {
               <>
                 <div>
                   <p className="mb-2 text-sm font-semibold text-foreground">Cabeza</p>
-                  <PieceSwatches options={HEAD_PIECES} value={head} onChange={setHead} />
+                  <PartPicker character={character} part="cabeza" value={headTheme} onChange={setHeadTheme} />
                 </div>
 
                 <div>
-                  <p className="mb-2 text-sm font-semibold text-foreground">Mano</p>
-                  <PieceSwatches options={HAND_PIECES} value={hand} onChange={setHand} />
+                  <p className="mb-2 text-sm font-semibold text-foreground">Torso</p>
+                  <PartPicker character={character} part="torso" value={torsoTheme} onChange={setTorsoTheme} />
                 </div>
 
                 <div>
-                  <p className="mb-2 text-sm font-semibold text-foreground">Capa / Vestimenta</p>
-                  <PieceSwatches options={CAPE_PIECES} value={cape} onChange={setCape} />
+                  <p className="mb-2 text-sm font-semibold text-foreground">Piernas</p>
+                  <PartPicker character={character} part="piernas" value={legsTheme} onChange={setLegsTheme} />
                 </div>
 
                 <p className="text-sm leading-relaxed text-muted-foreground">
-                  Combiná cada accesorio como quieras: el sombrero de un tema con la capa de otro — ¡la combinación
-                  es toda tuya!
+                  Elegí el tema de cada parte del cuerpo por separado: la cabeza de un tema, el torso de otro y las
+                  piernas de otro. Cada parte es el recorte real de esa ilustración, así que siempre encaja bien con
+                  el resto.
                 </p>
               </>
             )}
