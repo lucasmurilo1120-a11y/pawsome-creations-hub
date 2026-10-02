@@ -80,10 +80,10 @@ const CHARACTER_IMAGES: Record<Character, Record<ThemeKey, string>> = {
 // cabeza encaja con cualquier torso y con cualquier par de piernas: lo que
 // cambia es la parte entera de esa ilustración, no un accesorio suelto.
 //
-// "astronauta" y "mago" quedan afuera de este modo por ahora: el casco y el
-// sombrero todavía salen más anchos que el hombro del cuerpo en algunas
-// combinaciones (medido, no es una sospecha) — entran en cuanto la nueva
-// versión pase la misma prueba que los demás temas.
+// "mago" queda afuera de este modo por ahora: el sombrero del niño todavía
+// sale más ancho que el hombro del cuerpo en algunas combinaciones (medido,
+// no es una sospecha) — entra en cuanto la nueva versión pase la misma
+// prueba que los demás temas. La versión de la niña ya pasó.
 // ---------------------------------------------------------------------------
 
 type PartKey = "cabeza" | "torso" | "piernas";
@@ -95,7 +95,7 @@ const PART_THEMES: { key: PartThemeKey; label: string; emoji: string; enabled: b
   { key: "pirata", label: "Pirata", emoji: "🏴‍☠️", enabled: true },
   { key: "guerreiro", label: "Guerrero", emoji: "🛡️", enabled: true },
   { key: "realeza", label: "Realeza", emoji: "👑", enabled: true },
-  { key: "astronauta", label: "Astronauta", emoji: "🚀", enabled: false },
+  { key: "astronauta", label: "Astronauta", emoji: "🚀", enabled: true },
   { key: "mago", label: "Mago/Bruja", emoji: "🧙", enabled: false },
 ];
 
