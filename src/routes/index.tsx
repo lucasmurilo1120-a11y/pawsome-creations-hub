@@ -4,19 +4,23 @@ import { Download, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
+// Nombre de la marca en un solo lugar: cambiarlo acá lo cambia en toda la app.
+const BRAND = "Papelitos";
+const TAGLINE = "Tu hijo, el héroe de papel";
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Héroes de Papel — Crea tu personaje" },
+      { title: `${BRAND} — ${TAGLINE}` },
       {
         name: "description",
         content:
-          "Elegí el personaje y el tema de tu Héroe de Papel, mirá cómo queda y descargá tu kit para imprimir, recortar y jugar.",
+          "Elige el personaje y el tema, escribe el nombre de tu hijo y descarga su kit de héroe de papel con historias y certificado, listo para imprimir.",
       },
-      { property: "og:title", content: "Héroes de Papel — Crea tu personaje" },
+      { property: "og:title", content: `${BRAND} — ${TAGLINE}` },
       {
         property: "og:description",
-        content: "Personalizá tu personaje y descargá el kit completo para imprimir en casa.",
+        content: "Su nombre en cada historia y en su certificado de héroe. Imprímelo en casa y a jugar.",
       },
     ],
   }),
@@ -24,18 +28,12 @@ export const Route = createFileRoute("/")({
 });
 
 // ---------------------------------------------------------------------------
-// Option data — plan Básico: 2 personajes base x temas ilustrados (+ "Sin
-// tema"). Dos formas de jugar con la vista previa:
-//   1) "Looks completos": una ilustración entera por personaje x tema.
-//   2) "Armá tu combo": la cabeza, el torso y las piernas se eligen por
-//      separado, cada una de un tema distinto si se quiere. Cada pieza es el
-//      recorte real de esa ilustración (no un accesorio puesto encima de un
-//      cuerpo fijo), así que siempre encaja con el resto del cuerpo elegido.
+// Datos — 2 personajes x 7 looks ilustrados. Cada look es una ilustración
+// completa (pelo, ropa y accesorios ya combinados), lista para recortar.
 // ---------------------------------------------------------------------------
 
 type Character = "nino" | "nina";
 type ThemeKey = "ninguno" | "superheroe" | "pirata" | "astronauta" | "mago" | "guerreiro" | "realeza";
-type Mode = "looks" | "combo";
 
 const CHARACTERS: { key: Character; label: string; emoji: string }[] = [
   { key: "nino", label: "Niño", emoji: "👦" },
@@ -52,7 +50,6 @@ const THEMES: { key: ThemeKey; label: string; emoji: string }[] = [
   { key: "realeza", label: "Realeza", emoji: "👑" },
 ];
 
-// Un look ilustrado por personaje x tema.
 const CHARACTER_IMAGES: Record<Character, Record<ThemeKey, string>> = {
   nino: {
     ninguno: "/personajes/nino-base.webp",
@@ -75,36 +72,145 @@ const CHARACTER_IMAGES: Record<Character, Record<ThemeKey, string>> = {
 };
 
 // ---------------------------------------------------------------------------
-// Armá tu combo — cada ilustración está cortada en 3 franjas (cabeza / torso
-// / piernas) en el mismo punto relativo para todos los temas, así cualquier
-// cabeza encaja con cualquier torso y con cualquier par de piernas: lo que
-// cambia es la parte entera de esa ilustración, no un accesorio suelto.
-//
-// "mago" queda afuera de este modo por ahora: el sombrero del niño todavía
-// sale más ancho que el hombro del cuerpo en algunas combinaciones (medido,
-// no es una sospecha) — entra en cuanto la nueva versión pase la misma
-// prueba que los demás temas. La versión de la niña ya pasó.
+// Historias — el nombre del niño entra en el texto.
 // ---------------------------------------------------------------------------
 
-type PartKey = "cabeza" | "torso" | "piernas";
-type PartThemeKey = "base" | "superheroe" | "pirata" | "astronauta" | "mago" | "guerreiro" | "realeza";
+type Story = { theme: ThemeKey; label: string; title: string; paragraphs: string[] };
 
-const PART_THEMES: { key: PartThemeKey; label: string; emoji: string; enabled: boolean }[] = [
-  { key: "base", label: "Normal", emoji: "✨", enabled: true },
-  { key: "superheroe", label: "Superhéroe", emoji: "🦸", enabled: true },
-  { key: "pirata", label: "Pirata", emoji: "🏴‍☠️", enabled: true },
-  { key: "guerreiro", label: "Guerrero", emoji: "🛡️", enabled: true },
-  { key: "realeza", label: "Realeza", emoji: "👑", enabled: true },
-  { key: "astronauta", label: "Astronauta", emoji: "🚀", enabled: true },
-  { key: "mago", label: "Mago/Bruja", emoji: "🧙", enabled: false },
-];
+function buildStories(name: string, character: Character): Story[] {
+  const girl = character === "nina";
+  const capitan = girl ? "la capitana" : "el capitán";
+  const explorador = girl ? "la primera exploradora" : "el primer explorador";
+  const mago = girl ? "la maga" : "el mago";
 
-function partImg(character: Character, theme: PartThemeKey, part: PartKey) {
-  return `/partes/${character}-${theme}-${part}.webp`;
+  return [
+    {
+      theme: "superheroe",
+      label: "Superhéroe",
+      title: "El día que salvó el parque",
+      paragraphs: [
+        `Esa tarde, el gato del señor Antonio se había subido al árbol más alto del parque y no quería bajar. Todos miraban hacia arriba sin saber qué hacer, hasta que llegó ${name}.`,
+        `No hicieron falta poderes mágicos: bastaron unos brazos fuertes, una capa que ondeaba con el viento y muchas ganas de ayudar. ${name} subió rama por rama, con cuidado, hablándole despacito al gato asustado.`,
+        "Cuando por fin llegó arriba, lo sostuvo con firmeza contra el pecho y bajó despacio, un escalón invisible a la vez, mientras el parque entero contenía la respiración.",
+        `Abajo, todos aplaudieron. El señor Antonio le dio las gracias con los ojos brillosos. ${name} solo sonrió: los héroes de verdad no buscan medallas, buscan un buen final.`,
+      ],
+    },
+    {
+      theme: "pirata",
+      label: "Pirata",
+      title: "El mapa del tesoro escondido",
+      paragraphs: [
+        "La lluvia había lavado el jardín y, entre las piedras del camino, algo brillaba distinto. Era la esquina de un papel doblado en cuatro, con bordes quemados a propósito y una equis dibujada con tinta gruesa.",
+        "El mapa marcaba el camino: pasar bajo la mesa de la cocina, rodear dos veces la maceta grande y girar a la izquierda en el sillón azul. Cada paso se sentía más importante que el anterior.",
+        `Con el catalejo en alto para vigilar peligros invisibles, ${capitan} ${name} avanzó sin apuro. Los verdaderos tesoros nunca están donde uno espera, y eso lo hace todo más emocionante.`,
+        `Al final del camino, detrás del cojín más grande del sofá, esperaba el cofre: un puñado de piedritas brillantes y una nota que decía "el tesoro más grande fue el viaje". ${name} sonrió — ya sabía que volvería a navegar.`,
+      ],
+    },
+    {
+      theme: "astronauta",
+      label: "Astronauta",
+      title: "Un viaje a la luna de papel",
+      paragraphs: [
+        "La cuenta regresiva empezó en la sala: diez, nueve, ocho... El cohete —hecho con dos sillas y una manta bien estirada— estaba listo para despegar rumbo a una luna hecha de papel plateado.",
+        "Flotar era más fácil de lo que parecía: solo había que mover los brazos despacio y fingir que el suelo ya no tiraba hacia abajo. Afuera de la ventana imaginaria, las estrellas se dejaban contar una por una.",
+        "En la superficie lunar —la alfombra de la sala, ahora cubierta de cráteres invisibles— cada paso se sentía enorme y silencioso, como si el mundo entero estuviera esperando para ver qué se descubría ahí.",
+        `La bandera se plantó justo al lado del sillón: ${name} era ${explorador} en pisar esa luna en particular. La misión había sido un éxito, y ya se estaba planeando el próximo viaje para después de la cena.`,
+      ],
+    },
+    {
+      theme: "mago",
+      label: "Mago/Bruja",
+      title: "El hechizo de las estrellas",
+      paragraphs: [
+        "El libro de hechizos —en realidad, un cuaderno con dibujos de estrellas— decía que esa noche el cielo iba a estar de humor para la magia. Solo hacía falta una varita, un sombrero puntiagudo y mucha concentración.",
+        'El primer hechizo era sencillo: "Luces, brillen fuerte". Con la varita en alto, dando una vuelta completa sobre los talones, las luces de verdad parecían titilar un poquito más.',
+        "El segundo hechizo era más ambicioso: hacer que la manta del sillón volara como una capa mágica. No funcionó exactamente como en el libro, pero terminó siendo aún mejor: una capa de verdad, lista para la próxima aventura.",
+        `Cuando el reloj marcó la hora de dormir, ${mago} ${name} guardó la varita bajo la almohada. Mañana habría más estrellas que encender, y ninguna magia es tan poderosa como la de una buena noche de sueño.`,
+      ],
+    },
+  ];
 }
 
 // ---------------------------------------------------------------------------
-// Page
+// Kit imprimible — se arma en el momento con el nombre elegido. Solo se ve al
+// imprimir ("Guardar como PDF" en el diálogo de impresión).
+// ---------------------------------------------------------------------------
+
+const PAGE_BREAK = { breakAfter: "page", pageBreakAfter: "always" } as const;
+
+function PrintKit({ name, character }: { name: string; character: Character }) {
+  const images = CHARACTER_IMAGES[character];
+  const stories = buildStories(name, character);
+
+  return (
+    <div className="print-kit hidden print:block" aria-hidden>
+      {/* Portada */}
+      <section style={PAGE_BREAK} className="flex min-h-[250mm] flex-col items-center justify-center gap-6 text-center">
+        <p className="text-lg font-semibold tracking-wide text-brand">{BRAND}</p>
+        <h1 className="font-display text-5xl font-semibold text-foreground">El kit de héroe de {name}</h1>
+        <img src={images.ninguno} alt="" className="max-h-[170mm] object-contain" />
+        <p className="text-base text-muted-foreground">
+          Recorta, juega y vive las aventuras de {name}.
+        </p>
+      </section>
+
+      {/* Looks */}
+      {THEMES.map((t) => (
+        <section
+          key={t.key}
+          style={PAGE_BREAK}
+          className="flex min-h-[250mm] flex-col items-center justify-center gap-5 text-center"
+        >
+          <p className="text-sm font-semibold tracking-wide text-brand">
+            {t.emoji} {t.key === "ninguno" ? "Look normal" : t.label}
+          </p>
+          <h2 className="font-display text-3xl font-semibold text-foreground">{name}</h2>
+          <img src={images[t.key]} alt="" className="max-h-[200mm] object-contain" />
+          <p className="text-sm text-muted-foreground">Recorta siguiendo el borde del dibujo.</p>
+        </section>
+      ))}
+
+      {/* Historias */}
+      {stories.map((s, i) => (
+        <section key={s.theme} style={PAGE_BREAK} className="flex min-h-[250mm] flex-col gap-5">
+          <p className="text-sm font-semibold tracking-wide text-brand">
+            HISTORIA {i + 1} DE {stories.length} · {s.label.toUpperCase()}
+          </p>
+          <h2 className="font-display text-4xl font-semibold text-foreground">{s.title}</h2>
+          <div className="flex items-start gap-8">
+            <div className="flex-1 space-y-4 text-lg leading-relaxed text-foreground">
+              {s.paragraphs.map((p, j) => (
+                <p key={j}>{p}</p>
+              ))}
+            </div>
+            <img src={images[s.theme]} alt="" className="max-h-[140mm] w-[55mm] shrink-0 object-contain" />
+          </div>
+          <p className="mt-auto text-center text-sm text-muted-foreground">
+            {BRAND} · Recorta, arma y sigue la aventura
+          </p>
+        </section>
+      ))}
+
+      {/* Certificado */}
+      <section className="flex min-h-[250mm] flex-col items-center justify-center gap-6 text-center">
+        <div className="flex w-full flex-col items-center gap-5 rounded-3xl border-4 border-dashed border-brand p-10">
+          <p className="text-lg font-semibold tracking-wide text-brand">{BRAND}</p>
+          <h2 className="font-display text-5xl font-semibold text-foreground">Certificado de Héroe</h2>
+          <p className="text-lg text-muted-foreground">Se otorga con orgullo a</p>
+          <p className="font-display text-6xl font-semibold text-brand-deep">{name}</p>
+          <img src={images.superheroe} alt="" className="max-h-[110mm] object-contain" />
+          <p className="max-w-md text-lg text-foreground">
+            por su valentía, su imaginación y por jugar siempre a lo grande.
+          </p>
+          <p className="mt-4 text-sm text-muted-foreground">Fecha: ____ / ____ / ________</p>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Página
 // ---------------------------------------------------------------------------
 
 function ThemePicker({ value, onChange }: { value: ThemeKey; onChange: (key: ThemeKey) => void }) {
@@ -129,274 +235,140 @@ function ThemePicker({ value, onChange }: { value: ThemeKey; onChange: (key: The
   );
 }
 
-function PartPicker({
-  character,
-  part,
-  value,
-  onChange,
-}: {
-  character: Character;
-  part: PartKey;
-  value: PartThemeKey;
-  onChange: (key: PartThemeKey) => void;
-}) {
-  const options = PART_THEMES.filter((t) => t.enabled);
-  return (
-    <div className="flex flex-wrap gap-2">
-      {options.map((t) => (
-        <button
-          key={t.key}
-          type="button"
-          onClick={() => onChange(t.key)}
-          title={t.label}
-          aria-label={t.label}
-          aria-pressed={value === t.key}
-          className={`flex size-14 shrink-0 items-center justify-center rounded-xl border-2 bg-surface p-1.5 transition-colors ${
-            value === t.key ? "border-brand shadow-cta" : "border-border hover:bg-mist"
-          }`}
-        >
-          <img
-            src={partImg(character, t.key, part)}
-            alt={t.label}
-            className="max-h-full max-w-full object-contain"
-          />
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function ModeTabs({ value, onChange }: { value: Mode; onChange: (m: Mode) => void }) {
-  const tabs: { key: Mode; label: string }[] = [
-    { key: "looks", label: "Looks completos" },
-    { key: "combo", label: "Armá tu combo" },
-  ];
-  return (
-    <div className="inline-flex gap-1 rounded-full border border-border bg-surface p-1">
-      {tabs.map((t) => (
-        <button
-          key={t.key}
-          type="button"
-          onClick={() => onChange(t.key)}
-          className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
-            value === t.key ? "bg-brand text-primary-foreground shadow-cta" : "text-foreground hover:bg-mist"
-          }`}
-        >
-          {t.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function PartsStage({
-  character,
-  headTheme,
-  torsoTheme,
-  legsTheme,
-  label,
-}: {
-  character: Character;
-  headTheme: PartThemeKey;
-  torsoTheme: PartThemeKey;
-  legsTheme: PartThemeKey;
-  label: string;
-}) {
-  return (
-    <div className="flex w-full flex-col" role="img" aria-label={`Ilustración de ${label}`}>
-      <img
-        src={partImg(character, headTheme, "cabeza")}
-        alt=""
-        className="block w-full select-none"
-        draggable={false}
-      />
-      <img
-        src={partImg(character, torsoTheme, "torso")}
-        alt=""
-        className="block w-full select-none"
-        draggable={false}
-      />
-      <img
-        src={partImg(character, legsTheme, "piernas")}
-        alt=""
-        className="block w-full select-none"
-        draggable={false}
-      />
-    </div>
-  );
-}
-
 function CreatorApp() {
-  const [mode, setMode] = useState<Mode>("looks");
   const [character, setCharacter] = useState<Character>("nino");
   const [theme, setTheme] = useState<ThemeKey>("ninguno");
+  const [rawName, setRawName] = useState("");
 
-  const [headTheme, setHeadTheme] = useState<PartThemeKey>("base");
-  const [torsoTheme, setTorsoTheme] = useState<PartThemeKey>("base");
-  const [legsTheme, setLegsTheme] = useState<PartThemeKey>("base");
+  const name = rawName.trim();
 
   const summary = useMemo(() => {
     const c = CHARACTERS.find((x) => x.key === character)!.label;
-    if (mode === "looks") {
-      const t = THEMES.find((x) => x.key === theme)!.label;
-      return theme === "ninguno" ? c : `${c} · ${t}`;
-    }
-    const partLabel = (key: PartThemeKey) => PART_THEMES.find((p) => p.key === key)!.label;
-    const parts = [
-      headTheme !== "base" ? `Cabeza ${partLabel(headTheme)}` : null,
-      torsoTheme !== "base" ? `Torso ${partLabel(torsoTheme)}` : null,
-      legsTheme !== "base" ? `Piernas ${partLabel(legsTheme)}` : null,
-    ].filter((label): label is string => label !== null);
-    return parts.length ? `${c} · ${parts.join(" + ")}` : c;
-  }, [mode, character, theme, headTheme, torsoTheme, legsTheme]);
+    const t = THEMES.find((x) => x.key === theme)!.label;
+    const who = name || c;
+    return theme === "ninguno" ? who : `${who} · ${t}`;
+  }, [character, theme, name]);
 
   const imageSrc = CHARACTER_IMAGES[character][theme];
 
   return (
-    <main className="min-h-screen bg-background">
-      <header className="border-b border-border/60 bg-surface/70">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
-          <span className="font-display text-lg font-semibold text-foreground">Héroes de Papel</span>
-          <span className="hidden text-sm text-muted-foreground sm:inline">Crea tu personaje</span>
-        </div>
-      </header>
+    <>
+      <main className="min-h-screen bg-background print:hidden">
+        <header className="border-b border-border/60 bg-surface/70">
+          <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
+            <span className="font-display text-lg font-semibold text-foreground">{BRAND}</span>
+            <span className="hidden text-sm text-muted-foreground sm:inline">{TAGLINE}</span>
+          </div>
+        </header>
 
-      <section className="mx-auto max-w-6xl px-5 py-10">
-        <div className="mb-8 max-w-2xl">
-          <p className="text-sm font-semibold text-brand">Tu kit, a tu manera</p>
-          <h1 className="mt-2 font-display text-3xl font-semibold text-balance text-foreground sm:text-4xl">
-            Elegí un look completo, o armá tu propia combinación
-          </h1>
-          <p className="mt-3 leading-relaxed text-muted-foreground">
-            Esto es una vista previa interactiva. Tu kit para imprimir incluye los 2 personajes base, los 4 temas
-            ilustrados y las 4 historias — no solo la combinación que elijas aquí.
-          </p>
-        </div>
+        <section className="mx-auto max-w-6xl px-5 py-10">
+          <div className="mb-8 max-w-2xl">
+            <p className="text-sm font-semibold text-brand">Tu kit, a su nombre</p>
+            <h1 className="mt-2 font-display text-3xl font-semibold text-balance text-foreground sm:text-4xl">
+              Crea el héroe de tu hijo y descarga su kit personalizado
+            </h1>
+            <p className="mt-3 leading-relaxed text-muted-foreground">
+              Escribe su nombre, elige personaje y tema, y mira cómo queda. Tu kit para imprimir incluye los 7 looks
+              ilustrados, 4 historias con su nombre y su certificado de héroe.
+            </p>
+          </div>
 
-        <div className="mb-6">
-          <ModeTabs value={mode} onChange={setMode} />
-        </div>
-
-        <div className="grid gap-8 md:grid-cols-[minmax(0,320px)_1fr] md:items-start">
-          {/* Preview */}
-          <div className="mx-auto w-full max-w-[280px] md:mx-0">
-            <div className="flex aspect-[5/8] items-center justify-center rounded-3xl bg-surface p-4 shadow-lift">
-              {mode === "looks" ? (
+          <div className="grid gap-8 md:grid-cols-[minmax(0,320px)_1fr] md:items-start">
+            {/* Vista previa */}
+            <div className="mx-auto w-full max-w-[280px] md:mx-0">
+              <div className="flex aspect-[5/8] items-center justify-center rounded-3xl bg-surface p-4 shadow-lift">
                 <img
                   src={imageSrc}
                   alt={`Ilustración de ${summary}`}
                   className="max-h-full max-w-full object-contain"
                 />
-              ) : (
-                <div className="w-full max-w-[220px]">
-                  <PartsStage
-                    character={character}
-                    headTheme={headTheme}
-                    torsoTheme={torsoTheme}
-                    legsTheme={legsTheme}
-                    label={summary}
-                  />
-                </div>
-              )}
-            </div>
-            <p className="mt-3 text-center text-sm font-semibold text-brand-deep">{summary}</p>
-          </div>
-
-          {/* Controls */}
-          <div className="flex flex-col gap-6 rounded-3xl border border-border bg-surface p-6 shadow-soft">
-            <div>
-              <p className="mb-2 text-sm font-semibold text-foreground">Personaje</p>
-              <div className="flex gap-2">
-                {CHARACTERS.map((c) => (
-                  <button
-                    key={c.key}
-                    type="button"
-                    onClick={() => setCharacter(c.key)}
-                    className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
-                      character === c.key
-                        ? "border-brand bg-brand text-primary-foreground"
-                        : "border-border bg-surface text-foreground hover:bg-mist"
-                    }`}
-                  >
-                    <span aria-hidden>{c.emoji}</span>
-                    {c.label}
-                  </button>
-                ))}
               </div>
+              <p className="mt-3 text-center text-sm font-semibold text-brand-deep">{summary}</p>
             </div>
 
-            {mode === "looks" ? (
-              <>
-                <div>
-                  <p className="mb-2 text-sm font-semibold text-foreground">Tema</p>
-                  <ThemePicker value={theme} onChange={setTheme} />
-                </div>
-
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  Cada tema es una ilustración completa —pelo, ropa y accesorios ya combinados por nuestro equipo—
-                  lista para imprimir y recortar.
+            {/* Controles */}
+            <div className="flex flex-col gap-6 rounded-3xl border border-border bg-surface p-6 shadow-soft">
+              <div>
+                <label htmlFor="hero-name" className="mb-2 block text-sm font-semibold text-foreground">
+                  ¿Cómo se llama tu héroe?
+                </label>
+                <input
+                  id="hero-name"
+                  type="text"
+                  value={rawName}
+                  maxLength={18}
+                  onChange={(e) => setRawName(e.target.value)}
+                  placeholder="Ej.: Mateo"
+                  autoComplete="off"
+                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-base text-foreground outline-none transition-colors focus:border-brand"
+                />
+                <p className="mt-1.5 text-xs text-muted-foreground">
+                  Su nombre aparecerá en las historias, en cada look y en el certificado.
                 </p>
-              </>
-            ) : (
-              <>
-                <div>
-                  <p className="mb-2 text-sm font-semibold text-foreground">Cabeza</p>
-                  <PartPicker character={character} part="cabeza" value={headTheme} onChange={setHeadTheme} />
+              </div>
+
+              <div>
+                <p className="mb-2 text-sm font-semibold text-foreground">Personaje</p>
+                <div className="flex gap-2">
+                  {CHARACTERS.map((c) => (
+                    <button
+                      key={c.key}
+                      type="button"
+                      onClick={() => setCharacter(c.key)}
+                      className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+                        character === c.key
+                          ? "border-brand bg-brand text-primary-foreground"
+                          : "border-border bg-surface text-foreground hover:bg-mist"
+                      }`}
+                    >
+                      <span aria-hidden>{c.emoji}</span>
+                      {c.label}
+                    </button>
+                  ))}
                 </div>
+              </div>
 
-                <div>
-                  <p className="mb-2 text-sm font-semibold text-foreground">Torso</p>
-                  <PartPicker character={character} part="torso" value={torsoTheme} onChange={setTorsoTheme} />
-                </div>
+              <div>
+                <p className="mb-2 text-sm font-semibold text-foreground">Tema</p>
+                <ThemePicker value={theme} onChange={setTheme} />
+              </div>
 
-                <div>
-                  <p className="mb-2 text-sm font-semibold text-foreground">Piernas</p>
-                  <PartPicker character={character} part="piernas" value={legsTheme} onChange={setLegsTheme} />
-                </div>
-
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  Elegí el tema de cada parte del cuerpo por separado: la cabeza de un tema, el torso de otro y las
-                  piernas de otro. Cada parte es el recorte real de esa ilustración, así que siempre encaja bien con
-                  el resto.
-                </p>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Download */}
-        <div className="mt-10 rounded-3xl border border-brand/25 bg-mist/60 p-6">
-          <div className="flex items-start gap-3">
-            <Sparkles className="mt-0.5 size-5 shrink-0 text-brand" />
-            <div>
-              <p className="font-semibold text-foreground">Tu kit completo para imprimir</p>
-              <p className="text-sm text-muted-foreground">
-                3 PDF listos para imprimir: los 2 muñecos base con los 4 temas ilustrados y las 4 historias.
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                Cada tema es una ilustración completa —pelo, ropa y accesorios ya combinados por nuestro equipo—
+                lista para imprimir y recortar.
               </p>
             </div>
           </div>
-          <div className="mt-5 flex flex-wrap gap-3">
-            <Button asChild size="lg" className="shadow-cta">
-              <a href="/descargas/heroes-de-papel-nino.pdf" download>
+
+          {/* Descarga */}
+          <div className="mt-10 rounded-3xl border border-brand/25 bg-mist/60 p-6">
+            <div className="flex items-start gap-3">
+              <Sparkles className="mt-0.5 size-5 shrink-0 text-brand" />
+              <div>
+                <p className="font-semibold text-foreground">
+                  {name ? `El kit de ${name}, listo para imprimir` : "Tu kit completo para imprimir"}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  13 páginas: portada, los 7 looks, 4 historias con su nombre y el certificado de héroe.
+                </p>
+              </div>
+            </div>
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <Button size="lg" className="shadow-cta" disabled={!name} onClick={() => window.print()}>
                 <Download className="size-4" />
-                Muñeco niño (PDF)
-              </a>
-            </Button>
-            <Button asChild size="lg" variant="secondary">
-              <a href="/descargas/heroes-de-papel-nina.pdf" download>
-                <Download className="size-4" />
-                Muñeca niña (PDF)
-              </a>
-            </Button>
-            <Button asChild size="lg" variant="secondary">
-              <a href="/descargas/heroes-de-papel-historias.pdf" download>
-                <Download className="size-4" />
-                4 historias (PDF)
-              </a>
-            </Button>
+                Descargar mi kit (PDF)
+              </Button>
+              <p className="text-sm text-muted-foreground">
+                {name
+                  ? "En la ventana que se abre, elige “Guardar como PDF” (o imprime directo)."
+                  : "Escribe el nombre de tu héroe para activar la descarga."}
+              </p>
+            </div>
           </div>
-        </div>
-      </section>
-    </main>
+        </section>
+      </main>
+
+      {name ? <PrintKit name={name} character={character} /> : null}
+    </>
   );
 }

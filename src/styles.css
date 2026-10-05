@@ -145,3 +145,20 @@ lovable-badge {
   position: absolute !important;
   z-index: -9999 !important;
 }
+
+/* Kit imprimible: colores fieles y márgenes parejos al "Guardar como PDF". */
+@page {
+  margin: 12mm;
+}
+
+@media print {
+  html,
+  body {
+    background: #fff !important;
+  }
+
+  .print-kit {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

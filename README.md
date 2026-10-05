@@ -1,6 +1,6 @@
-# Héroes de Papel
+# Papelitos
 
-Página de ventas del producto digital "Héroes de Papel" — héroe/muñeco de papel personalizable para imprimir y jugar sin pantalla.
+Página de ventas del producto digital "Papelitos" — héroe/muñeco de papel personalizable para imprimir y jugar sin pantalla.
 
 This project was built with [Lovable](https://lovable.dev).
 
