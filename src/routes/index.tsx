@@ -396,9 +396,9 @@ function CreatorApp() {
             </p>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-[minmax(0,320px)_1fr] md:items-start">
+          <div className="grid gap-8 md:grid-cols-[minmax(0,380px)_1fr] md:items-start">
             {/* Vista previa */}
-            <div className="mx-auto w-full max-w-[280px] md:mx-0">
+            <div className="mx-auto w-full max-w-[340px] md:mx-0">
               <div className="flex aspect-[5/8] items-center justify-center rounded-3xl bg-surface p-4 shadow-lift">
                 <img
                   src={imageSrc}
