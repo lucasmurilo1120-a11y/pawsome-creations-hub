@@ -77,7 +77,7 @@ const CHARACTER_IMAGES: Record<Character, Record<ThemeKey, string>> = {
 
 type Story = { theme: ThemeKey; label: string; title: string; paragraphs: string[] };
 
-function buildStories(name: string, character: Character): Story[] {
+function coreStories(name: string, character: Character): Story[] {
   const girl = character === "nina";
   const capitan = girl ? "la capitana" : "el capitán";
   const explorador = girl ? "la primera exploradora" : "el primer explorador";
@@ -131,6 +131,109 @@ function buildStories(name: string, character: Character): Story[] {
   ];
 }
 
+function extraStories(name: string, character: Character): Story[] {
+  const mago = character === "nina" ? "la maga" : "el mago";
+
+  return [
+    {
+      theme: "guerreiro",
+      label: "Guerrero",
+      title: "El guardián de la muralla de almohadas",
+      paragraphs: [
+        `El castillo era la sala de juegos, y esa tarde alguien tenía que protegerlo. Se escuchaban pasos pesados del otro lado de la puerta, y la guardia del reino estaba formada por una sola persona: ${name}.`,
+        `Con el escudo en alto y el casco bien ajustado, ${name} levantó una muralla de almohadas, una sobre otra, hasta que quedó más alta que el sillón. Cada almohada era un ladrillo, y cada ladrillo, una promesa de valentía.`,
+        `Los pasos se acercaron, la puerta crujió... y apareció el gato, que solo quería dormir en la torre más blanda. ${name} lo pensó un segundo: un guerrero de verdad también sabe cuándo bajar la espada.`,
+        "Le hizo un lugar en lo alto de la muralla, y el reino quedó a salvo: protegido por un guerrero valiente y por un gato muy dormido.",
+      ],
+    },
+    {
+      theme: "guerreiro",
+      label: "Guerrero",
+      title: "El torneo de los valientes",
+      paragraphs: [
+        `Ese sábado se celebraba el gran torneo del reino, y ${name} se había preparado toda la semana: armadura brillante, escudo firme y una espada de cartón que, para sus propósitos, funcionaba perfecto.`,
+        `La primera prueba era cruzar el río: seis hojas de papel pegadas al suelo del pasillo. Había que saltar de una a otra sin pisar el agua imaginaria. ${name} respiró hondo y saltó, una, dos, tres veces.`,
+        `La segunda prueba era la más difícil: ayudar a un competidor que se había tropezado. Nadie lo miraba, pero ${name} se detuvo, le tendió la mano y lo ayudó a levantarse.`,
+        `Cuando el jurado entregó la medalla, dijo: «Este premio es para quien ganó la carrera… y también para quien no dejó a nadie atrás». ${name} sonrió: había ganado dos veces.`,
+      ],
+    },
+    {
+      theme: "realeza",
+      label: "Realeza",
+      title: "El baile del reino de papel",
+      paragraphs: [
+        `En el reino de papel se celebraba el baile más esperado del año, y ${name} tenía la tarea más importante: abrir la fiesta con el primer saludo.`,
+        `La corona le quedaba un poquito grande y el manto arrastraba por el suelo, pero ${name} caminó por la alfombra con la espalda recta y una sonrisa enorme. Todos se pusieron de pie.`,
+        `En medio del baile, un invitado pequeño se quedó solo en un rincón, sin atreverse a bailar. ${name} cruzó el salón, le ofreció la mano y le dijo: «Aquí todos son bienvenidos».`,
+        "Esa noche el reino aprendió que lo más brillante de una corona no son las joyas, sino la amabilidad de quien la lleva.",
+      ],
+    },
+    {
+      theme: "realeza",
+      label: "Realeza",
+      title: "El tesoro más raro del castillo",
+      paragraphs: [
+        `En lo alto del castillo había una puerta que nadie había abierto en cien años, y ${name} acababa de encontrar la llave: dorada, pequeña y un poco pegajosa de mermelada.`,
+        "Detrás de la puerta no había oro ni diamantes, sino un cuarto lleno de juguetes olvidados: un caballito de madera, un tambor sin parche, un osito con un solo ojo.",
+        `${name} decidió que un reino generoso no deja juguetes olvidados. Los limpió, los acomodó y organizó una fiesta para devolverles la alegría.`,
+        "Esa noche el castillo sonó a risas, y el tesoro más raro de todos resultó ser ese: un cuarto que volvió a tener vida.",
+      ],
+    },
+    {
+      theme: "ninguno",
+      label: "Aventura libre",
+      title: "Un día perfecto para ser valiente",
+      paragraphs: [
+        `No hacía falta capa, ni espada, ni cohete: ese día ${name} despertó con una idea muy simple. Hoy iba a hacer algo valiente.`,
+        "Primero, probó una comida nueva que parecía sospechosa. Después, saludó al vecino al que siempre le daba un poco de vergüenza hablar. Cada cosa pequeña era una misión en sí misma.",
+        "A la tarde, armó un fuerte con sábanas y sillas, y llevó a todos sus peluches a una reunión de emergencia: había que decidir quién era el más valiente de la casa.",
+        `Ganó ${name}, por supuesto. Porque los héroes de verdad no necesitan disfraz: solo ganas de intentarlo.`,
+      ],
+    },
+    {
+      theme: "superheroe",
+      label: "Superhéroe",
+      title: "La misión secreta del vecindario",
+      paragraphs: [
+        `Todo empezó con una nota debajo de la puerta: «Se necesita un héroe. La pelota quedó atrapada en el tejado». ${name} se puso la capa y salió corriendo.`,
+        `La escalera era demasiado corta y el tejado, demasiado alto. Un héroe sin poderes tenía que usar la cabeza: ${name} reunió a los vecinos, y entre todos armaron un plan.`,
+        `Uno sostuvo la escalera, otro pasó una caña, otro hizo de vigía. ${name} dio las órdenes con voz firme y amable, y la pelota bajó girando, sana y salva.`,
+        `El vecindario entero aplaudió. ${name} entendió que el mejor superpoder no era volar: era lograr que todos ayudaran juntos.`,
+      ],
+    },
+    {
+      theme: "astronauta",
+      label: "Astronauta",
+      title: "El planeta de los colores",
+      paragraphs: [
+        `La nave aterrizó con un suave «pum» sobre un planeta desconocido. ${name} abrió la escotilla y se quedó sin palabras: todo allí era de colores que no existen en la Tierra.`,
+        `El suelo era azul eléctrico, las montañas, de un naranja brillante, y los árboles cambiaban de color cada vez que se los miraba. ${name} anotó todo en el cuaderno de la misión.`,
+        `De pronto, una criatura redonda y peluda salió de detrás de una roca. No hablaba, pero movía las orejas como diciendo «hola». ${name} le devolvió el saludo con las dos manos.`,
+        `Se despidieron como buenos amigos. Al volver a casa, ${name} escribió la conclusión más importante de la misión: «El universo es enorme, pero la amabilidad se entiende en cualquier planeta».`,
+      ],
+    },
+    {
+      theme: "mago",
+      label: "Mago/Bruja",
+      title: "La poción de la risa",
+      paragraphs: [
+        `En la cocina del castillo mágico, ${name} preparaba la poción más difícil del libro: la poción de la risa. Los ingredientes eran raros: una pizca de polvo de estrellas, una cucharada de luz de luna y tres cosquillas.`,
+        `Pero faltaba el ingrediente final, y estaba escondido: una sonrisa sincera. ${name} buscó en el armario, debajo de la mesa, dentro del sombrero... pero la sonrisa no aparecía.`,
+        `Entonces ${mago} se miró en el espejo, vio el sombrero torcido y el pelo despeinado, y se echó a reír de verdad. La sonrisa cayó directo dentro del caldero.`,
+        `La poción brilló, burbujeó y llenó el castillo de risas. Desde ese día, ${name} sabe que la mejor magia siempre estuvo adentro.`,
+      ],
+    },
+  ];
+}
+
+function buildStories(name: string, character: Character): Story[] {
+  return [...coreStories(name, character), ...extraStories(name, character)];
+}
+
+const STORY_COUNT = buildStories("x", "nino").length;
+// portada + looks + looks para colorear + historias + certificado
+const TOTAL_PAGES = 1 + THEMES.length * 2 + STORY_COUNT + 1;
+
 // ---------------------------------------------------------------------------
 // Kit imprimible — se arma en el momento con el nombre elegido. Solo se ve al
 // imprimir ("Guardar como PDF" en el diálogo de impresión).
@@ -167,6 +270,26 @@ function PrintKit({ name, character }: { name: string; character: Character }) {
           <h2 className="font-display text-3xl font-semibold text-foreground">{name}</h2>
           <img src={images[t.key]} alt="" className="max-h-[200mm] object-contain" />
           <p className="text-sm text-muted-foreground">Recorta siguiendo el borde del dibujo.</p>
+        </section>
+      ))}
+
+      {/* Para colorear */}
+      {THEMES.map((t) => (
+        <section
+          key={`c-${t.key}`}
+          style={PAGE_BREAK}
+          className="flex min-h-[250mm] flex-col items-center justify-center gap-5 text-center"
+        >
+          <p className="text-sm font-semibold tracking-wide text-brand">
+            🎨 PARA COLOREAR · {t.key === "ninguno" ? "LOOK NORMAL" : t.label.toUpperCase()}
+          </p>
+          <h2 className="font-display text-3xl font-semibold text-foreground">Colorea a {name}</h2>
+          <img
+            src={images[t.key].replace("/personajes/", "/colorear/")}
+            alt=""
+            className="max-h-[200mm] object-contain"
+          />
+          <p className="text-sm text-muted-foreground">Usa tus colores favoritos y luego recorta por el borde.</p>
         </section>
       ))}
 
@@ -269,7 +392,7 @@ function CreatorApp() {
             </h1>
             <p className="mt-3 leading-relaxed text-muted-foreground">
               Escribe su nombre, elige personaje y tema, y mira cómo queda. Tu kit para imprimir incluye los 7 looks
-              ilustrados, 4 historias con su nombre y su certificado de héroe.
+              ilustrados, sus versiones para colorear, {STORY_COUNT} historias con su nombre y su certificado de héroe.
             </p>
           </div>
 
@@ -349,7 +472,7 @@ function CreatorApp() {
                   {name ? `El kit de ${name}, listo para imprimir` : "Tu kit completo para imprimir"}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  13 páginas: portada, los 7 looks, 4 historias con su nombre y el certificado de héroe.
+                  {TOTAL_PAGES} páginas: portada, 7 looks, 7 para colorear, {STORY_COUNT} historias con su nombre y el certificado de héroe.
                 </p>
               </div>
             </div>
