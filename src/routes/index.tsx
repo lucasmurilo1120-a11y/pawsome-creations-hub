@@ -28,16 +28,19 @@ export const Route = createFileRoute("/")({
 });
 
 // ---------------------------------------------------------------------------
-// Datos — 2 personajes x 7 looks ilustrados. Cada look es una ilustración
+// Datos — 4 personajes x 7 looks ilustrados. Cada look es una ilustración
 // completa (pelo, ropa y accesorios ya combinados), lista para recortar.
 // ---------------------------------------------------------------------------
 
-type Character = "nino" | "nina";
+type Character = "nino" | "nina" | "nino2" | "nina2";
+const isGirl = (c: Character) => c === "nina" || c === "nina2";
 type ThemeKey = "ninguno" | "superheroe" | "pirata" | "astronauta" | "mago" | "guerreiro" | "realeza";
 
 const CHARACTERS: { key: Character; label: string; emoji: string }[] = [
   { key: "nino", label: "Niño", emoji: "👦" },
   { key: "nina", label: "Niña", emoji: "👧" },
+  { key: "nino2", label: "Niño 2", emoji: "🧒" },
+  { key: "nina2", label: "Niña 2", emoji: "👧🏻" },
 ];
 
 const THEMES: { key: ThemeKey; label: string; emoji: string }[] = [
@@ -69,6 +72,24 @@ const CHARACTER_IMAGES: Record<Character, Record<ThemeKey, string>> = {
     guerreiro: "/personajes/nina-guerreiro.webp",
     realeza: "/personajes/nina-realeza.webp",
   },
+  nino2: {
+    ninguno: "/personajes/nino2-base.webp",
+    superheroe: "/personajes/nino2-superheroe.webp",
+    pirata: "/personajes/nino2-pirata.webp",
+    astronauta: "/personajes/nino2-astronauta.webp",
+    mago: "/personajes/nino2-mago.webp",
+    guerreiro: "/personajes/nino2-guerreiro.webp",
+    realeza: "/personajes/nino2-realeza.webp",
+  },
+  nina2: {
+    ninguno: "/personajes/nina2-base.webp",
+    superheroe: "/personajes/nina2-superheroe.webp",
+    pirata: "/personajes/nina2-pirata.webp",
+    astronauta: "/personajes/nina2-astronauta.webp",
+    mago: "/personajes/nina2-mago.webp",
+    guerreiro: "/personajes/nina2-guerreiro.webp",
+    realeza: "/personajes/nina2-realeza.webp",
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -78,7 +99,7 @@ const CHARACTER_IMAGES: Record<Character, Record<ThemeKey, string>> = {
 type Story = { theme: ThemeKey; label: string; title: string; paragraphs: string[] };
 
 function coreStories(name: string, character: Character): Story[] {
-  const girl = character === "nina";
+  const girl = isGirl(character);
   const capitan = girl ? "la capitana" : "el capitán";
   const explorador = girl ? "la primera exploradora" : "el primer explorador";
   const mago = girl ? "la maga" : "el mago";
@@ -132,7 +153,7 @@ function coreStories(name: string, character: Character): Story[] {
 }
 
 function extraStories(name: string, character: Character): Story[] {
-  const mago = character === "nina" ? "la maga" : "el mago";
+  const mago = isGirl(character) ? "la maga" : "el mago";
 
   return [
     {
@@ -432,7 +453,7 @@ function CreatorApp() {
 
               <div>
                 <p className="mb-2 text-sm font-semibold text-foreground">Personaje</p>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   {CHARACTERS.map((c) => (
                     <button
                       key={c.key}
