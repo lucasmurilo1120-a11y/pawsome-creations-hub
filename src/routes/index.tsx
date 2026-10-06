@@ -57,7 +57,7 @@ const CHARACTERS: { key: Character; label: string; emoji: string }[] = [
 ];
 
 const THEMES: { key: ThemeKey; label: string; emoji: string }[] = [
-  { key: "ninguno", label: "Sin tema", emoji: "✨" },
+  { key: "ninguno", label: "Normal", emoji: "✨" },
   { key: "superheroe", label: "Superhéroe", emoji: "🦸" },
   { key: "pirata", label: "Pirata", emoji: "🏴‍☠️" },
   { key: "astronauta", label: "Astronauta", emoji: "🚀" },
@@ -426,7 +426,8 @@ function StepTitle({ n, children }: { n: number; children: ReactNode }) {
 // Vista previa en pantalla de algunas páginas del kit, con el nombre en vivo.
 function KitPreview({ name, character }: { name: string; character: Character }) {
   const images = CHARACTER_IMAGES[character];
-  const who = name || "tu héroe";
+  // Sin nombre todavía: mostramos un nombre de ejemplo para que se entienda el resultado.
+  const who = name || (isGirl(character) ? "Sofía" : "Mateo");
   const firstStory = buildStories(who, character)[0];
   return (
     <div className="-mx-5 overflow-x-auto px-5 pb-2">
