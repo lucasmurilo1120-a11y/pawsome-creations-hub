@@ -24,13 +24,13 @@ const mini = (src: string) => src.replace("/personajes/", "/personajes/mini/");
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: `${BRAND} — ${TAGLINE}` },
+      { title: `${BRAND}: ${TAGLINE.charAt(0).toLowerCase()}${TAGLINE.slice(1)}` },
       {
         name: "description",
         content:
           "Elige el personaje y el tema, escribe el nombre de tu hijo y descarga su kit de héroe de papel con historias y certificado, listo para imprimir.",
       },
-      { property: "og:title", content: `${BRAND} — ${TAGLINE}` },
+      { property: "og:title", content: `${BRAND}: ${TAGLINE.charAt(0).toLowerCase()}${TAGLINE.slice(1)}` },
       {
         property: "og:description",
         content: "Su nombre en cada historia y en su certificado de héroe. Imprímelo en casa y a jugar.",
@@ -137,7 +137,7 @@ function coreStories(name: string, character: Character): Story[] {
         "La lluvia había lavado el jardín y, entre las piedras del camino, algo brillaba distinto. Era la esquina de un papel doblado en cuatro, con bordes quemados a propósito y una equis dibujada con tinta gruesa.",
         "El mapa marcaba el camino: pasar bajo la mesa de la cocina, rodear dos veces la maceta grande y girar a la izquierda en el sillón azul. Cada paso se sentía más importante que el anterior.",
         `Con el catalejo en alto para vigilar peligros invisibles, ${capitan} ${name} avanzó sin apuro. Los verdaderos tesoros nunca están donde uno espera, y eso lo hace todo más emocionante.`,
-        `Al final del camino, detrás del cojín más grande del sofá, esperaba el cofre: un puñado de piedritas brillantes y una nota que decía "el tesoro más grande fue el viaje". ${name} sonrió — ya sabía que volvería a navegar.`,
+        `Al final del camino, detrás del cojín más grande del sofá, esperaba el cofre: un puñado de piedritas brillantes y una nota que decía "el tesoro más grande fue el viaje". ${name} sonrió: ya sabía que volvería a navegar.`,
       ],
     },
     {

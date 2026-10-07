@@ -77,7 +77,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Papelitos — Tu hijo, el héroe de papel" },
+      { title: "Papelitos: tu hijo, el héroe de papel" },
       {
         name: "description",
         content:
