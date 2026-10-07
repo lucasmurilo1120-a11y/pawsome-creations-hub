@@ -37,8 +37,13 @@ async function aDataUrl(url: string): Promise<string> {
   return `data:${tipo};base64,${btoa(bin)}`;
 }
 
+// Ilustraciones de referencia (estilo y disfraces). APP_ORIGIN fija el dominio del app;
+// si no está definido, se usa el del pedido solo si es https.
 function referencia(genero: Genero, look: "base" | LookCarita) {
-  const origin = new URL(getRequest().url).origin;
+  const fijo = process.env["APP_ORIGIN"];
+  const delPedido = new URL(getRequest().url);
+  const origin = fijo ?? (delPedido.protocol === "https:" ? delPedido.origin : "");
+  if (!origin) throw new Error("Origen del app no configurado");
   return `${origin}/personajes/${genero}-${look}.webp`;
 }
 
