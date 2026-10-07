@@ -1,8 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Download, Printer, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Cargando, EntrarPantalla, SinCompraPantalla } from "@/components/papelitos/EntrarPantalla";
+import { Extras } from "@/components/papelitos/Extras";
+import { CrearConFoto } from "@/components/papelitos/CrearConFoto";
+import { LibroColorearImprimible, PAGINAS_COLOREAR, type PersonajeEstandar } from "@/components/papelitos/LibroColorear";
+import { cargarPersonajeCarita, useAcceso, type Acceso, type PersonajeCarita } from "@/lib/acceso";
 
 // Nombre de la marca en un solo lugar: cambiarlo acá lo cambia en toda la app.
 const BRAND = "Papelitos";
@@ -37,7 +42,7 @@ export const Route = createFileRoute("/")({
       },
     ],
   }),
-  component: CreatorApp,
+  component: App,
 });
 
 // ---------------------------------------------------------------------------
@@ -111,8 +116,7 @@ const CHARACTER_IMAGES: Record<Character, Record<ThemeKey, string>> = {
 
 type Story = { theme: ThemeKey; label: string; title: string; paragraphs: string[] };
 
-function coreStories(name: string, character: Character): Story[] {
-  const girl = isGirl(character);
+function coreStories(name: string, girl: boolean): Story[] {
   const capitan = girl ? "la capitana" : "el capitán";
   const explorador = girl ? "la primera exploradora" : "el primer explorador";
   const mago = girl ? "la maga" : "el mago";
@@ -165,8 +169,8 @@ function coreStories(name: string, character: Character): Story[] {
   ];
 }
 
-function extraStories(name: string, character: Character): Story[] {
-  const mago = isGirl(character) ? "la maga" : "el mago";
+function extraStories(name: string, girl: boolean): Story[] {
+  const mago = girl ? "la maga" : "el mago";
 
   return [
     {
@@ -260,11 +264,42 @@ function extraStories(name: string, character: Character): Story[] {
   ];
 }
 
-function buildStories(name: string, character: Character): Story[] {
-  return [...coreStories(name, character), ...extraStories(name, character)];
+function buildStories(name: string, girl: boolean): Story[] {
+  return [...coreStories(name, girl), ...extraStories(name, girl)];
 }
 
-const STORY_COUNT = buildStories("x", "nino").length;
+const STORY_COUNT = buildStories("x", false).length;
+
+// ---------------------------------------------------------------------------
+// Héroes: los 4 personajes ilustrados + "Con su carita" (creado con la foto).
+// ---------------------------------------------------------------------------
+
+type HeroKey = Character | "carita";
+type Hero = {
+  key: HeroKey;
+  label: string;
+  girl: boolean;
+  images: Record<ThemeKey, string>;
+  thumbs: Record<ThemeKey, string>;
+};
+
+const mapThemes = (fn: (t: ThemeKey) => string) =>
+  Object.fromEntries(THEMES.map((t) => [t.key, fn(t.key)])) as Record<ThemeKey, string>;
+
+const STANDARD_HEROES: Hero[] = CHARACTERS.map((c) => ({
+  key: c.key,
+  label: c.label,
+  girl: isGirl(c.key),
+  images: CHARACTER_IMAGES[c.key],
+  thumbs: mapThemes((t) => mini(CHARACTER_IMAGES[c.key][t])),
+}));
+
+// El personaje con su carita aparece solo cuando sus 7 looks están listos.
+function heroCarita(p: PersonajeCarita | null): Hero | null {
+  if (!p || THEMES.some((t) => !p.imagenes[t.key])) return null;
+  const images = mapThemes((t) => p.imagenes[t]!);
+  return { key: "carita", label: "Con su carita", girl: p.genero === "nina", images, thumbs: images };
+}
 // portada + looks + historias + certificado
 const TOTAL_PAGES = 1 + THEMES.length + STORY_COUNT + 1;
 
@@ -275,9 +310,9 @@ const TOTAL_PAGES = 1 + THEMES.length + STORY_COUNT + 1;
 
 const PAGE_BREAK = { breakAfter: "page", pageBreakAfter: "always" } as const;
 
-function PrintKit({ name, character }: { name: string; character: Character }) {
-  const images = CHARACTER_IMAGES[character];
-  const stories = buildStories(name, character);
+function PrintKit({ name, hero }: { name: string; hero: Hero }) {
+  const images = hero.images;
+  const stories = buildStories(name, hero.girl);
 
   return (
     <div className="print-kit hidden print:block" aria-hidden>
@@ -354,11 +389,11 @@ function PrintKit({ name, character }: { name: string; character: Character }) {
 // ---------------------------------------------------------------------------
 
 function ThemePicker({
-  character,
+  hero,
   value,
   onChange,
 }: {
-  character: Character;
+  hero: Hero;
   value: ThemeKey;
   onChange: (key: ThemeKey) => void;
 }) {
@@ -377,7 +412,7 @@ function ThemePicker({
             }`}
           >
             <img
-              src={mini(CHARACTER_IMAGES[character][t.key])}
+              src={hero.thumbs[t.key]}
               alt=""
               width={72}
               height={120}
@@ -404,24 +439,24 @@ function StepTitle({ n, children }: { n: number; children: ReactNode }) {
 }
 
 // Vista previa en pantalla de algunas páginas del kit, con el nombre en vivo.
-function KitPreview({ name, character }: { name: string; character: Character }) {
-  const images = CHARACTER_IMAGES[character];
+function KitPreview({ name, hero }: { name: string; hero: Hero }) {
+  const thumbs = hero.thumbs;
   // Sin nombre todavía: mostramos un nombre de ejemplo para que se entienda el resultado.
-  const who = name || (isGirl(character) ? "Sofía" : "Mateo");
-  const firstStory = buildStories(who, character)[0];
+  const who = name || (hero.girl ? "Sofía" : "Mateo");
+  const firstStory = buildStories(who, hero.girl)[0]!;
   return (
     <div className="-mx-5 overflow-x-auto px-5 pb-2">
       <div className="flex w-max gap-4">
         <div className="flex w-40 flex-col items-center gap-2 rounded-xl bg-surface p-3 text-center shadow-soft">
           <p className="text-[10px] font-semibold text-brand">{BRAND}</p>
           <p className="font-display text-sm leading-tight font-semibold">El kit de héroe de {who}</p>
-          <img src={mini(images.superheroe)} alt="" className="h-28 object-contain" />
+          <img src={thumbs.superheroe} alt="" className="h-28 object-contain" />
           <p className="text-[10px] text-muted-foreground">Portada</p>
         </div>
         <div className="flex w-40 flex-col items-center gap-2 rounded-xl bg-surface p-3 text-center shadow-soft">
           <p className="text-[10px] font-semibold text-brand">LOOK PIRATA</p>
           <p className="font-display text-sm leading-tight font-semibold">{who}</p>
-          <img src={mini(images.pirata)} alt="" loading="lazy" className="h-28 object-contain" />
+          <img src={thumbs.pirata} alt="" loading="lazy" className="h-28 object-contain" />
           <p className="text-[10px] text-muted-foreground">7 looks para recortar</p>
         </div>
         <div className="flex w-56 flex-col gap-2 rounded-xl bg-surface p-3 shadow-soft">
@@ -434,37 +469,87 @@ function KitPreview({ name, character }: { name: string; character: Character })
           <p className="font-display text-sm leading-tight font-semibold">Certificado de Héroe</p>
           <p className="text-[10px] text-muted-foreground">Se otorga con orgullo a</p>
           <p className="font-display text-base font-semibold text-brand-deep">{who}</p>
-          <img src={mini(images.superheroe)} alt="" className="h-16 object-contain" />
+          <img src={thumbs.superheroe} alt="" className="h-16 object-contain" />
         </div>
       </div>
     </div>
   );
 }
 
-function CreatorApp() {
-  const [character, setCharacter] = useState<Character>("nino");
+// Acceso: solo entra quien compró. El que no tiene sesión ve el login por e-mail.
+function App() {
+  const acceso = useAcceso();
+  if (acceso.estado === "cargando") return <Cargando />;
+  if (acceso.estado === "sin_sesion") return <EntrarPantalla />;
+  if (!acceso.claves.has("kit")) {
+    return <SinCompraPantalla email={acceso.email} onSalir={acceso.salir} onRecargar={acceso.recargar} />;
+  }
+  return <CreatorApp acceso={acceso} />;
+}
+
+type Panel = "carita" | "colorear" | null;
+type ModoImpresion = "kit" | "colorear";
+
+function CreatorApp({ acceso }: { acceso: Acceso }) {
+  const [heroKey, setHeroKey] = useState<HeroKey>("nino");
   const [theme, setTheme] = useState<ThemeKey>("ninguno");
   const [rawName, setRawName] = useState("");
+  const [panel, setPanel] = useState<Panel>(null);
+  const [modo, setModo] = useState<ModoImpresion>("kit");
+  const [carita, setCarita] = useState<PersonajeCarita | null>(null);
+  const [colorChar, setColorChar] = useState<PersonajeEstandar>("nino");
+
+  const tieneCarita = acceso.claves.has("carita");
+  const recargarCarita = useCallback(async () => {
+    setCarita(tieneCarita ? await cargarPersonajeCarita() : null);
+  }, [tieneCarita]);
+  useEffect(() => {
+    void recargarCarita();
+  }, [recargarCarita]);
+
+  const caritaHero = heroCarita(carita);
+  const heroes = caritaHero ? [caritaHero, ...STANDARD_HEROES] : STANDARD_HEROES;
+  const hero = heroes.find((h) => h.key === heroKey) ?? STANDARD_HEROES[0]!;
+
+  // Cuando el personaje con su carita queda listo, lo elegimos.
+  const caritaLista = Boolean(caritaHero);
+  useEffect(() => {
+    if (caritaLista) setHeroKey("carita");
+  }, [caritaLista]);
 
   const name = formatName(rawName);
 
   const summary = useMemo(() => {
-    const c = CHARACTERS.find((x) => x.key === character)!.label;
     const t = THEMES.find((x) => x.key === theme)!.label;
-    const who = name || c;
+    const who = name || hero.label;
     return theme === "ninguno" ? who : `${who} · ${t}`;
-  }, [character, theme, name]);
+  }, [hero.label, theme, name]);
 
-  const imageSrc = CHARACTER_IMAGES[character][theme];
   const downloadLabel = name ? `Descargar el kit de ${name} (PDF)` : "Descargar mi kit (PDF)";
+
+  function abrirPanel(p: Exclude<Panel, null>) {
+    setPanel(p);
+    window.setTimeout(() => document.getElementById("panel-extra")?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
+  }
+
+  // Imprime el kit o el libro para colorear (se arma solo lo que se va a imprimir).
+  function imprimir(m: ModoImpresion) {
+    setModo(m);
+    window.setTimeout(() => window.print(), 60);
+  }
 
   return (
     <>
       <main className="min-h-screen bg-background pb-28 print:hidden sm:pb-0">
         <header className="border-b border-border/60 bg-surface/70">
-          <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
+          <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-3">
             <span className="font-display text-lg font-semibold text-foreground">{BRAND}</span>
-            <span className="hidden text-sm text-muted-foreground sm:inline">{TAGLINE}</span>
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="hidden truncate text-sm text-muted-foreground sm:inline">{acceso.email}</span>
+              <button type="button" onClick={acceso.salir} className="min-h-11 text-sm font-semibold text-brand">
+                Salir
+              </button>
+            </div>
           </div>
         </header>
 
@@ -484,7 +569,7 @@ function CreatorApp() {
             <div className="mx-auto w-full max-w-[320px] md:sticky md:top-6 md:mx-0">
               <div className="flex aspect-[5/8] items-center justify-center rounded-3xl bg-surface p-4 shadow-lift">
                 <img
-                  src={imageSrc}
+                  src={hero.images[theme]}
                   alt={`Ilustración de ${summary}`}
                   className="max-h-full max-w-full object-contain"
                 />
@@ -516,36 +601,39 @@ function CreatorApp() {
 
               <div>
                 <StepTitle n={2}>Elige su personaje</StepTitle>
-                <div className="grid grid-cols-4 gap-2">
-                  {CHARACTERS.map((c) => {
-                    const active = character === c.key;
+                <div className={`grid gap-2 ${heroes.length > 4 ? "grid-cols-5" : "grid-cols-4"}`}>
+                  {heroes.map((h) => {
+                    const active = hero.key === h.key;
                     return (
                       <button
-                        key={c.key}
+                        key={h.key}
                         type="button"
-                        onClick={() => setCharacter(c.key)}
+                        onClick={() => setHeroKey(h.key)}
                         aria-pressed={active}
                         className={`flex flex-col items-center gap-1 rounded-2xl border-2 bg-surface p-1.5 pb-2 text-xs font-medium transition-[transform,border-color] duration-150 ease-out active:scale-[0.97] ${
                           active ? "border-brand text-brand-deep" : "border-transparent text-foreground hover:border-border"
                         }`}
                       >
-                        <img
-                          src={mini(CHARACTER_IMAGES[c.key].ninguno)}
-                          alt=""
-                          width={72}
-                          height={120}
-                          className="h-[96px] w-full object-contain"
-                        />
-                        {c.label}
+                        <img src={h.thumbs.ninguno} alt="" width={72} height={120} className="h-[96px] w-full object-contain" />
+                        <span className="leading-tight">{h.key === "carita" ? "Su carita" : h.label}</span>
                       </button>
                     );
                   })}
                 </div>
+                {!caritaHero && (
+                  <button
+                    type="button"
+                    onClick={() => abrirPanel("carita")}
+                    className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-brand"
+                  >
+                    ¿Y si el héroe tiene su carita? Créalo con una foto
+                  </button>
+                )}
               </div>
 
               <div>
                 <StepTitle n={3}>Mira sus looks</StepTitle>
-                <ThemePicker character={character} value={theme} onChange={setTheme} />
+                <ThemePicker hero={hero} value={theme} onChange={setTheme} />
                 <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
                   Los 7 looks vienen todos en su kit. Cada uno es una ilustración completa, lista para imprimir y recortar.
                 </p>
@@ -558,7 +646,7 @@ function CreatorApp() {
             <p className="mb-3 font-semibold text-foreground">
               {name ? `Así se verá el kit de ${name}` : "Así se verá su kit"}
             </p>
-            <KitPreview name={name} character={character} />
+            <KitPreview name={name} hero={hero} />
           </div>
 
           {/* Descarga */}
@@ -575,7 +663,7 @@ function CreatorApp() {
               </div>
             </div>
             <div className="mt-5 flex flex-wrap items-center gap-3">
-              <Button size="lg" className="shadow-cta" disabled={!name} onClick={() => window.print()}>
+              <Button size="lg" className="shadow-cta" disabled={!name} onClick={() => imprimir("kit")}>
                 <Download className="size-4" />
                 {downloadLabel}
               </Button>
@@ -599,23 +687,76 @@ function CreatorApp() {
               </ul>
             </div>
           </div>
+
+          {/* Extras */}
+          <Extras
+            claves={acceso.claves}
+            email={acceso.email}
+            onRecargar={acceso.recargar}
+            onAbrir={abrirPanel}
+            personajeCaritaListo={Boolean(caritaHero)}
+          />
+
+          {panel === "carita" && (
+            <div id="panel-extra" className="mt-6 scroll-mt-4">
+              {tieneCarita ? (
+                <CrearConFoto
+                  looksExistentes={Object.keys(carita?.imagenes ?? {})}
+                  onListo={recargarCarita}
+                  onCerrar={() => setPanel(null)}
+                />
+              ) : (
+                <p className="rounded-3xl border border-border bg-surface p-5 text-sm leading-relaxed text-muted-foreground">
+                  Para crear su personaje con una foto, desbloquea el extra “Con su carita” aquí arriba.
+                </p>
+              )}
+            </div>
+          )}
+
+          {panel === "colorear" && acceso.claves.has("colorear") && (
+            <div id="panel-extra" className="mt-6 scroll-mt-4 rounded-3xl border border-brand/30 bg-surface p-5 shadow-soft sm:p-6">
+              <p className="font-display text-xl font-semibold text-foreground">Su libro para colorear</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {PAGINAS_COLOREAR} páginas: portada, 7 looks para pintar con su nombre y su diploma de artista.
+              </p>
+              <p className="mt-4 text-sm font-semibold text-foreground">Personaje para colorear</p>
+              <div className="mt-2 grid grid-cols-4 gap-2">
+                {STANDARD_HEROES.map((h) => (
+                  <button
+                    key={h.key}
+                    type="button"
+                    onClick={() => setColorChar(h.key as PersonajeEstandar)}
+                    aria-pressed={colorChar === h.key}
+                    className={`flex flex-col items-center gap-1 rounded-2xl border-2 bg-surface p-1.5 pb-2 text-xs font-medium ${
+                      colorChar === h.key ? "border-brand text-brand-deep" : "border-transparent text-foreground"
+                    }`}
+                  >
+                    <img src={`/colorear/${h.key}-base.webp`} alt="" width={72} height={120} loading="lazy" className="h-[84px] w-full object-contain" />
+                    {h.label}
+                  </button>
+                ))}
+              </div>
+              <div className="mt-5 flex flex-wrap items-center gap-3">
+                <Button size="lg" className="shadow-cta" disabled={!name} onClick={() => imprimir("colorear")}>
+                  <Download className="size-4" />
+                  {name ? `Descargar el libro de ${name} (PDF)` : "Escribe su nombre arriba"}
+                </Button>
+              </div>
+            </div>
+          )}
         </section>
       </main>
 
       {/* Botón fijo en el celular */}
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 p-3 backdrop-blur-md print:hidden sm:hidden">
-        <Button
-          size="lg"
-          className="h-12 w-full shadow-cta"
-          disabled={!name}
-          onClick={() => window.print()}
-        >
+        <Button size="lg" className="h-12 w-full shadow-cta" disabled={!name} onClick={() => imprimir("kit")}>
           <Download className="size-4" />
           {name ? downloadLabel : "Escribe su nombre para descargar"}
         </Button>
       </div>
 
-      {name ? <PrintKit name={name} character={character} /> : null}
+      {name && modo === "kit" ? <PrintKit name={name} hero={hero} /> : null}
+      {name && modo === "colorear" ? <LibroColorearImprimible name={name} personaje={colorChar} /> : null}
     </>
   );
 }
