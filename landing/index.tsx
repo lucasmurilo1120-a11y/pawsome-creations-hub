@@ -1,22 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import { z } from "zod";
-import { Download, Mail, Printer, ShieldCheck } from "lucide-react";
+import { Camera, Palette, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import heroFamilia from "@/assets/marketing/hero-familia.webp.asset.json";
 import pasoApp from "@/assets/marketing/paso-app.webp.asset.json";
 import pasoRecortar from "@/assets/paso-recortar.jpg.asset.json";
 import pasoJuego from "@/assets/marketing/paso-juego.webp.asset.json";
-import personajes4 from "@/assets/marketing/personajes-4.webp.asset.json";
-import looks7 from "@/assets/marketing/looks-7.webp.asset.json";
-import historia from "@/assets/marketing/historia.webp.asset.json";
-import certificado from "@/assets/marketing/certificado.webp.asset.json";
 import kitPaginas from "@/assets/marketing/kit-paginas-v2.webp.asset.json";
 import demoSprite from "@/assets/marketing/demo-sprite.webp.asset.json";
 
 // ---------------------------------------------------------------------------
 // Configuración de la oferta: todo lo que cambia la venta está acá arriba.
-// Cuando tengas los links de Hotmart/Kiwify, pégalos en CHECKOUT_URLS y los
+// Cuando tengas los links de Hotmart, pégalos en CHECKOUT_URLS y los
 // botones pasan solos de "Avísame" a "Quiero el plan".
 // META_PIXEL_ID: pega el ID numérico de tu píxel de Meta y se activa solo
 // (PageView al entrar, Lead al dejar el e-mail, InitiateCheckout al ir a pagar).
@@ -48,7 +44,7 @@ const PLANS: {
     description: "El kit completo para empezar a jugar hoy.",
     features: [
       "4 personajes para elegir",
-      "7 looks por personaje: normal, superhéroe, pirata, astronauta, mago o bruja, guerrero y realeza",
+      "7 looks por personaje: su ropa de siempre y 6 disfraces, uno para cada aventura",
       "12 historias donde tu hijo es el protagonista, con su nombre",
       "Portada y certificado de héroe con su nombre",
       "Un kit para cada hijo, sin pagar de nuevo",
@@ -62,13 +58,39 @@ const PLANS: {
     description: "Todo el Básico y un mundo que sigue creciendo.",
     features: [
       "Todo lo del plan Básico",
-      "Personajes nuevos a medida que se lanzan, sin pagar de nuevo",
+      "Personajes y looks nuevos a medida que se lanzan, sin pagar de nuevo",
       "3 historias nuevas cada 18 días",
       "Acceso a todas las actualizaciones del kit",
     ],
     featured: true,
   },
 ];
+
+// Extras opcionales: aparecen como order bump en el pago de Hotmart y se
+// activan en la app con el código de compra (HP...) que llega por e-mail.
+const EXTRAS = [
+  {
+    key: "carita",
+    icon: Camera,
+    name: "Con su carita",
+    price: "US$4,97",
+    lead: "Tu hijo, convertido en un personaje más del kit.",
+    copy: "Subes 1 foto y la app lo dibuja con su cara, su pelo y sus 7 looks, listo para jugar junto a los demás.",
+    bullets: [
+      "¿Hermanos, mamá o papá? Dentro de la app sumas 4 fotos más por US$9,97",
+      "No guardamos la foto: se usa una sola vez para crear el dibujo",
+    ],
+  },
+  {
+    key: "color",
+    icon: Palette,
+    name: "MiniMundos Color",
+    price: "US$4,97",
+    lead: "16 escenas para pintar, no solo el personaje.",
+    copy: "El príncipe frente a su castillo, la brujita con su caldero, la sirena en el arrecife, el astronauta en la Luna y más. Cada lámina trae la escena a color como guía y la versión para pintar.",
+    bullets: ["Portada con su nombre y diploma de artista", "Imprime y pinta las veces que quieras"],
+  },
+] as const;
 
 const CHARACTERS = [
   { key: "nino", label: "Niño" },
@@ -89,31 +111,22 @@ const THEMES = [
 
 // Datos con fuente. No agregar números sin fuente verificable.
 const DATOS = [
-  {
-    n: "1 hora",
-    t: "al día como máximo frente a pantallas para niños de 2 a 4 años. Y menos es mejor.",
-    f: "Organización Mundial de la Salud, 2019",
-  },
-  {
-    n: "2 de 3",
-    t: "niños de 1 a 4 años en América Latina ya usan el celular.",
-    f: "Estudio en 19 países de América Latina, PLOS One, 2025",
-  },
-  {
-    n: "1 de 5",
-    t: "padres logra cumplir siempre sus reglas de pantalla, aunque el 86% dice que es una prioridad diaria.",
-    f: "Pew Research Center, padres de EE. UU., 2025",
-  },
+  { n: "1 hora", t: "al día como máximo frente a pantallas para niños de 2 a 4 años. Y menos es mejor.", f: "Organización Mundial de la Salud, 2019" },
+  { n: "2 de 3", t: "niños de 1 a 4 años en América Latina ya usan el celular.", f: "Estudio en 19 países de América Latina, PLOS One, 2025" },
+  { n: "1 de 5", t: "padres logra cumplir siempre sus reglas de pantalla, aunque el 86% dice que es una prioridad diaria.", f: "Pew Research Center, padres de EE. UU., 2025" },
+];
+
+const QUE_TRAE = [
+  { n: "4", t: "personajes", c: "Distintos tonos de piel y peinados, para que elija el que más se le parece." },
+  { n: "7", t: "looks", c: "Su ropa de siempre y 6 disfraces, uno para cada aventura." },
+  { n: "12", t: "historias", c: "Cuentos cortos con su nombre, para leer juntos y después jugarlos." },
+  { n: "1", t: "certificado", c: "De héroe y con su nombre, para colgar en la puerta de su cuarto." },
 ];
 
 const FAQ = [
   {
-    q: "¿Qué recibo exactamente?",
-    a: `Acceso a la app de Papelitos. Escribes el nombre de tu hijo, eliges su personaje y descargas su kit en PDF: ${TOTAL_PAGES} páginas con portada, 7 looks, 12 historias con su nombre y su certificado de héroe.`,
-  },
-  {
-    q: "¿Cómo y cuándo lo recibo?",
-    a: "Apenas se confirma el pago, te llega por e-mail (el mismo que usaste en la compra) el enlace de acceso. Es 100% digital: no se envía nada físico y no hay que esperar.",
+    q: "¿Qué recibo y cómo me llega?",
+    a: `Apenas se confirma el pago te llega por e-mail (el de la compra) el acceso a la app de Papelitos. Escribes el nombre de tu hijo, eliges su personaje y descargas su kit en PDF: ${TOTAL_PAGES} páginas con portada, 7 looks, 12 historias con su nombre y su certificado. Es 100% digital: no se envía nada físico y no hay que instalar nada.`,
   },
   {
     q: "¿Necesito una impresora especial?",
@@ -124,20 +137,16 @@ const FAQ = [
     a: "Para niños de 3 a 8 años. Los más pequeños recortan con ayuda de un adulto y los más grandes pueden leer las historias por su cuenta.",
   },
   {
-    q: "Tengo más de un hijo. ¿Tengo que comprar dos veces?",
-    a: "No. Puedes crear un kit con el nombre de cada hijo, las veces que quieras.",
+    q: "Tengo más de un hijo. ¿Tengo que pagar dos veces?",
+    a: "No. Creas un kit con el nombre de cada hijo y lo imprimes las veces que quieras, por ejemplo cuando los personajes se gasten de tanto jugar.",
   },
   {
-    q: "¿Puedo imprimirlo más de una vez?",
-    a: "Sí. Descarga el PDF cuando quieras e imprime de nuevo los personajes cuando se gasten de tanto jugar.",
+    q: "¿Cómo funciona Con su carita? ¿Qué pasa con la foto?",
+    a: "Subes una foto de frente y con buena luz, y la app usa inteligencia artificial para dibujar a tu hijo en el estilo de Papelitos, con sus 7 looks. La foto se usa una sola vez para crear el dibujo y no la guardamos. Si el resultado no te convence, puedes probar con otra foto: tienes hasta 3 intentos por personaje.",
   },
   {
-    q: "¿Necesito instalar algo?",
-    a: "No. Se usa desde el navegador del celular, la tablet o la computadora.",
-  },
-  {
-    q: "¿Cuál es la diferencia entre los planes?",
-    a: "El Básico trae el kit completo de hoy. El Premium suma los personajes nuevos que lancemos y 3 historias nuevas cada 18 días, sin volver a pagar.",
+    q: "¿Cómo activo los extras?",
+    a: "Si sumas Con su carita o MiniMundos Color en el pago, Hotmart te envía un e-mail por cada uno con su código de compra (empieza con HP). Lo pegas una vez en la app y queda activado en tu cuenta.",
   },
   {
     q: "¿Y si no me gusta?",
@@ -361,26 +370,26 @@ function Demo() {
   const themeLabel = (THEMES[theme] ?? THEMES[1]).label;
 
   return (
-    <section id="pruebalo" className="scroll-mt-4 bg-mist py-16 sm:py-20">
+    <section id="pruebalo" className="scroll-mt-4 bg-mist py-12 sm:py-20">
       <div className="mx-auto max-w-6xl px-5">
         <h2 className="max-w-2xl font-display text-3xl font-semibold text-balance sm:text-4xl">
-          Pruébalo ahora: escribe su nombre y elige su héroe.
+          Pruébalo: escribe su nombre y elige su héroe.
         </h2>
-        <p className="mt-3 max-w-xl text-base text-muted-foreground">Así empieza su kit. Gratis y sin registrarte.</p>
+        <p className="mt-2 max-w-xl text-base text-muted-foreground">Así empieza su kit. Gratis y sin registrarte.</p>
 
-        <div className="mt-10 grid items-start gap-8 md:grid-cols-[minmax(0,360px)_1fr]">
-          <div className="mx-auto w-full max-w-[360px] rounded-3xl bg-surface p-6 text-center shadow-lift md:mx-0">
+        <div className="mt-7 grid items-start gap-6 md:mt-10 md:grid-cols-[minmax(0,360px)_1fr] md:gap-8">
+          <div className="mx-auto w-full max-w-[360px] rounded-3xl bg-surface px-5 py-4 text-center shadow-lift md:mx-0 md:p-6">
             <p className="text-xs font-bold text-brand">{BRAND}</p>
-            <p className="mt-1 font-display text-2xl leading-tight font-semibold">El kit de héroe de {shown}</p>
-            <div className="mt-4 flex justify-center">
-              <SpriteCell row={character} col={theme} scale={1.1} alt={`${(CHARACTERS[character] ?? CHARACTERS[0]).label}, look ${themeLabel}`} />
+            <p className="mt-1 font-display text-xl leading-tight font-semibold sm:text-2xl">El kit de héroe de {shown}</p>
+            <div className="mt-3 flex justify-center">
+              <SpriteCell row={character} col={theme} scale={0.8} alt={`${(CHARACTERS[character] ?? CHARACTERS[0]).label}, look ${themeLabel}`} />
             </div>
-            <p className="mt-3 text-sm text-muted-foreground">
+            <p className="mt-2 text-sm text-muted-foreground">
               Look {themeLabel} · 1 de las {TOTAL_PAGES} páginas de su kit
             </p>
           </div>
 
-          <div className="space-y-7">
+          <div className="space-y-6">
             <div>
               <label htmlFor="demo-name" className="mb-2 block text-base font-bold">
                 ¿Cómo se llama tu hijo?
@@ -412,7 +421,7 @@ function Demo() {
                       character === i ? "border-brand" : "border-transparent hover:border-border"
                     }`}
                   >
-                    <SpriteCell row={i} col={0} scale={0.3} alt="" />
+                    <SpriteCell row={i} col={0} scale={0.28} alt="" />
                   </button>
                 ))}
               </div>
@@ -437,13 +446,7 @@ function Demo() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-border bg-surface p-5">
-              <p className="text-base font-bold">{name ? `El kit de ${name} trae:` : "Su kit completo trae:"}</p>
-              <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">
-                Su portada, los 7 looks de su personaje, 12 historias donde {shown} es el protagonista y su certificado de héroe.
-              </p>
-              <PrimaryCta label={name ? `Quiero el kit de ${name}` : CTA_LABEL} className="mt-5 w-full sm:w-auto" />
-            </div>
+            <PrimaryCta label={name ? `Quiero el kit de ${name}` : CTA_LABEL} className="w-full sm:w-auto" />
           </div>
         </div>
       </div>
@@ -519,45 +522,26 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* LO QUE TRAE, DE UN VISTAZO */}
-      <section aria-label="Lo que trae el kit" className="mx-auto max-w-6xl px-5 pb-14 sm:pb-20">
-        <ul className="grid grid-cols-4 divide-x divide-border rounded-3xl bg-surface py-5 text-center shadow-soft sm:py-7">
-          {[
-            { n: "4", t: "personajes" },
-            { n: "7", t: "looks" },
-            { n: "12", t: "historias" },
-            { n: "1", t: "certificado" },
-          ].map((s) => (
-            <li key={s.t} className="px-1">
-              <p className="font-display text-3xl font-semibold text-brand-deep sm:text-5xl">{s.n}</p>
-              <p className="mt-1 text-[13px] font-semibold text-muted-foreground sm:text-base">{s.t}</p>
-            </li>
-          ))}
-        </ul>
-      </section>
-
       {/* DOLOR + DATOS */}
-      <section className="bg-ink py-16 text-paper sm:py-20">
+      <section className="bg-ink py-12 text-paper sm:py-20">
         <div className="mx-auto max-w-6xl px-5">
-          <div className="grid gap-8 md:grid-cols-[.9fr_1.1fr] md:items-center md:gap-10">
+          <div className="grid gap-4 md:grid-cols-[.9fr_1.1fr] md:items-center md:gap-10">
             <h2 className="font-display text-3xl font-semibold text-balance sm:text-4xl">
               Estás cansado. Tu hijo está aburrido. Y la pantalla siempre está lista.
             </h2>
-            <div className="space-y-4 text-base leading-relaxed text-paper/80 sm:text-lg">
-              <p>
-                Después de un día largo, inventar un juego, buscar materiales y lograr que le interese se siente como otra tarea más. Entonces aparecen esos “15 minutos más” que se estiran, y después llega la culpa.
-              </p>
-              <p className="font-semibold text-paper">
-                No es falta de ganas. Te faltaba un plan que ya estuviera listo y que a tu hijo le importe de verdad: uno donde el héroe tiene su nombre.
-              </p>
-            </div>
+            <p className="text-base leading-relaxed text-paper/85 sm:text-lg">
+              Inventar un juego después de un día largo se siente como otra tarea más. No es falta de ganas:{" "}
+              <span className="font-semibold text-paper">te faltaba un plan ya listo, que a tu hijo le importe de verdad. Uno donde el héroe tiene su nombre.</span>
+            </p>
           </div>
-          <ul className="mt-12 grid gap-6 border-t border-paper/15 pt-10 md:grid-cols-3 md:gap-10">
+          <ul className="mt-8 grid gap-5 border-t border-paper/15 pt-7 md:mt-12 md:grid-cols-3 md:gap-10 md:pt-10">
             {DATOS.map((d) => (
-              <li key={d.n}>
-                <p className="font-display text-4xl font-semibold text-amber sm:text-5xl">{d.n}</p>
-                <p className="mt-2 text-base leading-relaxed text-paper/90">{d.t}</p>
-                <p className="mt-2 text-xs text-paper/60">{d.f}</p>
+              <li key={d.n} className="grid grid-cols-[5.5rem_1fr] items-baseline gap-3 md:block">
+                <p className="font-display text-3xl font-semibold text-amber sm:text-5xl">{d.n}</p>
+                <div>
+                  <p className="text-[15px] leading-relaxed text-paper/90 md:mt-2 md:text-base">{d.t}</p>
+                  <p className="mt-1 text-xs text-paper/60">{d.f}</p>
+                </div>
               </li>
             ))}
           </ul>
@@ -567,80 +551,11 @@ function LandingPage() {
       <Demo />
 
       {/* QUÉ TRAE */}
-      <section className="mx-auto max-w-6xl px-5 py-16 sm:py-20">
+      <section className="mx-auto max-w-6xl px-5 py-12 sm:py-20">
         <h2 className="max-w-2xl font-display text-3xl font-semibold text-balance sm:text-4xl">
-          Todo lo que trae su kit, listo para imprimir.
+          Su kit: {TOTAL_PAGES} páginas con su nombre, listas para imprimir.
         </h2>
-
-        <div className="mt-10 grid items-center gap-8 md:grid-cols-[1.2fr_.8fr]">
-          <img src={personajes4.url} alt="Los 4 personajes de Papelitos" loading="lazy" decoding="async" width={1200} height={600} className="w-full" />
-          <div>
-            <h3 className="font-display text-2xl font-semibold">4 personajes para elegir</h3>
-            <p className="mt-2 text-base leading-relaxed text-muted-foreground">
-              Distintos tonos de piel, peinados y estilos, para que tu hijo elija el que más se le parece. Ilustraciones originales de Papelitos, revisadas una por una.
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-14">
-          <h3 className="font-display text-2xl font-semibold">7 looks por personaje</h3>
-          <p className="mt-2 max-w-2xl text-base leading-relaxed text-muted-foreground">
-            Normal, superhéroe, pirata, astronauta, mago o bruja, guerrero y realeza. Una aventura distinta para cada tarde, y cada look listo para recortar.
-          </p>
-          <img src={looks7.url} alt="Los 7 looks de un personaje de Papelitos" loading="lazy" decoding="async" width={1600} height={455} className="mt-6 w-full" />
-        </div>
-
-        <div className="mt-14 grid gap-6 md:grid-cols-3">
-          <article className="grid items-center gap-6 rounded-3xl bg-surface p-6 shadow-soft sm:grid-cols-[.8fr_1.2fr] md:col-span-2 md:p-8">
-            <img src={historia.url} alt="Página de historia con el nombre del niño como protagonista" loading="lazy" decoding="async" width={600} height={822} className="mx-auto w-full max-w-[240px]" />
-            <div>
-              <h3 className="font-display text-2xl font-semibold">12 historias donde tu hijo es el protagonista</h3>
-              <p className="mt-2 text-base leading-relaxed text-muted-foreground">
-                Su nombre aparece en cada aventura: salva el parque, encuentra un tesoro pirata, camina sobre la luna. Cuentos cortos para leer juntos y después jugarlos con su personaje.
-              </p>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                Leer juntos fortalece el vínculo y el lenguaje, según la Academia Americana de Pediatría.
-              </p>
-            </div>
-          </article>
-          <article className="rounded-3xl bg-surface p-6 shadow-soft">
-            <img src={certificado.url} alt="Certificado de héroe con el nombre del niño" loading="lazy" decoding="async" width={600} height={819} className="mx-auto w-full max-w-[220px]" />
-            <h3 className="mt-4 font-display text-xl font-semibold">Su certificado de héroe</h3>
-            <p className="mt-1 text-base leading-relaxed text-muted-foreground">Con su nombre, para colgar en la puerta de su cuarto.</p>
-          </article>
-        </div>
-      </section>
-
-      {/* CÓMO FUNCIONA */}
-      <section className="bg-surface py-16 sm:py-20">
-        <div className="mx-auto max-w-6xl px-5">
-          <h2 className="font-display text-3xl font-semibold sm:text-4xl">Listo en 3 pasos.</h2>
-          <p className="mt-3 max-w-xl text-base text-muted-foreground">Sin materiales raros: una impresora común, tijeras y ganas de jugar.</p>
-          <div className="mt-10 grid gap-5 md:grid-cols-3">
-            {[
-              { title: "Escribe su nombre", copy: "Elige su personaje desde el celular. Toma menos de un minuto.", img: pasoApp.url, w: 960, h: 720, alt: "La app de Papelitos en un celular con el nombre Mateo escrito y su personaje elegido" },
-              { title: "Imprime y recorta", copy: "Descarga su PDF y usa tu impresora de siempre. En cartulina, los personajes duran más.", img: pasoRecortar.url, w: 816, h: 816, alt: "Manos recortando un personaje impreso" },
-              { title: "Jueguen juntos", copy: "Lean su historia, armen la escena y dejen que la aventura siga.", img: pasoJuego.url, w: 960, h: 720, alt: "Familia sentada en el piso jugando con los personajes de papel" },
-            ].map((s) => (
-              <article key={s.title} className="overflow-hidden rounded-3xl bg-paper">
-                <img src={s.img} alt={s.alt} loading="lazy" decoding="async" width={s.w} height={s.h} className="aspect-[4/3] w-full object-cover" />
-                <div className="p-6">
-                  <h3 className="font-display text-xl font-semibold">{s.title}</h3>
-                  <p className="mt-1 text-base leading-relaxed text-muted-foreground">{s.copy}</p>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* POR DENTRO */}
-      <section className="mx-auto max-w-6xl px-5 py-16 sm:py-20">
-        <h2 className="font-display text-3xl font-semibold text-balance sm:text-4xl">Así se ve su kit por dentro.</h2>
-        <p className="mt-3 max-w-xl text-base text-muted-foreground">
-          {TOTAL_PAGES} páginas: portada, looks, historias y certificado. Todo con su nombre.
-        </p>
-        <div className="-mx-5 mt-8 snap-x overflow-x-auto px-5 pb-2">
+        <div className="-mx-5 mt-6 snap-x overflow-x-auto px-5 pb-2 md:mt-8">
           <img
             src={kitPaginas.url}
             alt="Páginas del kit: portada, dos looks, una historia y el certificado, con el nombre Valentina"
@@ -648,23 +563,58 @@ function LandingPage() {
             decoding="async"
             width={1600}
             height={538}
-            className="w-[880px] max-w-none md:w-full"
+            className="w-[760px] max-w-none md:w-full"
           />
         </div>
-        <p className="mt-2 text-sm text-muted-foreground md:hidden">Desliza para ver todas las páginas →</p>
+        <p className="mt-1 text-sm text-muted-foreground md:hidden">Desliza para ver las páginas →</p>
+        <ul className="mt-7 grid grid-cols-2 gap-x-5 gap-y-6 md:mt-10 md:grid-cols-4">
+          {QUE_TRAE.map((q) => (
+            <li key={q.t} className="min-w-0 border-t border-border pt-4">
+              <p className="font-display text-2xl font-semibold text-brand-deep sm:text-3xl">
+                {q.n} <span className="text-lg sm:text-xl">{q.t}</span>
+              </p>
+              <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">{q.c}</p>
+            </li>
+          ))}
+        </ul>
       </section>
 
-      {/* PLANES */}
-      <section id="planes" className="scroll-mt-4 bg-mist py-16 sm:py-20">
+      {/* CÓMO FUNCIONA */}
+      <section className="bg-surface py-12 sm:py-20">
+        <div className="mx-auto max-w-6xl px-5">
+          <h2 className="font-display text-3xl font-semibold sm:text-4xl">Listo en 3 pasos.</h2>
+          <p className="mt-2 max-w-xl text-base text-muted-foreground">Una impresora común, tijeras y ganas de jugar.</p>
+          <ol className="mt-7 grid gap-4 md:mt-10 md:grid-cols-3 md:gap-5">
+            {[
+              { title: "Escribe su nombre", copy: "Elige su personaje desde el celular. Toma menos de un minuto.", img: pasoApp.url, w: 960, h: 720, alt: "La app de Papelitos en un celular con el nombre Mateo escrito y su personaje elegido" },
+              { title: "Imprime y recorta", copy: "Descarga su PDF y usa tu impresora de siempre. En cartulina duran más.", img: pasoRecortar.url, w: 816, h: 816, alt: "Manos recortando un personaje impreso" },
+              { title: "Jueguen juntos", copy: "Lean su historia, armen la escena y dejen que la aventura siga.", img: pasoJuego.url, w: 960, h: 720, alt: "Familia sentada en el piso jugando con los personajes de papel" },
+            ].map((s, i) => (
+              <li key={s.title} className="flex items-center gap-4 rounded-3xl bg-paper p-3 md:block md:overflow-hidden md:p-0">
+                <img src={s.img} alt={s.alt} loading="lazy" decoding="async" width={s.w} height={s.h} className="aspect-[4/3] w-28 shrink-0 rounded-2xl object-cover md:w-full md:rounded-none" />
+                <div className="min-w-0 md:p-6">
+                  <h3 className="font-display text-lg font-semibold sm:text-xl">
+                    {i + 1}. {s.title}
+                  </h3>
+                  <p className="mt-0.5 text-[15px] leading-relaxed text-muted-foreground md:mt-1 md:text-base">{s.copy}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* PLANES + EXTRAS */}
+      <section id="planes" className="scroll-mt-4 bg-mist py-12 sm:py-20">
         <div className="mx-auto max-w-6xl px-5">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="font-display text-3xl font-semibold text-balance sm:text-5xl">Elige su kit.</h2>
-            <p className="mt-3 text-base text-muted-foreground">Pago único. Sin suscripción. Acceso inmediato.</p>
-            <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-muted-foreground">
-              Un libro personalizado impreso suele costar entre US$30 y US$40, y llega una sola vez. Su kit trae 12 historias con su nombre, 7 looks y su certificado, y lo imprimes cuando quieras.
+            <p className="mt-2 text-base text-muted-foreground">Pago único. Sin suscripción. Acceso inmediato.</p>
+            <p className="mx-auto mt-3 max-w-xl text-[15px] leading-relaxed text-muted-foreground">
+              Un libro personalizado impreso suele costar entre US$30 y US$40 y llega una sola vez. Su kit lo imprimes cuando quieras.
             </p>
           </div>
-          <div className="mx-auto mt-10 grid max-w-4xl gap-5 md:grid-cols-2 md:items-start">
+          <div className="mx-auto mt-8 grid max-w-4xl gap-5 md:mt-10 md:grid-cols-2 md:items-start">
             {PLANS.map((plan) => (
               <article
                 key={plan.key}
@@ -674,10 +624,10 @@ function LandingPage() {
                   <h3 className="font-display text-2xl font-semibold">{plan.name}</h3>
                   {plan.featured && <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-bold text-brand-deep">Más contenido</span>}
                 </div>
-                <p className="mt-2 text-[15px] text-muted-foreground">{plan.description}</p>
-                <p className="mt-5 font-display text-5xl font-semibold">{plan.price}</p>
+                <p className="mt-1 text-[15px] text-muted-foreground">{plan.description}</p>
+                <p className="mt-4 font-display text-5xl font-semibold">{plan.price}</p>
                 <p className="mt-1 text-sm text-muted-foreground">{plan.note}</p>
-                <ul className="mt-6 space-y-3 border-t border-border pt-6 text-[15px]">
+                <ul className="mt-5 space-y-2.5 border-t border-border pt-5 text-[15px]">
                   {plan.features.map((f) => (
                     <li key={f} className="flex gap-3 leading-relaxed">
                       <span className="shrink-0 font-bold text-brand" aria-hidden="true">✓</span>
@@ -685,49 +635,63 @@ function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <div className="mt-7">
+                <div className="mt-6">
                   <PlanAction plan={plan.key} planName={plan.name} price={plan.price} />
                 </div>
               </article>
             ))}
           </div>
 
-          <div className="mx-auto mt-8 flex max-w-4xl flex-col items-center gap-4 rounded-3xl border border-brand/20 bg-surface p-7 text-center sm:flex-row sm:text-left">
-            <span className="grid size-12 shrink-0 place-items-center rounded-full bg-brand/10">
+          <div className="mx-auto mt-5 flex max-w-4xl items-start gap-4 rounded-3xl border border-brand/20 bg-surface p-5 sm:items-center sm:p-6">
+            <span className="grid size-11 shrink-0 place-items-center rounded-full bg-brand/10">
               <ShieldCheck className="size-6 text-brand" aria-hidden="true" />
             </span>
             <div>
               <p className="font-display text-lg font-semibold">Garantía de 7 días, sin preguntas.</p>
-              <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">
+              <p className="mt-0.5 text-[15px] leading-relaxed text-muted-foreground">
                 Imprímelo, juega con tu hijo y decide. Si no te convence, te devolvemos el 100% de tu dinero.
               </p>
+            </div>
+          </div>
+
+          {/* EXTRAS (order bumps de Hotmart) */}
+          <div className="mx-auto mt-12 max-w-4xl">
+            <p className="text-sm font-bold text-brand">Opcional</p>
+            <h3 className="mt-1 font-display text-2xl font-semibold text-balance sm:text-3xl">Súmale más en el pago, con un clic.</h3>
+            <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-muted-foreground">
+              No los necesitas para jugar. Aparecen en la página de pago y los activas en la app con el código de compra que te llega por e-mail.
+            </p>
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              {EXTRAS.map((x) => (
+                <article key={x.key} className="flex flex-col rounded-3xl border border-border bg-surface p-5 sm:p-6">
+                  <div className="flex items-center gap-3">
+                    <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-brand/10">
+                      <x.icon className="size-5 text-brand" aria-hidden="true" />
+                    </span>
+                    <h4 className="min-w-0 flex-1 font-display text-xl font-semibold">{x.name}</h4>
+                    <p className="shrink-0 rounded-full bg-mist px-3 py-1 text-sm font-bold">+ {x.price}</p>
+                  </div>
+                  <p className="mt-4 text-base font-bold">{x.lead}</p>
+                  <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">{x.copy}</p>
+                  <ul className="mt-4 space-y-2 border-t border-border pt-4 text-[15px]">
+                    {x.bullets.map((b) => (
+                      <li key={b} className="flex gap-3 leading-relaxed">
+                        <span className="shrink-0 font-bold text-brand" aria-hidden="true">✓</span>
+                        <span>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </article>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* ENTREGA */}
-      <section className="mx-auto max-w-6xl px-5 py-16 sm:py-20">
-        <h2 className="font-display text-3xl font-semibold sm:text-4xl">Cómo lo recibes.</h2>
-        <ul className="mt-8 grid gap-6 sm:grid-cols-3">
-          {[
-            { icon: Mail, title: "Al instante, por e-mail", copy: "Apenas se confirma el pago te llega el enlace de acceso, al mismo e-mail de la compra." },
-            { icon: Download, title: "Descarga cuando quieras", copy: "Entra desde cualquier dispositivo y descarga sus kits las veces que necesites." },
-            { icon: Printer, title: "100% digital", copy: "No se envía nada físico. Imprimes en casa, sin esperar ni pagar envío." },
-          ].map((d) => (
-            <li key={d.title} className="border-t border-border pt-5">
-              <d.icon className="size-5 text-brand" aria-hidden="true" />
-              <p className="mt-3 text-base font-bold">{d.title}</p>
-              <p className="mt-1 text-base leading-relaxed text-muted-foreground">{d.copy}</p>
-            </li>
-          ))}
-        </ul>
-      </section>
-
       {/* FAQ */}
-      <section className="mx-auto max-w-3xl px-5 pb-16 sm:pb-20">
+      <section className="mx-auto max-w-3xl px-5 py-12 sm:py-20">
         <h2 className="text-center font-display text-3xl font-semibold sm:text-4xl">Preguntas frecuentes</h2>
-        <div className="mt-8">
+        <div className="mt-6 sm:mt-8">
           {FAQ.map((item) => (
             <details key={item.q} className="group border-b border-border">
               <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-4 text-left text-base font-bold">
@@ -741,15 +705,15 @@ function LandingPage() {
       </section>
 
       {/* CIERRE */}
-      <section className="bg-brand py-16 text-primary-foreground sm:py-20">
+      <section className="bg-brand py-12 text-primary-foreground sm:py-20">
         <div className="mx-auto max-w-3xl px-5 text-center">
           <h2 className="font-display text-3xl font-semibold text-balance sm:text-5xl">Esta tarde puede ser distinta.</h2>
-          <p className="mx-auto mt-4 max-w-xl text-base text-primary-foreground/90 sm:text-lg">
-            Escribe su nombre, imprime su kit y mira su cara cuando descubra que el héroe de la historia tiene su nombre.
+          <p className="mx-auto mt-3 max-w-xl text-base text-primary-foreground/90 sm:text-lg">
+            Mira su cara cuando descubra que el héroe de la historia tiene su nombre.
           </p>
           <a
             href="#planes"
-            className="mt-8 inline-flex min-h-14 items-center justify-center rounded-full bg-surface px-8 py-4 text-base font-bold text-ink shadow-soft transition-transform duration-150 ease-out active:scale-[0.97]"
+            className="mt-6 inline-flex min-h-14 items-center justify-center rounded-full bg-surface px-8 py-4 text-base font-bold text-ink shadow-soft transition-transform duration-150 ease-out active:scale-[0.97]"
           >
             {CTA_LABEL}
           </a>
