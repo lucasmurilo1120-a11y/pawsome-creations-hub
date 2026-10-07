@@ -265,8 +265,8 @@ function buildStories(name: string, character: Character): Story[] {
 }
 
 const STORY_COUNT = buildStories("x", "nino").length;
-// portada + looks + looks para colorear + historias + certificado
-const TOTAL_PAGES = 1 + THEMES.length * 2 + STORY_COUNT + 1;
+// portada + looks + historias + certificado
+const TOTAL_PAGES = 1 + THEMES.length + STORY_COUNT + 1;
 
 // ---------------------------------------------------------------------------
 // Kit imprimible — se arma en el momento con el nombre elegido. Solo se ve al
@@ -290,7 +290,7 @@ function PrintKit({ name, character }: { name: string; character: Character }) {
           Recorta, juega y vive las aventuras de {name}.
         </p>
         <p className="text-sm font-semibold text-brand-deep">
-          7 looks · 7 para colorear · {STORY_COUNT} historias · Certificado de héroe
+          7 looks · {STORY_COUNT} historias · Certificado de héroe
         </p>
       </section>
 
@@ -307,26 +307,6 @@ function PrintKit({ name, character }: { name: string; character: Character }) {
           <h2 className="font-display text-3xl font-semibold text-foreground">{name}</h2>
           <img src={images[t.key]} alt="" className="max-h-[200mm] object-contain" />
           <p className="text-sm text-muted-foreground">Recorta siguiendo el borde del dibujo.</p>
-        </section>
-      ))}
-
-      {/* Para colorear */}
-      {THEMES.map((t) => (
-        <section
-          key={`c-${t.key}`}
-          style={PAGE_BREAK}
-          className="flex min-h-[250mm] flex-col items-center justify-center gap-5 text-center"
-        >
-          <p className="text-sm font-semibold tracking-wide text-brand">
-            PARA COLOREAR · {t.key === "ninguno" ? "LOOK NORMAL" : t.label.toUpperCase()}
-          </p>
-          <h2 className="font-display text-3xl font-semibold text-foreground">Colorea a {name}</h2>
-          <img
-            src={images[t.key].replace("/personajes/", "/colorear/")}
-            alt=""
-            className="max-h-[200mm] object-contain"
-          />
-          <p className="text-sm text-muted-foreground">Usa tus colores favoritos y luego recorta por el borde.</p>
         </section>
       ))}
 
@@ -439,10 +419,10 @@ function KitPreview({ name, character }: { name: string; character: Character })
           <p className="text-[10px] text-muted-foreground">Portada</p>
         </div>
         <div className="flex w-40 flex-col items-center gap-2 rounded-xl bg-surface p-3 text-center shadow-soft">
-          <p className="text-[10px] font-semibold text-brand">PARA COLOREAR</p>
-          <p className="font-display text-sm leading-tight font-semibold">Colorea a {who}</p>
-          <img src={images.ninguno.replace("/personajes/", "/colorear/")} alt="" loading="lazy" className="h-28 object-contain" />
-          <p className="text-[10px] text-muted-foreground">7 páginas para colorear</p>
+          <p className="text-[10px] font-semibold text-brand">LOOK PIRATA</p>
+          <p className="font-display text-sm leading-tight font-semibold">{who}</p>
+          <img src={mini(images.pirata)} alt="" loading="lazy" className="h-28 object-contain" />
+          <p className="text-[10px] text-muted-foreground">7 looks para recortar</p>
         </div>
         <div className="flex w-56 flex-col gap-2 rounded-xl bg-surface p-3 shadow-soft">
           <p className="text-[10px] font-semibold text-brand">HISTORIA 1 DE {STORY_COUNT}</p>
@@ -494,8 +474,8 @@ function CreatorApp() {
               {name ? `Vamos a crear el kit de ${name}` : "Crea el héroe de tu hijo y descarga su kit personalizado"}
             </h1>
             <p className="mt-3 leading-relaxed text-muted-foreground">
-              Son 3 pasos y menos de un minuto. Su kit para imprimir trae los 7 looks de su personaje, sus versiones para
-              colorear, {STORY_COUNT} historias con su nombre y su certificado de héroe: {TOTAL_PAGES} páginas en total.
+              Son 3 pasos y menos de un minuto. Su kit para imprimir trae su portada, los 7 looks de su personaje,{" "}
+              {STORY_COUNT} historias con su nombre y su certificado de héroe: {TOTAL_PAGES} páginas en total.
             </p>
           </div>
 
@@ -590,7 +570,7 @@ function CreatorApp() {
                   {name ? `El kit de ${name}, listo para imprimir` : "Tu kit completo para imprimir"}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {TOTAL_PAGES} páginas: portada, 7 looks, 7 para colorear, {STORY_COUNT} historias con su nombre y el certificado de héroe.
+                  {TOTAL_PAGES} páginas: portada, 7 looks, {STORY_COUNT} historias con su nombre y el certificado de héroe.
                 </p>
               </div>
             </div>
