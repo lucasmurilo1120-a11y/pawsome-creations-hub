@@ -22,17 +22,37 @@ create table if not exists public.compras (
   hotmart_product_id text,
   estado text not null default 'activo' check (estado in ('activo', 'revocado')),
   evento text,
+  -- Canje por código: el código es el de la transacción de Hotmart (HP...), que el
+  -- comprador recibe en el e-mail de compra. Se usa una sola vez y la compra pasa a
+  -- la cuenta que lo canjeó (sirve para regalar: la abuela compra, el nieto canjea).
+  canjeado_por uuid references auth.users (id) on delete set null,
+  canjeado_en timestamptz,
   creado timestamptz not null default now(),
   actualizado timestamptz not null default now()
 );
 create index if not exists compras_email_idx on public.compras (lower(email));
+create index if not exists compras_canjeado_idx on public.compras (canjeado_por);
 alter table public.compras enable row level security;
 
--- Cada persona logueada ve solo las compras de su propio e-mail.
+-- Cada persona ve las compras de su e-mail y las que canjeó con código.
 drop policy if exists "ver mis compras" on public.compras;
 create policy "ver mis compras" on public.compras
   for select to authenticated
-  using (lower(email) = lower(coalesce(auth.jwt() ->> 'email', '')));
+  using (
+    lower(email) = lower(coalesce(auth.jwt() ->> 'email', ''))
+    or canjeado_por = auth.uid()
+  );
+
+-- Intentos de canje (para frenar a quien pruebe códigos al azar).
+create table if not exists public.intentos_canje (
+  id bigint generated always as identity primary key,
+  user_id uuid not null references auth.users (id) on delete cascade,
+  exito boolean not null default false,
+  creado timestamptz not null default now()
+);
+create index if not exists intentos_canje_user_idx on public.intentos_canje (user_id, creado);
+alter table public.intentos_canje enable row level security;
+-- Sin políticas: solo el servidor.
 
 -- 3) Personajes con foto: una fila por foto comprada (slot 0, 1, 2...).
 --    Se guardan solo los dibujos generados, nunca la foto.

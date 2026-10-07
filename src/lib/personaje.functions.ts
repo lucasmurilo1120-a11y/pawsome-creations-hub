@@ -51,11 +51,13 @@ function referencia(genero: Genero, look: "base" | LookCarita) {
   return `${origin}/personajes/${genero}-${look}.webp`;
 }
 
-// Cuántas fotos compró esta familia (suma de "Con su carita" + Pack familia activos).
-async function fotosCompradas(supabase: { from: (t: string) => any }): Promise<number> {
-  const { data } = await supabase.from("compras").select("clave, fotos").eq("estado", "activo");
+// Cuántas fotos tiene esta cuenta: compras de su e-mail que nadie canjeó + las que canjeó con código.
+async function fotosCompradas(supabase: { from: (t: string) => any }, uid: string): Promise<number> {
+  const { data } = await supabase.from("compras").select("clave, fotos, canjeado_por").eq("estado", "activo");
   if (!Array.isArray(data)) return 0;
-  return data.filter((c: { clave: string }) => c.clave === "carita").reduce((s: number, c: { fotos: number }) => s + (c.fotos ?? 0), 0);
+  return data
+    .filter((c: { clave: string; canjeado_por: string | null }) => c.clave === "carita" && (c.canjeado_por == null || c.canjeado_por === uid))
+    .reduce((s: number, c: { fotos: number }) => s + (c.fotos ?? 0), 0);
 }
 
 async function guardarImagen(userId: string, slot: number, look: string, dataUrl: string): Promise<string> {
@@ -91,7 +93,7 @@ export const crearPersonajeBase = createServerFn({ method: "POST" })
     return { ...d, nombre };
   })
   .handler(async ({ data, context }): Promise<Resultado> => {
-    const fotos = await fotosCompradas(context.supabase);
+    const fotos = await fotosCompradas(context.supabase, context.userId);
     if (fotos === 0) return { ok: false, error: "sin_compra" };
     if (data.slot >= fotos) return { ok: false, error: "limite" };
 
@@ -137,7 +139,7 @@ export const crearLookCarita = createServerFn({ method: "POST" })
     return d;
   })
   .handler(async ({ data, context }): Promise<Resultado> => {
-    if ((await fotosCompradas(context.supabase)) <= data.slot) return { ok: false, error: "sin_compra" };
+    if ((await fotosCompradas(context.supabase, context.userId)) <= data.slot) return { ok: false, error: "sin_compra" };
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: fila } = await supabaseAdmin

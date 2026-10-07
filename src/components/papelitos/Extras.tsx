@@ -1,5 +1,6 @@
 import { Lock, Palette, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CanjearCodigo } from "@/components/papelitos/CanjearCodigo";
 import { checkoutConEmail, EXTRAS, type Clave, type Extra } from "@/lib/papelitos-config";
 
 // Tarjetas de los extras. Si la familia ya lo compró, muestra la acción; si no,
@@ -66,6 +67,9 @@ export function Extras({
             </article>
           );
         })}
+      </div>
+      <div className="mt-4">
+        <CanjearCodigo onListo={onRecargar} />
       </div>
     </section>
   );

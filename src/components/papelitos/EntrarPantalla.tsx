@@ -2,6 +2,7 @@ import { useState, type FormEvent, type ReactNode } from "react";
 import { Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { enviarEnlace } from "@/lib/acceso";
+import { CanjearCodigo } from "@/components/papelitos/CanjearCodigo";
 import { BRAND, SALES_URL, SUPPORT_EMAIL } from "@/lib/papelitos-config";
 
 function Marco({ children }: { children: ReactNode }) {
@@ -120,6 +121,9 @@ export function SinCompraPantalla({ email, onSalir, onRecargar }: { email: strin
         <a href={SALES_URL} className="mt-1 inline-flex min-h-11 items-center justify-center text-sm font-semibold text-brand">
           Todavía no lo compré
         </a>
+      </div>
+      <div className="mt-6 border-t border-border pt-5">
+        <CanjearCodigo onListo={onRecargar} compacto />
       </div>
     </Marco>
   );

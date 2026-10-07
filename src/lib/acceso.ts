@@ -22,8 +22,13 @@ export function useAcceso(): Acceso {
   const [fotos, setFotos] = useState(0);
 
   const cargarCompras = useCallback(async () => {
-    const { data } = await supabase.from("compras").select("clave, fotos").eq("estado", "activo");
-    const filas = (data ?? []) as { clave: Clave; fotos: number | null }[];
+    const { data: ses } = await supabase.auth.getSession();
+    const uid = ses.session?.user?.id;
+    const { data } = await supabase.from("compras").select("clave, fotos, canjeado_por").eq("estado", "activo");
+    // Cuentan las compras de mi e-mail que nadie canjeó y las que yo canjeé con código.
+    const filas = ((data ?? []) as { clave: Clave; fotos: number | null; canjeado_por: string | null }[]).filter(
+      (c) => c.canjeado_por == null || c.canjeado_por === uid,
+    );
     const set = new Set<Clave>(filas.map((c) => c.clave));
     if (set.has("premium")) set.add("kit"); // el Premium incluye el kit
     setClaves(set);
