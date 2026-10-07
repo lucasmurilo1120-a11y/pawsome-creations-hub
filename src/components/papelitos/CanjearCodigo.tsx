@@ -20,7 +20,7 @@ const MENSAJES: Record<Exclude<ResultadoCanje, { ok: true }>["error"], string> =
 const NOMBRE_CLAVE: Record<string, string> = {
   kit: "el kit",
   premium: "el plan Premium",
-  colorear: "el libro para colorear",
+  colorear: "MiniMundos Color",
   carita: "Con su carita",
 };
 

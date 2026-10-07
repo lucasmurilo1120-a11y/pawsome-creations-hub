@@ -46,7 +46,7 @@ export function Extras({
               <div className="mt-4">
                 {activo ? (
                   <Button size="lg" className="h-12 w-full shadow-cta sm:w-auto" onClick={() => onAbrir(extra.clave)}>
-                    {extra.clave === "carita" ? (personajeCaritaListo ? "Ver sus personajes" : "Crear su personaje con una foto") : "Abrir su libro para colorear"}
+                    {extra.clave === "carita" ? (personajeCaritaListo ? "Ver sus personajes" : "Crear su personaje con una foto") : "Abrir MiniMundos Color"}
                   </Button>
                 ) : link ? (
                   <div className="flex flex-wrap items-center gap-3">

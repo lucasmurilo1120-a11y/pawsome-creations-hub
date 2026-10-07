@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Cargando, EntrarPantalla, SinCompraPantalla } from "@/components/papelitos/EntrarPantalla";
 import { Extras } from "@/components/papelitos/Extras";
 import { PersonajesCarita } from "@/components/papelitos/PersonajesCarita";
-import { LibroColorearImprimible, PAGINAS_COLOREAR, type PersonajeEstandar } from "@/components/papelitos/LibroColorear";
+import { ESCENAS, escenaColor, LibroColorearImprimible, PAGINAS_COLOREAR, type PersonajeEstandar } from "@/components/papelitos/LibroColorear";
 import { cargarPersonajesCarita, useAcceso, type Acceso, type PersonajeCarita } from "@/lib/acceso";
+import { ESCENAS_LISTAS } from "@/lib/papelitos-config";
 
 // Nombre de la marca en un solo lugar: cambiarlo acá lo cambia en toda la app.
 const BRAND = "Papelitos";
@@ -726,10 +727,20 @@ function CreatorApp({ acceso }: { acceso: Acceso }) {
 
           {panel === "colorear" && acceso.claves.has("colorear") && (
             <div id="panel-extra" className="mt-6 scroll-mt-4 rounded-3xl border border-brand/30 bg-surface p-5 shadow-soft sm:p-6">
-              <p className="font-display text-xl font-semibold text-foreground">Su libro para colorear</p>
+              <p className="font-display text-xl font-semibold text-foreground">MiniMundos Color</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                {PAGINAS_COLOREAR} páginas: portada, 7 looks para pintar con su nombre y su diploma de artista.
+                {ESCENAS_LISTAS
+                  ? `${PAGINAS_COLOREAR} páginas: portada con su nombre, ${ESCENAS.length} escenas para pintar (cada una con su guía a color) y su diploma de artista.`
+                  : `${PAGINAS_COLOREAR} páginas: portada, 7 looks para pintar con su nombre y su diploma de artista.`}
               </p>
+              {ESCENAS_LISTAS ? (
+                <div className="-mx-1 mt-4 flex gap-2 overflow-x-auto px-1 pb-1">
+                  {ESCENAS.map((e, i) => (
+                    <img key={e.titulo} src={escenaColor(i)} alt={e.titulo} width={90} height={120} loading="lazy" className="h-[120px] w-[90px] shrink-0 rounded-xl object-cover" />
+                  ))}
+                </div>
+              ) : (
+              <>
               <p className="mt-4 text-sm font-semibold text-foreground">Personaje para colorear</p>
               <div className="mt-2 grid grid-cols-4 gap-2">
                 {STANDARD_HEROES.map((h) => (
@@ -747,6 +758,8 @@ function CreatorApp({ acceso }: { acceso: Acceso }) {
                   </button>
                 ))}
               </div>
+              </>
+              )}
               <div className="mt-5 flex flex-wrap items-center gap-3">
                 <Button size="lg" className="shadow-cta" disabled={!name} onClick={() => imprimir("colorear")}>
                   <Download className="size-4" />

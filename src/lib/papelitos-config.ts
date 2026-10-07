@@ -10,6 +10,11 @@ export const SALES_URL = "https://build-your-world-853.lovable.app";
 // de estas claves en la tabla productos_hotmart (ver supabase/migrations).
 export type Clave = "kit" | "premium" | "colorear" | "carita";
 
+// MiniMundos Color: pasa a true cuando estén las 16 escenas en public/colorear/escenas
+// (escena-01.webp a color y escena-01-lineas.webp para pintar, hasta la 16).
+// Mientras sea false, el extra entrega el libro anterior: los 7 looks para pintar.
+export const ESCENAS_LISTAS = false;
+
 export type Extra = {
   clave: Extract<Clave, "colorear" | "carita">;
   titulo: string;
@@ -29,8 +34,10 @@ export const EXTRAS: Extra[] = [
   },
   {
     clave: "colorear",
-    titulo: "Libro para colorear",
-    descripcion: "Su personaje en los 7 looks para pintar, con su nombre en cada página y un diploma de artista.",
+    titulo: "MiniMundos Color",
+    descripcion: ESCENAS_LISTAS
+      ? "16 escenas para pintar, cada una en su mundo: el castillo, el fondo del mar, la Luna, el bosque mágico y más. Cada lámina trae su guía a color. Con su nombre en la portada y un diploma de artista."
+      : "Su personaje en los 7 looks para pintar, con su nombre en cada página y un diploma de artista.",
     precio: "US$4,97",
     checkout: "",
   },
