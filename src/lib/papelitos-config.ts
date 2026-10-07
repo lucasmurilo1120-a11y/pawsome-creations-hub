@@ -24,7 +24,7 @@ export const EXTRAS: Extra[] = [
     clave: "carita",
     titulo: "Con su carita",
     descripcion: "Sube una foto y su héroe tendrá su cara en los 7 looks y en todas sus historias.",
-    precio: "US$7,97",
+    precio: "US$4,97",
     checkout: "",
   },
   {
@@ -36,8 +36,19 @@ export const EXTRAS: Extra[] = [
   },
 ];
 
-// Límite de veces que una familia puede crear el personaje con foto (cada intento usa IA).
-export const MAX_CREACIONES_CARITA = 3;
+// Pack familia: suma fotos (personajes con carita) a quien ya tiene "Con su carita".
+// Se ofrece dentro del app después de crear el primer personaje.
+export const PACK_FAMILIA = {
+  titulo: "Pack familia",
+  descripcion: "Suma 4 fotos más: sus hermanos, mamá, papá o los abuelos, cada uno como personaje del kit.",
+  fotos: 4,
+  precio: "US$9,97",
+  checkout: "",
+};
+
+// Intentos por cada foto comprada (si la primera no sale bien, puede probar con otra).
+// Cada intento usa IA, por eso hay un límite.
+export const MAX_INTENTOS_POR_FOTO = 3;
 
 // Agrega el e-mail del comprador al link de Hotmart para que no tenga que escribirlo.
 export function checkoutConEmail(url: string, email?: string | null) {

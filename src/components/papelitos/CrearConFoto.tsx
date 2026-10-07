@@ -1,10 +1,11 @@
 import { useRef, useState, type ChangeEvent } from "react";
-import { Camera, Loader2, ShieldCheck, Trash2 } from "lucide-react";
+import { Camera, Loader2, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { MAX_CREACIONES_CARITA, SUPPORT_EMAIL } from "@/lib/papelitos-config";
-import { borrarPersonajeCarita, crearLookCarita, crearPersonajeBase, LOOKS_CARITA, type Genero } from "@/lib/personaje.functions";
+import { MAX_INTENTOS_POR_FOTO, SUPPORT_EMAIL } from "@/lib/papelitos-config";
+import type { PersonajeCarita } from "@/lib/acceso";
+import { crearLookCarita, crearPersonajeBase, LOOKS_CARITA, type Genero, type LookCarita } from "@/lib/personaje.functions";
 
-// Flujo "Con su carita": consentimiento -> foto -> creación -> listo.
+// Flujo de UNA foto: permiso -> foto -> creación.
 // La foto se achica a 768 px en el propio celular (eso además borra los datos de
 // ubicación de la cámara), se envía una sola vez y no se guarda.
 
@@ -13,15 +14,15 @@ type ErrorClave = "sin_compra" | "limite" | "sin_credito" | "ocupado" | "rechaza
 
 const MENSAJES: Record<ErrorClave, string> = {
   rechazada: "No pudimos crear el personaje con esta foto. Prueba con otra: de frente, con buena luz y sin otras personas.",
-  limite: `Ya usaste los ${MAX_CREACIONES_CARITA} intentos para crear su personaje. Si necesitas otro, escríbenos a ${SUPPORT_EMAIL}.`,
+  limite: `Ya usaste los ${MAX_INTENTOS_POR_FOTO} intentos de esta foto. Si necesitas ayuda, escríbenos a ${SUPPORT_EMAIL}.`,
   ocupado: "Hay muchas familias creando personajes ahora. Inténtalo de nuevo en unos minutos.",
   sin_credito: "La creación de personajes está en pausa por unos minutos. Inténtalo de nuevo más tarde.",
-  sin_compra: "Este extra no está activo en tu cuenta. Si acabas de pagar, espera un minuto y actualiza.",
-  sin_base: "Algo salió mal al guardar su personaje. Inténtalo de nuevo.",
+  sin_compra: "Esta foto no está activa en tu cuenta. Si acabas de pagar, espera un minuto y actualiza.",
+  sin_base: "Algo salió mal al guardar el personaje. Inténtalo de nuevo.",
   fallo: "Algo salió mal. Inténtalo de nuevo en un momento.",
 };
 
-const NOMBRES_LOOK: Record<string, string> = {
+const NOMBRES_LOOK: Record<LookCarita, string> = {
   superheroe: "Superhéroe",
   pirata: "Pirata",
   astronauta: "Astronauta",
@@ -64,24 +65,36 @@ async function enTandas<T>(items: readonly T[], n: number, fn: (item: T) => Prom
   );
 }
 
+// Genera los looks que faltan de un personaje (también sirve para reintentar los que fallaron).
+export async function completarLooksCarita(slot: number, lista: readonly LookCarita[], onLook: (l: LookCarita) => void) {
+  const fallas: ErrorClave[] = [];
+  await enTandas(lista, 3, async (look) => {
+    const r = await crearLookCarita({ data: { slot, look } });
+    if (r.ok) onLook(look);
+    else fallas.push(r.error);
+  });
+  return fallas;
+}
+
 export function CrearConFoto({
-  looksExistentes,
+  slot,
+  existente,
   onListo,
   onCerrar,
 }: {
-  looksExistentes: string[];
+  slot: number;
+  existente?: PersonajeCarita;
   onListo: () => void;
   onCerrar: () => void;
 }) {
-  const tienePersonaje = looksExistentes.includes("ninguno");
-  const faltantes = LOOKS_CARITA.filter((l) => !looksExistentes.includes(l));
-  const [paso, setPaso] = useState<Paso>("permiso");
+  const intentosRestantes = MAX_INTENTOS_POR_FOTO - (existente?.intentos ?? 0);
+  const [paso, setPaso] = useState<Paso>(intentosRestantes > 0 ? "permiso" : "error");
   const [acepto, setAcepto] = useState(false);
-  const [genero, setGenero] = useState<Genero | null>(null);
+  const [nombre, setNombre] = useState(existente?.nombre ?? "");
+  const [genero, setGenero] = useState<Genero | null>(existente?.genero ?? null);
   const [foto, setFoto] = useState<string | null>(null);
-  const [progreso, setProgreso] = useState<{ base: boolean; looks: string[] }>({ base: false, looks: [] });
-  const [error, setError] = useState<ErrorClave>("fallo");
-  const [borrando, setBorrando] = useState(false);
+  const [progreso, setProgreso] = useState<{ base: boolean; looks: LookCarita[] }>({ base: false, looks: [] });
+  const [error, setError] = useState<ErrorClave>("limite");
   const input = useRef<HTMLInputElement>(null);
 
   async function elegirFoto(e: ChangeEvent<HTMLInputElement>) {
@@ -96,30 +109,10 @@ export function CrearConFoto({
     }
   }
 
-  async function crear() {
-    if (!foto || !genero) return;
-    setPaso("creando");
-    setProgreso({ base: false, looks: [] });
-    const base = await crearPersonajeBase({ data: { foto, genero } });
-    setFoto(null); // la foto ya no se necesita: se descarta también en el celular
-    if (!base.ok) {
-      setError(base.error);
-      setPaso("error");
-      return;
-    }
-    await completarLooks(LOOKS_CARITA, []);
-  }
-
-  // Genera los looks que faltan (después de crear la base, o para reintentar los que fallaron).
-  async function completarLooks(lista: readonly (typeof LOOKS_CARITA)[number][], listos: string[]) {
+  async function completar(lista: readonly LookCarita[], listos: LookCarita[]) {
     setPaso("creando");
     setProgreso({ base: true, looks: listos });
-    const fallas: ErrorClave[] = [];
-    await enTandas(lista, 3, async (look) => {
-      const r = await crearLookCarita({ data: { look } });
-      if (r.ok) setProgreso((p) => ({ ...p, looks: [...p.looks, look] }));
-      else fallas.push(r.error);
-    });
+    const fallas = await completarLooksCarita(slot, lista, (look) => setProgreso((p) => ({ ...p, looks: [...p.looks, look] })));
     onListo();
     if (fallas.length) {
       setError(fallas[0]!);
@@ -129,12 +122,18 @@ export function CrearConFoto({
     onCerrar();
   }
 
-  async function borrar() {
-    setBorrando(true);
-    await borrarPersonajeCarita();
-    setBorrando(false);
-    onListo();
-    onCerrar();
+  async function crear() {
+    if (!foto || !genero) return;
+    setPaso("creando");
+    setProgreso({ base: false, looks: [] });
+    const base = await crearPersonajeBase({ data: { foto, genero, slot, nombre } });
+    setFoto(null); // la foto ya no se necesita: se descarta también en el celular
+    if (!base.ok) {
+      setError(base.error);
+      setPaso("error");
+      return;
+    }
+    await completar(LOOKS_CARITA, []);
   }
 
   return (
@@ -143,11 +142,26 @@ export function CrearConFoto({
         <div>
           <p className="font-display text-xl font-semibold text-foreground">Antes de la foto</p>
           <ul className="mt-3 space-y-2 text-sm leading-relaxed text-muted-foreground">
-            <li>Usamos la foto solo para dibujar su personaje. No se publica ni se usa para nada más.</li>
+            <li>Usamos la foto solo para dibujar el personaje. No se publica ni se usa para nada más.</li>
             <li>La foto se borra apenas se crea el personaje. Solo guardamos los dibujos, y puedes borrarlos cuando quieras.</li>
-            <li>Tienes {MAX_CREACIONES_CARITA} intentos para crear su personaje.</li>
+            <li>
+              Si no sale bien, puedes probar con otra foto: te quedan {intentosRestantes} {intentosRestantes === 1 ? "intento" : "intentos"} para este personaje.
+            </li>
           </ul>
-          <p className="mt-5 text-sm font-semibold text-foreground">Su personaje es:</p>
+          <label htmlFor={`nombre-${slot}`} className="mt-5 block text-sm font-semibold text-foreground">
+            ¿De quién es la foto? <span className="font-normal text-muted-foreground">(opcional)</span>
+          </label>
+          <input
+            id={`nombre-${slot}`}
+            type="text"
+            value={nombre}
+            maxLength={20}
+            onChange={(e) => setNombre(e.target.value)}
+            placeholder="Ej.: Sofía, Mamá, el abuelo"
+            autoComplete="off"
+            className="mt-2 h-12 w-full rounded-xl border border-border bg-background px-4 text-base text-foreground outline-none focus:border-brand"
+          />
+          <p className="mt-5 text-sm font-semibold text-foreground">Estilo del personaje:</p>
           <div className="mt-2 grid grid-cols-2 gap-2">
             {(
               [
@@ -170,7 +184,10 @@ export function CrearConFoto({
           </div>
           <label className="mt-5 flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-foreground">
             <input type="checkbox" checked={acepto} onChange={(e) => setAcepto(e.target.checked)} className="mt-1 size-5 shrink-0 accent-[var(--brand)]" />
-            <span>Soy mayor de 18 años, soy madre, padre o tutor de este niño o niña y autorizo usar su foto solo para crear su personaje.</span>
+            <span>
+              Soy mayor de 18 años. Si la foto es de un niño o niña, soy su madre, padre o tutor; si es de un adulto, tengo su permiso.
+              Autorizo usarla solo para crear este personaje.
+            </span>
           </label>
           <div className="mt-5 flex flex-wrap gap-2">
             <Button size="lg" className="h-12" disabled={!acepto || !genero} onClick={() => setPaso("foto")}>
@@ -180,27 +197,16 @@ export function CrearConFoto({
               Cancelar
             </Button>
           </div>
-          {tienePersonaje && faltantes.length > 0 && (
-            <Button size="lg" variant="outline" className="mt-4 h-12 w-full" onClick={() => completarLooks(faltantes, LOOKS_CARITA.filter((l) => !faltantes.includes(l)))}>
-              Completar los {faltantes.length} looks que faltan
-            </Button>
-          )}
-          {tienePersonaje && (
-            <button type="button" onClick={borrar} disabled={borrando} className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-destructive">
-              <Trash2 className="size-4" aria-hidden />
-              {borrando ? "Borrando…" : "Borrar su personaje actual"}
-            </button>
-          )}
         </div>
       )}
 
       {paso === "foto" && (
         <div>
-          <p className="font-display text-xl font-semibold text-foreground">Su foto</p>
+          <p className="font-display text-xl font-semibold text-foreground">La foto</p>
           <ul className="mt-2 space-y-1 text-sm leading-relaxed text-muted-foreground">
             <li>De frente, mirando a la cámara.</li>
             <li>Con buena luz, sin lentes de sol ni gorro.</li>
-            <li>Solo él o ella en la foto.</li>
+            <li>Una sola persona en la foto.</li>
           </ul>
           <input ref={input} type="file" accept="image/*" className="hidden" onChange={elegirFoto} />
           {foto ? (
@@ -208,7 +214,7 @@ export function CrearConFoto({
               <img src={foto} alt="Foto elegida" className="mx-auto aspect-square w-full max-w-[260px] rounded-2xl object-cover" />
               <div className="mt-4 flex flex-wrap gap-2">
                 <Button size="lg" className="h-12 shadow-cta" onClick={crear}>
-                  Crear su personaje
+                  Crear el personaje
                 </Button>
                 <Button size="lg" variant="outline" className="h-12" onClick={() => input.current?.click()}>
                   Elegir otra
@@ -232,11 +238,11 @@ export function CrearConFoto({
         <div role="status" aria-live="polite">
           <p className="flex items-center gap-2 font-display text-xl font-semibold text-foreground">
             <Loader2 className="size-5 animate-spin text-brand" aria-hidden />
-            Creando su personaje…
+            Creando {nombre ? `a ${nombre}` : "el personaje"}…
           </p>
           <p className="mt-2 text-sm text-muted-foreground">Tarda alrededor de un minuto. No cierres esta pantalla.</p>
           <ul className="mt-4 space-y-1.5 text-sm">
-            <li className={progreso.base ? "text-foreground" : "text-muted-foreground"}>{progreso.base ? "✓" : "…"} Su personaje</li>
+            <li className={progreso.base ? "text-foreground" : "text-muted-foreground"}>{progreso.base ? "✓" : "…"} El personaje</li>
             {LOOKS_CARITA.map((l) => (
               <li key={l} className={progreso.looks.includes(l) ? "text-foreground" : "text-muted-foreground"}>
                 {progreso.looks.includes(l) ? "✓" : "…"} Look {NOMBRES_LOOK[l]}
@@ -255,7 +261,7 @@ export function CrearConFoto({
               <Button
                 size="lg"
                 className="h-12"
-                onClick={() => completarLooks(LOOKS_CARITA.filter((l) => !progreso.looks.includes(l)), progreso.looks)}
+                onClick={() => completar(LOOKS_CARITA.filter((l) => !progreso.looks.includes(l)), progreso.looks)}
               >
                 Completar los looks que faltan
               </Button>

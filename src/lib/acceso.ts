@@ -10,6 +10,7 @@ export type Acceso = {
   estado: "cargando" | "sin_sesion" | "listo";
   email: string | null;
   claves: Set<Clave>;
+  fotos: number; // personajes con carita comprados (1 por "Con su carita" + 4 por Pack familia)
   recargar: () => Promise<void>;
   salir: () => Promise<void>;
 };
@@ -18,12 +19,15 @@ export function useAcceso(): Acceso {
   const [estado, setEstado] = useState<Acceso["estado"]>("cargando");
   const [email, setEmail] = useState<string | null>(null);
   const [claves, setClaves] = useState<Set<Clave>>(new Set());
+  const [fotos, setFotos] = useState(0);
 
   const cargarCompras = useCallback(async () => {
-    const { data } = await supabase.from("compras").select("clave").eq("estado", "activo");
-    const set = new Set<Clave>(((data ?? []) as { clave: Clave }[]).map((c) => c.clave));
+    const { data } = await supabase.from("compras").select("clave, fotos").eq("estado", "activo");
+    const filas = (data ?? []) as { clave: Clave; fotos: number | null }[];
+    const set = new Set<Clave>(filas.map((c) => c.clave));
     if (set.has("premium")) set.add("kit"); // el Premium incluye el kit
     setClaves(set);
+    setFotos(filas.filter((c) => c.clave === "carita").reduce((s, c) => s + (c.fotos ?? 0), 0));
   }, []);
 
   useEffect(() => {
@@ -43,6 +47,7 @@ export function useAcceso(): Acceso {
       if (!session?.user) {
         setEmail(null);
         setClaves(new Set());
+        setFotos(0);
         setEstado("sin_sesion");
         return;
       }
@@ -60,7 +65,7 @@ export function useAcceso(): Acceso {
     await supabase.auth.signOut();
   }, []);
 
-  return { estado, email, claves, recargar: cargarCompras, salir };
+  return { estado, email, claves, fotos, recargar: cargarCompras, salir };
 }
 
 export async function enviarEnlace(email: string) {
@@ -70,22 +75,34 @@ export async function enviarEnlace(email: string) {
   });
 }
 
-// Imágenes del personaje con su carita (URLs firmadas, válidas por 1 hora).
-export type PersonajeCarita = { genero: "nino" | "nina"; imagenes: Record<string, string> };
+// Personajes con su carita (uno por foto comprada). URLs firmadas, válidas por 1 hora.
+export type PersonajeCarita = {
+  slot: number;
+  nombre: string | null;
+  genero: "nino" | "nina";
+  intentos: number;
+  imagenes: Record<string, string>;
+};
 
-export async function cargarPersonajeCarita(): Promise<PersonajeCarita | null> {
-  const { data } = await supabase.from("personajes_carita").select("genero, looks").maybeSingle();
-  const fila = data as { genero: "nino" | "nina"; looks: Record<string, string> } | null;
-  if (!fila || !fila.looks || !fila.looks.ninguno) return null;
-  const entradas = Object.entries(fila.looks);
-  const { data: firmadas } = await supabase.storage.from("personajes").createSignedUrls(
-    entradas.map(([, path]) => path),
-    3600,
-  );
-  const imagenes: Record<string, string> = {};
-  entradas.forEach(([look], i) => {
-    const url = firmadas?.[i]?.signedUrl;
-    if (url) imagenes[look] = url;
+export async function cargarPersonajesCarita(): Promise<PersonajeCarita[]> {
+  const { data } = await supabase.from("personajes_carita").select("slot, nombre, genero, intentos, looks").order("slot");
+  const filas = (data ?? []) as { slot: number; nombre: string | null; genero: "nino" | "nina"; intentos: number; looks: Record<string, string> }[];
+  const paths = filas.flatMap((f) => Object.values(f.looks ?? {}));
+  const firmadas = paths.length
+    ? (await supabase.storage.from("personajes").createSignedUrls(paths, 3600)).data ?? []
+    : [];
+  const url = new Map<string, string>();
+  paths.forEach((p, i) => {
+    const u = (firmadas as { signedUrl?: string }[])[i]?.signedUrl;
+    if (u) url.set(p, u);
   });
-  return { genero: fila.genero, imagenes };
+  return filas.map((f) => ({
+    slot: f.slot,
+    nombre: f.nombre,
+    genero: f.genero,
+    intentos: f.intentos,
+    imagenes: Object.fromEntries(
+      Object.entries(f.looks ?? {}).flatMap(([look, p]) => (url.has(p) ? [[look, url.get(p)!]] : [])),
+    ),
+  }));
 }

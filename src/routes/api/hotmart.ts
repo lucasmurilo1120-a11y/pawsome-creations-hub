@@ -56,7 +56,7 @@ export const Route = createFileRoute("/api/hotmart")({
 
         const { data: producto } = await supabaseAdmin
           .from("productos_hotmart")
-          .select("clave")
+          .select("clave, fotos")
           .eq("hotmart_product_id", productId)
           .maybeSingle();
 
@@ -67,6 +67,7 @@ export const Route = createFileRoute("/api/hotmart")({
           {
             email,
             clave: producto.clave,
+            fotos: producto.fotos ?? 0,
             transaccion,
             hotmart_product_id: productId,
             estado: ACTIVAR.has(evento) ? "activo" : "revocado",

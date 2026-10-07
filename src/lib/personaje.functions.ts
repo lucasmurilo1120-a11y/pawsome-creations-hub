@@ -1,25 +1,29 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { MAX_CREACIONES_CARITA } from "@/lib/papelitos-config";
+import { MAX_INTENTOS_POR_FOTO } from "@/lib/papelitos-config";
 
-// Personaje "Con su carita": la foto llega, se usa una sola vez para crear el
-// personaje base y se descarta (nunca se guarda). Solo se guardan los dibujos.
+// Personajes "Con su carita". Cada foto comprada es un "slot" (0, 1, 2...):
+// "Con su carita" da 1 foto y el Pack familia suma 4. La foto se usa una sola vez
+// para crear el personaje base y se descarta (nunca se guarda); solo quedan los dibujos.
 
 export type Genero = "nino" | "nina";
 export const LOOKS_CARITA = ["superheroe", "pirata", "astronauta", "mago", "guerreiro", "realeza"] as const;
 export type LookCarita = (typeof LOOKS_CARITA)[number];
 
-type Resultado = { ok: true; path: string } | { ok: false; error: "sin_compra" | "limite" | "sin_credito" | "ocupado" | "rechazada" | "fallo" | "sin_base" };
+type Resultado =
+  | { ok: true; path: string }
+  | { ok: false; error: "sin_compra" | "limite" | "sin_credito" | "ocupado" | "rechazada" | "fallo" | "sin_base" };
 
 const MAX_FOTO_CHARS = 3_000_000; // ~2,2 MB en base64; el app ya la achica a 768 px
+const MAX_SLOT = 19;
 
 const PROMPT_BASE =
-  "Create a full-body character for a children's paper-doll kit, based on the child in the FIRST image (a photo). " +
+  "Create a full-body character for a children's paper-doll kit, based on the person in the FIRST image (a photo). " +
   "Draw it in EXACTLY the same illustration style as the SECOND image: same proportions (big head, big expressive eyes, small body), " +
   "same clean outline, same soft shading and color palette, same front-facing standing pose with arms slightly open, " +
-  "plain white background and nothing else in the image. Keep the child's real features so the parents recognize them: " +
-  "hair color, hair length and texture, face shape, eye color, skin tone and glasses if any. " +
+  "plain white background and nothing else in the image. Keep the person's real features so the family recognizes them: " +
+  "hair color, hair length and texture, face shape, eye color, skin tone, glasses and beard if any. " +
   "Clothing exactly like the SECOND image. No text.";
 
 const PROMPT_LOOK =
@@ -47,16 +51,18 @@ function referencia(genero: Genero, look: "base" | LookCarita) {
   return `${origin}/personajes/${genero}-${look}.webp`;
 }
 
-async function tieneCarita(supabase: { from: (t: string) => any }): Promise<boolean> {
-  const { data } = await supabase.from("compras").select("clave").eq("estado", "activo");
-  return Array.isArray(data) && data.some((c: { clave: string }) => c.clave === "carita");
+// Cuántas fotos compró esta familia (suma de "Con su carita" + Pack familia activos).
+async function fotosCompradas(supabase: { from: (t: string) => any }): Promise<number> {
+  const { data } = await supabase.from("compras").select("clave, fotos").eq("estado", "activo");
+  if (!Array.isArray(data)) return 0;
+  return data.filter((c: { clave: string }) => c.clave === "carita").reduce((s: number, c: { fotos: number }) => s + (c.fotos ?? 0), 0);
 }
 
-async function guardarImagen(userId: string, look: string, dataUrl: string): Promise<string> {
+async function guardarImagen(userId: string, slot: number, look: string, dataUrl: string): Promise<string> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { dataUrlABytes } = await import("@/lib/ia.server");
   const { bytes, tipo } = dataUrlABytes(dataUrl);
-  const path = `${userId}/${look}.png`;
+  const path = `${userId}/${slot}/${look}.png`;
   const { error } = await supabaseAdmin.storage.from("personajes").upload(path, bytes, { contentType: tipo, upsert: true });
   if (error) throw new Error(error.message);
   return path;
@@ -70,41 +76,51 @@ function errorDeIA(e: unknown): Resultado {
   return { ok: false, error: "fallo" };
 }
 
-// 1) Foto -> personaje base (look normal).
+const slotValido = (slot: unknown) => Number.isInteger(slot) && (slot as number) >= 0 && (slot as number) <= MAX_SLOT;
+
+// 1) Foto -> personaje base (look normal) en un slot.
 export const crearPersonajeBase = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { foto: string; genero: Genero }) => {
+  .inputValidator((d: { foto: string; genero: Genero; slot: number; nombre?: string }) => {
     if (typeof d?.foto !== "string" || !/^data:image\/(jpeg|png|webp);base64,/.test(d.foto) || d.foto.length > MAX_FOTO_CHARS) {
       throw new Error("Foto inválida");
     }
     if (d.genero !== "nino" && d.genero !== "nina") throw new Error("Género inválido");
-    return d;
+    if (!slotValido(d.slot)) throw new Error("Slot inválido");
+    const nombre = typeof d.nombre === "string" ? d.nombre.trim().slice(0, 20) : "";
+    return { ...d, nombre };
   })
   .handler(async ({ data, context }): Promise<Resultado> => {
-    if (!(await tieneCarita(context.supabase))) return { ok: false, error: "sin_compra" };
+    const fotos = await fotosCompradas(context.supabase);
+    if (fotos === 0) return { ok: false, error: "sin_compra" };
+    if (data.slot >= fotos) return { ok: false, error: "limite" };
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: fila } = await supabaseAdmin
       .from("personajes_carita")
-      .select("creaciones")
+      .select("intentos")
       .eq("user_id", context.userId)
+      .eq("slot", data.slot)
       .maybeSingle();
-    if ((fila?.creaciones ?? 0) >= MAX_CREACIONES_CARITA) return { ok: false, error: "limite" };
+    const intentos = fila?.intentos ?? 0;
+    if (intentos >= MAX_INTENTOS_POR_FOTO) return { ok: false, error: "limite" };
 
     try {
       const { generarImagen } = await import("@/lib/ia.server");
       const estilo = await aDataUrl(referencia(data.genero, "base"));
       const imagen = await generarImagen(PROMPT_BASE, [data.foto, estilo]);
-      const path = await guardarImagen(context.userId, "ninguno", imagen);
+      const path = await guardarImagen(context.userId, data.slot, "ninguno", imagen);
       await supabaseAdmin.from("personajes_carita").upsert(
         {
           user_id: context.userId,
+          slot: data.slot,
+          nombre: data.nombre || null,
           genero: data.genero,
-          looks: { ninguno: path },
-          creaciones: (fila?.creaciones ?? 0) + 1,
+          looks: { ninguno: path }, // una foto nueva reemplaza los looks anteriores de este personaje
+          intentos: intentos + 1,
           actualizado: new Date().toISOString(),
         },
-        { onConflict: "user_id" },
+        { onConflict: "user_id,slot" },
       );
       return { ok: true, path };
     } catch (e) {
@@ -112,25 +128,28 @@ export const crearPersonajeBase = createServerFn({ method: "POST" })
     }
   });
 
-// 2) Personaje base -> cada uno de los otros 6 looks (se llama una vez por look, en paralelo).
+// 2) Personaje base -> cada uno de los otros 6 looks (una llamada por look, en paralelo).
 export const crearLookCarita = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { look: LookCarita }) => {
+  .inputValidator((d: { slot: number; look: LookCarita }) => {
+    if (!slotValido(d?.slot)) throw new Error("Slot inválido");
     if (!LOOKS_CARITA.includes(d?.look)) throw new Error("Look inválido");
     return d;
   })
   .handler(async ({ data, context }): Promise<Resultado> => {
-    if (!(await tieneCarita(context.supabase))) return { ok: false, error: "sin_compra" };
+    if ((await fotosCompradas(context.supabase)) <= data.slot) return { ok: false, error: "sin_compra" };
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: fila } = await supabaseAdmin
       .from("personajes_carita")
-      .select("genero, looks, regeneraciones")
+      .select("genero, looks, looks_generados")
       .eq("user_id", context.userId)
+      .eq("slot", data.slot)
       .maybeSingle();
     const looks = (fila?.looks ?? {}) as Record<string, string>;
     if (!fila || !looks.ninguno) return { ok: false, error: "sin_base" };
-    if (fila.regeneraciones >= LOOKS_CARITA.length * MAX_CREACIONES_CARITA) return { ok: false, error: "limite" };
+    // Tope de seguridad de costo: 6 looks por intento, con margen para reintentos.
+    if (fila.looks_generados >= LOOKS_CARITA.length * MAX_INTENTOS_POR_FOTO * 2) return { ok: false, error: "limite" };
 
     try {
       const { generarImagen } = await import("@/lib/ia.server");
@@ -139,23 +158,27 @@ export const crearLookCarita = createServerFn({ method: "POST" })
       const base = await aDataUrl(firmada.signedUrl);
       const disfraz = await aDataUrl(referencia(fila.genero as Genero, data.look));
       const imagen = await generarImagen(PROMPT_LOOK, [base, disfraz]);
-      const path = await guardarImagen(context.userId, data.look, imagen);
-
+      const path = await guardarImagen(context.userId, data.slot, data.look, imagen);
       // Fusión atómica en la base: varios looks se generan al mismo tiempo.
-      await supabaseAdmin.rpc("guardar_look_carita", { p_user: context.userId, p_look: data.look, p_path: path });
+      await supabaseAdmin.rpc("guardar_look_carita", { p_user: context.userId, p_slot: data.slot, p_look: data.look, p_path: path });
       return { ok: true, path };
     } catch (e) {
       return errorDeIA(e);
     }
   });
 
-// 3) Borrar todo (botón "Borrar su personaje").
+// 3) Borrar los dibujos de un personaje. Los intentos usados no se devuelven
+//    (si no, borrar y volver a crear daría IA gratis sin límite).
 export const borrarPersonajeCarita = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((d: { slot: number }) => {
+    if (!slotValido(d?.slot)) throw new Error("Slot inválido");
+    return d;
+  })
+  .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const archivos = ["ninguno", ...LOOKS_CARITA].map((l) => `${context.userId}/${l}.png`);
+    const archivos = ["ninguno", ...LOOKS_CARITA].map((l) => `${context.userId}/${data.slot}/${l}.png`);
     await supabaseAdmin.storage.from("personajes").remove(archivos);
-    await supabaseAdmin.from("personajes_carita").update({ looks: {} }).eq("user_id", context.userId);
+    await supabaseAdmin.from("personajes_carita").update({ looks: {} }).eq("user_id", context.userId).eq("slot", data.slot);
     return { ok: true as const };
   });

@@ -5,9 +5,9 @@ import { Download, Printer, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Cargando, EntrarPantalla, SinCompraPantalla } from "@/components/papelitos/EntrarPantalla";
 import { Extras } from "@/components/papelitos/Extras";
-import { CrearConFoto } from "@/components/papelitos/CrearConFoto";
+import { PersonajesCarita } from "@/components/papelitos/PersonajesCarita";
 import { LibroColorearImprimible, PAGINAS_COLOREAR, type PersonajeEstandar } from "@/components/papelitos/LibroColorear";
-import { cargarPersonajeCarita, useAcceso, type Acceso, type PersonajeCarita } from "@/lib/acceso";
+import { cargarPersonajesCarita, useAcceso, type Acceso, type PersonajeCarita } from "@/lib/acceso";
 
 // Nombre de la marca en un solo lugar: cambiarlo acá lo cambia en toda la app.
 const BRAND = "Papelitos";
@@ -274,7 +274,7 @@ const STORY_COUNT = buildStories("x", false).length;
 // Héroes: los 4 personajes ilustrados + "Con su carita" (creado con la foto).
 // ---------------------------------------------------------------------------
 
-type HeroKey = Character | "carita";
+type HeroKey = Character | `carita-${number}`;
 type Hero = {
   key: HeroKey;
   label: string;
@@ -294,11 +294,20 @@ const STANDARD_HEROES: Hero[] = CHARACTERS.map((c) => ({
   thumbs: mapThemes((t) => mini(CHARACTER_IMAGES[c.key][t])),
 }));
 
-// El personaje con su carita aparece solo cuando sus 7 looks están listos.
-function heroCarita(p: PersonajeCarita | null): Hero | null {
-  if (!p || THEMES.some((t) => !p.imagenes[t.key])) return null;
-  const images = mapThemes((t) => p.imagenes[t]!);
-  return { key: "carita", label: "Con su carita", girl: p.genero === "nina", images, thumbs: images };
+// Cada personaje con su carita aparece solo cuando sus 7 looks están listos.
+function heroesCarita(lista: PersonajeCarita[]): Hero[] {
+  return lista
+    .filter((p) => THEMES.every((t) => p.imagenes[t.key]))
+    .map((p) => {
+      const images = mapThemes((t) => p.imagenes[t]!);
+      return {
+        key: `carita-${p.slot}` as const,
+        label: p.nombre || (lista.length > 1 ? `Carita ${p.slot + 1}` : "Su carita"),
+        girl: p.genero === "nina",
+        images,
+        thumbs: images,
+      };
+    });
 }
 // portada + looks + historias + certificado
 const TOTAL_PAGES = 1 + THEMES.length + STORY_COUNT + 1;
@@ -496,26 +505,26 @@ function CreatorApp({ acceso }: { acceso: Acceso }) {
   const [rawName, setRawName] = useState("");
   const [panel, setPanel] = useState<Panel>(null);
   const [modo, setModo] = useState<ModoImpresion>("kit");
-  const [carita, setCarita] = useState<PersonajeCarita | null>(null);
+  const [caritas, setCaritas] = useState<PersonajeCarita[]>([]);
   const [colorChar, setColorChar] = useState<PersonajeEstandar>("nino");
 
-  const tieneCarita = acceso.claves.has("carita");
-  const recargarCarita = useCallback(async () => {
-    setCarita(tieneCarita ? await cargarPersonajeCarita() : null);
+  const tieneCarita = acceso.fotos > 0;
+  const recargarCaritas = useCallback(async () => {
+    setCaritas(tieneCarita ? await cargarPersonajesCarita() : []);
   }, [tieneCarita]);
   useEffect(() => {
-    void recargarCarita();
-  }, [recargarCarita]);
+    void recargarCaritas();
+  }, [recargarCaritas]);
 
-  const caritaHero = heroCarita(carita);
-  const heroes = caritaHero ? [caritaHero, ...STANDARD_HEROES] : STANDARD_HEROES;
+  const caritaHeroes = heroesCarita(caritas);
+  const heroes = [...caritaHeroes, ...STANDARD_HEROES];
   const hero = heroes.find((h) => h.key === heroKey) ?? STANDARD_HEROES[0]!;
 
-  // Cuando el personaje con su carita queda listo, lo elegimos.
-  const caritaLista = Boolean(caritaHero);
+  // Cuando el primer personaje con carita queda listo, lo elegimos (los de la familia se eligen a mano).
+  const primeraCarita = caritaHeroes[0]?.key ?? null;
   useEffect(() => {
-    if (caritaLista) setHeroKey("carita");
-  }, [caritaLista]);
+    if (primeraCarita) setHeroKey(primeraCarita);
+  }, [primeraCarita]);
 
   const name = formatName(rawName);
 
@@ -601,7 +610,7 @@ function CreatorApp({ acceso }: { acceso: Acceso }) {
 
               <div>
                 <StepTitle n={2}>Elige su personaje</StepTitle>
-                <div className={`grid gap-2 ${heroes.length > 4 ? "grid-cols-5" : "grid-cols-4"}`}>
+                <div className={heroes.length > 4 ? "-mx-1 flex gap-2 overflow-x-auto px-1 pb-1" : "grid grid-cols-4 gap-2"}>
                   {heroes.map((h) => {
                     const active = hero.key === h.key;
                     return (
@@ -611,16 +620,16 @@ function CreatorApp({ acceso }: { acceso: Acceso }) {
                         onClick={() => setHeroKey(h.key)}
                         aria-pressed={active}
                         className={`flex flex-col items-center gap-1 rounded-2xl border-2 bg-surface p-1.5 pb-2 text-xs font-medium transition-[transform,border-color] duration-150 ease-out active:scale-[0.97] ${
-                          active ? "border-brand text-brand-deep" : "border-transparent text-foreground hover:border-border"
-                        }`}
+                          heroes.length > 4 ? "w-[76px] shrink-0" : ""
+                        } ${active ? "border-brand text-brand-deep" : "border-transparent text-foreground hover:border-border"}`}
                       >
                         <img src={h.thumbs.ninguno} alt="" width={72} height={120} className="h-[96px] w-full object-contain" />
-                        <span className="leading-tight">{h.key === "carita" ? "Su carita" : h.label}</span>
+                        <span className="w-full truncate text-center leading-tight">{h.label}</span>
                       </button>
                     );
                   })}
                 </div>
-                {!caritaHero && (
+                {caritaHeroes.length === 0 && (
                   <button
                     type="button"
                     onClick={() => abrirPanel("carita")}
@@ -694,16 +703,18 @@ function CreatorApp({ acceso }: { acceso: Acceso }) {
             email={acceso.email}
             onRecargar={acceso.recargar}
             onAbrir={abrirPanel}
-            personajeCaritaListo={Boolean(caritaHero)}
+            personajeCaritaListo={caritaHeroes.length > 0}
           />
 
           {panel === "carita" && (
             <div id="panel-extra" className="mt-6 scroll-mt-4">
               {tieneCarita ? (
-                <CrearConFoto
-                  looksExistentes={Object.keys(carita?.imagenes ?? {})}
-                  onListo={recargarCarita}
-                  onCerrar={() => setPanel(null)}
+                <PersonajesCarita
+                  fotos={acceso.fotos}
+                  personajes={caritas}
+                  email={acceso.email}
+                  onCambio={recargarCaritas}
+                  onRecargarCompras={acceso.recargar}
                 />
               ) : (
                 <p className="rounded-3xl border border-border bg-surface p-5 text-sm leading-relaxed text-muted-foreground">
