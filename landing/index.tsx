@@ -506,7 +506,7 @@ function LandingPage() {
           <h1 className="mt-2 font-display text-[2.05rem] leading-[1.06] font-semibold text-balance sm:text-5xl lg:text-6xl">
             Una tarde sin pantallas donde tu hijo es el héroe.
           </h1>
-          <p className="mt-3 max-w-xl text-[17px] leading-relaxed text-muted-foreground sm:mt-5 sm:text-lg">
+          <p className="mt-3 max-w-xl text-[17px] leading-[1.55] text-muted-foreground sm:mt-5 sm:text-lg sm:leading-relaxed">
             Escribe su nombre, imprime su kit y recórtenlo juntos. Su héroe en 7 looks, 12 historias con su nombre y su certificado.
           </p>
           <div className="mt-5 flex flex-col gap-2 sm:mt-7 sm:flex-row sm:items-center sm:gap-3">
@@ -515,7 +515,7 @@ function LandingPage() {
               Pruébalo gratis con su nombre
             </a>
           </div>
-          <p className="mt-2 text-sm text-muted-foreground sm:mt-4">Pago único · Acceso inmediato por e-mail · Garantía de 7 días</p>
+          <p className="mt-2 text-sm text-muted-foreground sm:mt-4">Pago único · Acceso inmediato · Garantía de 7 días</p>
         </div>
       </section>
 
