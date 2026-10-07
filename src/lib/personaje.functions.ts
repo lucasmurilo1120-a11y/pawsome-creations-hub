@@ -51,12 +51,12 @@ function referencia(genero: Genero, look: "base" | LookCarita) {
   return `${origin}/personajes/${genero}-${look}.webp`;
 }
 
-// Cuántas fotos tiene esta cuenta: compras de su e-mail que nadie canjeó + las que canjeó con código.
+// Cuántas fotos tiene esta cuenta: solo las compras que canjeó con su código (HP...).
 async function fotosCompradas(supabase: { from: (t: string) => any }, uid: string): Promise<number> {
   const { data } = await supabase.from("compras").select("clave, fotos, canjeado_por").eq("estado", "activo");
   if (!Array.isArray(data)) return 0;
   return data
-    .filter((c: { clave: string; canjeado_por: string | null }) => c.clave === "carita" && (c.canjeado_por == null || c.canjeado_por === uid))
+    .filter((c: { clave: string; canjeado_por: string | null }) => c.clave === "carita" && c.canjeado_por === uid)
     .reduce((s: number, c: { fotos: number }) => s + (c.fotos ?? 0), 0);
 }
 

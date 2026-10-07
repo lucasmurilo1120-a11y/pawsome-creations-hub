@@ -129,9 +129,9 @@ export function PersonajesCarita({
               >
                 Sumar {PACK_FAMILIA.fotos} fotos por {PACK_FAMILIA.precio}
               </a>
-              <button type="button" onClick={onRecargarCompras} className="min-h-11 text-sm font-semibold text-brand">
-                Ya pagué, actualizar
-              </button>
+              <a href="#codigo-canje" onClick={() => void onRecargarCompras()} className="inline-flex min-h-11 items-center text-sm font-semibold text-brand">
+                Ya pagué: pegar mi código
+              </a>
             </div>
           ) : (
             <p className="mt-2 text-sm font-semibold text-muted-foreground">Muy pronto</p>

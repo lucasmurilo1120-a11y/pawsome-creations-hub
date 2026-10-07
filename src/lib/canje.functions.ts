@@ -90,7 +90,7 @@ export const canjearCodigo = createServerFn({ method: "POST" })
     if (compra.canjeado_por && compra.canjeado_por !== uid) return fallo("usado");
     if (compra.canjeado_por === uid) return { ok: true, clave: compra.clave, fotos: compra.fotos };
 
-    // Regalo: si la cuenta es de otro e-mail, debe saber el e-mail de la compra.
+    // Si la cuenta es de otro e-mail (regalo), debe saber el e-mail de la compra.
     if (compra.email !== miEmail) {
       if (!data.email) {
         // Cuenta como intento: así nadie usa esta respuesta para descubrir códigos válidos.

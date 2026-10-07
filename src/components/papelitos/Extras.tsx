@@ -56,9 +56,9 @@ export function Extras({
                     >
                       Desbloquear por {extra.precio}
                     </a>
-                    <button type="button" onClick={onRecargar} className="min-h-11 text-sm font-semibold text-brand">
-                      Ya pagué, actualizar
-                    </button>
+                    <a href="#codigo-canje" className="inline-flex min-h-11 items-center text-sm font-semibold text-brand">
+                      Ya pagué: pegar mi código
+                    </a>
                   </div>
                 ) : (
                   <p className="text-sm font-semibold text-muted-foreground">Muy pronto</p>
