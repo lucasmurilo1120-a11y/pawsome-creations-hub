@@ -44,7 +44,7 @@ const PLANS: {
     description: "El kit completo para empezar a jugar hoy.",
     features: [
       "4 personajes para elegir",
-      "7 looks por personaje: su ropa de siempre y 6 disfraces, uno para cada aventura",
+      "7 looks por personaje, distintos en cada uno: de superhéroe a bombero, hada, buzo o doctora",
       "12 historias donde tu hijo es el protagonista, con su nombre",
       "Portada y certificado de héroe con su nombre",
       "Un kit para cada hijo, sin pagar de nuevo",
@@ -99,15 +99,14 @@ const CHARACTERS = [
   { key: "nina2", label: "Niña 2" },
 ] as const;
 
-const THEMES = [
-  { key: "ninguno", label: "Normal" },
-  { key: "superheroe", label: "Superhéroe" },
-  { key: "pirata", label: "Pirata" },
-  { key: "astronauta", label: "Astronauta" },
-  { key: "mago", label: "Mago/Bruja" },
-  { key: "guerreiro", label: "Guerrero" },
-  { key: "realeza", label: "Realeza" },
-] as const;
+// Los 7 looks de cada personaje, en el orden de las columnas de demo-sprite.webp.
+// Cada personaje tiene looks propios: no se repiten entre ellos.
+const LOOK_LABELS: string[][] = [
+  ["Normal", "Superhéroe", "Pirata", "Astronauta", "Bombero", "Explorador", "Chef"],
+  ["Normal", "Superheroína", "Maga", "Caballera", "Princesa", "Hada", "Bailarina"],
+  ["Normal", "Superhéroe", "Caballero", "Príncipe", "Dragones", "Buzo", "Futbolista"],
+  ["Normal", "Superheroína", "Capitana", "Brujita", "Princesa", "Jardinera", "Doctora"],
+];
 
 // Datos con fuente. No agregar números sin fuente verificable.
 const DATOS = [
@@ -118,7 +117,7 @@ const DATOS = [
 
 const QUE_TRAE = [
   { n: "4", t: "personajes", c: "Distintos tonos de piel y peinados, para que elija el que más se le parece." },
-  { n: "7", t: "looks", c: "Su ropa de siempre y 6 disfraces, uno para cada aventura." },
+  { n: "7", t: "looks", c: "Cada personaje tiene los suyos: superhéroe, hada, bombero, buzo, doctora y más." },
   { n: "12", t: "historias", c: "Cuentos cortos con su nombre, para leer juntos y después jugarlos." },
   { n: "1", t: "certificado", c: "De héroe y con su nombre, para colgar en la puerta de su cuarto." },
 ];
@@ -367,7 +366,8 @@ function Demo() {
   const [theme, setTheme] = useState(1);
   const name = rawName.trim();
   const shown = name || "tu hijo";
-  const themeLabel = (THEMES[theme] ?? THEMES[1]).label;
+  const labels = LOOK_LABELS[character] ?? LOOK_LABELS[0]!;
+  const themeLabel = labels[theme] ?? labels[1]!;
 
   return (
     <section id="pruebalo" className="scroll-mt-4 bg-mist py-12 sm:py-20">
@@ -430,9 +430,9 @@ function Demo() {
             <div>
               <p className="mb-3 text-base font-bold">Elige su look</p>
               <div className="flex flex-wrap gap-2">
-                {THEMES.map((t, i) => (
+                {labels.map((t, i) => (
                   <button
-                    key={t.key}
+                    key={t}
                     type="button"
                     onClick={() => setTheme(i)}
                     aria-pressed={theme === i}
@@ -440,7 +440,7 @@ function Demo() {
                       theme === i ? "border-brand bg-brand text-primary-foreground" : "border-border bg-surface hover:bg-paper"
                     }`}
                   >
-                    {t.label}
+                    {t}
                   </button>
                 ))}
               </div>
