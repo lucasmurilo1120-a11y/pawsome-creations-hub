@@ -48,7 +48,7 @@ const MENSAJES: Record<Exclude<Respuesta, { ok: true }>["error"], string> = {
   sin_compra: "No encontramos una compra con ese e-mail. Revisa que sea el mismo que usaste al pagar.",
   agotado: "Ya canjeaste todos los códigos de tu compra. Tus personajes están en la app de Papelitos.",
   ya_entregado:
-    "Desde esta conexión ya se canjeó tu código. Tus personajes están en la app de Papelitos, en el celular donde lo canjeaste. Si cambiaste de celular, escríbenos y te ayudamos.",
+    "Tu código ya se canjeó. Tus personajes están en la app de Papelitos, en el celular donde lo canjeaste. Si cambiaste de celular o no los ves, escríbenos y te ayudamos.",
   limite: "Hubo demasiados pedidos seguidos. Espera unos minutos y vuelve a intentar.",
   fallo: "No pudimos generar tu código ahora. Revisa tu conexión y vuelve a intentar.",
 };
@@ -62,6 +62,20 @@ const C = {
   gris: "#6F625A",
   borde: "#E6DCCF",
 };
+
+// Id al azar de este celular (solo para no entregar dos códigos al mismo dispositivo).
+function idDispositivo(): string | undefined {
+  try {
+    let id = localStorage.getItem("papelitos_dispositivo");
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem("papelitos_dispositivo", id);
+    }
+    return id;
+  } catch {
+    return undefined;
+  }
+}
 
 function mmss(ms: number) {
   const s = Math.max(0, Math.round(ms / 1000));
@@ -90,7 +104,7 @@ function PaginaCodigo() {
       const res = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: PLATAFORMA.token, email: correo || undefined }),
+        body: JSON.stringify({ token: PLATAFORMA.token, email: correo || undefined, dispositivo: idDispositivo() }),
       });
       const r = (await res.json()) as Respuesta;
       if (r.ok) {
