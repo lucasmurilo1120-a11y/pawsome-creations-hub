@@ -94,6 +94,9 @@ const TOTAL_PAGES = 1 + 7 + 1;
 
 const PAGE_BREAK = { breakAfter: "page", pageBreakAfter: "always" } as const;
 
+// En el PDF solo va el libro: nada de botones flotantes (ni el sello de Lovable).
+const SOLO_LIBRO_AL_IMPRIMIR = "@media print{body *{visibility:hidden!important}.print-kit,.print-kit *{visibility:visible!important}}";
+
 function PrintBook({ name, character }: { name: string; character: Character }) {
   return (
     <div className="print-kit hidden print:block" aria-hidden>
@@ -153,6 +156,7 @@ function ColoringApp() {
 
   return (
     <>
+      <style>{SOLO_LIBRO_AL_IMPRIMIR}</style>
       <main className="min-h-screen bg-background pb-28 print:hidden sm:pb-0">
         <header className="border-b border-border/60 bg-surface/70">
           <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
