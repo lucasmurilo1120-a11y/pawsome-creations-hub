@@ -162,6 +162,15 @@ lovable-badge {
     background: #fff !important;
   }
 
+  /* En el PDF solo va el kit: nada de botones flotantes (ni el de Lovable). */
+  body * {
+    visibility: hidden !important;
+  }
+  .print-kit,
+  .print-kit * {
+    visibility: visible !important;
+  }
+
   .print-kit {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
