@@ -1,0 +1,25 @@
+name: kit
+on:
+  push:
+    branches: [ci-kit]
+permissions:
+  contents: write
+jobs:
+  kit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: pdf
+        run: |
+          mkdir -p /tmp/k && cp .github/e2e/kit.mjs /tmp/k/ && cd /tmp/k
+          npm init -y >/dev/null && npm i playwright@1.49.1 >/dev/null 2>&1 && npx playwright install --with-deps chromium >/dev/null 2>&1
+          node kit.mjs
+      - name: publicar
+        if: always()
+        run: |
+          cd /tmp/k && mkdir -p pub && cp -r resultados pub/ 2>/dev/null; cd pub
+          git init -q && git checkout -q -b ci-kit-${{ github.run_id }}
+          git config user.name ci && git config user.email ci@users.noreply.github.com
+          git add -A && git commit -q -m "kit ${{ github.run_id }}"
+          git push -q "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:ci-kit-${{ github.run_id }}
