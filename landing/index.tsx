@@ -87,8 +87,8 @@ const EXTRAS = [
     icon: Palette,
     name: "MiniMundos Color",
     price: "US$4,97",
-    lead: "16 escenas para pintar, no solo el personaje.",
-    copy: "El príncipe frente a su castillo, la brujita con su caldero, la sirena en el arrecife, el astronauta en la Luna y más. Cada lámina trae la escena a color como guía y la versión para pintar.",
+    lead: "Su libro para colorear, con su nombre en cada página.",
+    copy: "Su personaje en sus 7 looks, en líneas para pintar: el bombero, la princesa, el buzo, la doctora y más. Puedes armar un libro con cada uno de los 4 personajes: 28 dibujos en total.",
     bullets: ["Portada con su nombre y diploma de artista", "Imprime y pinta las veces que quieras"],
   },
 ] as const;

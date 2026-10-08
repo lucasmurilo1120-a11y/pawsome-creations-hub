@@ -190,11 +190,20 @@ function PaginaCodigo() {
               <p className="mt-2 font-mono text-[2.6rem] leading-none font-bold tracking-[0.18em] sm:text-5xl" aria-label={`Código ${estado.codigo.split("").join(" ")}`}>
                 {estado.codigo.slice(0, 3)} {estado.codigo.slice(3)}
               </p>
+              <a
+                href={`${APP_URL}/?codigo=${estado.codigo}`}
+                target="_blank"
+                rel="noopener"
+                className="mt-5 inline-flex min-h-14 w-full items-center justify-center rounded-full px-6 text-base font-bold text-white transition-transform active:scale-[0.97]"
+                style={{ background: C.marca }}
+              >
+                Usar este código en la app
+              </a>
               <button
                 type="button"
                 onClick={() => copiar(estado.codigo)}
-                className="mt-5 inline-flex min-h-14 w-full items-center justify-center rounded-full px-6 text-base font-bold text-white transition-transform active:scale-[0.97]"
-                style={{ background: C.marca }}
+                className="mt-2 inline-flex min-h-12 w-full items-center justify-center rounded-full px-6 text-base font-bold transition-transform active:scale-[0.97]"
+                style={{ border: `2px solid ${C.marca}`, color: C.marcaOscura, background: "white" }}
               >
                 {copiado ? "¡Copiado!" : "Copiar código"}
               </button>
@@ -260,9 +269,8 @@ function PaginaCodigo() {
           </h2>
           <ol className="mt-4 space-y-3">
             {[
-              <>Toca <b>Copiar código</b>.</>,
-              <>Abre la app de Papelitos con el botón de abajo (es la misma app de tu kit).</>,
-              <>Arriba a la derecha, toca <b>Tengo un código</b>, pega el código y toca <b>Canjear</b>. Verás un mensaje verde si es correcto.</>,
+              <>Toca <b>Usar este código en la app</b>: se abre la app de Papelitos (la misma de tu kit) y el código se canjea solo. Verás un mensaje verde.</>,
+              <>¿No se abrió? Toca <b>Copiar código</b>, abre la app con el botón de abajo y, arriba a la derecha, toca <b>Tengo un código</b>, pégalo y toca <b>Canjear</b>.</>,
               <>Toca <b>Crear su personaje con una foto</b>, elige el estilo (niño o niña) y <b>toma o sube una foto</b> de frente y con buena luz.</>,
               <>En uno o dos minutos aparece su personaje con sus 7 looks. Elígelo en “Elige su personaje” y descarga su kit.</>,
             ].map((paso, i) => (
