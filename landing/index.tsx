@@ -66,8 +66,8 @@ const PLANS: {
   },
 ];
 
-// Extras opcionales: aparecen como order bump en el pago de Hotmart y se
-// activan en la app con el código de compra (HP...) que llega por e-mail.
+// Extras opcionales (order bumps de Hotmart). Con su carita llega como una página
+// de códigos (el código se canjea en la app); MiniMundos Color, como su propia app.
 const EXTRAS = [
   {
     key: "carita",
@@ -77,7 +77,8 @@ const EXTRAS = [
     lead: "Tu hijo, convertido en un personaje más del kit.",
     copy: "Subes 1 foto y la app lo dibuja con su cara, su pelo y sus 7 looks, listo para jugar junto a los demás.",
     bullets: [
-      "¿Hermanos, mamá o papá? Dentro de la app sumas 4 fotos más por US$9,97",
+      "Te llega por e-mail tu página de códigos: copias el código y lo pegas en la app",
+      "¿Hermanos, mamá o papá? El Pack familia suma 4 personajes más por US$9,97",
       "No guardamos la foto: se usa una sola vez para crear el dibujo",
     ],
   },
@@ -141,11 +142,11 @@ const FAQ = [
   },
   {
     q: "¿Cómo funciona Con su carita? ¿Qué pasa con la foto?",
-    a: "Subes una foto de frente y con buena luz, y la app usa inteligencia artificial para dibujar a tu hijo en el estilo de Papelitos, con sus 7 looks. La foto se usa una sola vez para crear el dibujo y no la guardamos. Si el resultado no te convence, puedes probar con otra foto: tienes hasta 3 intentos por personaje.",
+    a: "Tomas o subes una foto de frente y con buena luz, y la app usa inteligencia artificial para dibujar a tu hijo en el estilo de Papelitos, con sus 7 looks y sus 12 historias. La foto se usa una sola vez para crear el dibujo y no la guardamos. Si el resultado no te convence, puedes probar con otra foto: tienes hasta 3 intentos por personaje.",
   },
   {
     q: "¿Cómo activo los extras?",
-    a: "Si sumas Con su carita o MiniMundos Color en el pago, Hotmart te envía un e-mail por cada uno con su código de compra (empieza con HP). Lo pegas una vez en la app y queda activado en tu cuenta.",
+    a: "Con su carita: junto con tu compra te llega por e-mail el enlace a tu página de códigos. Copia el código, abre la app de Papelitos y pégalo en «Tengo un código», arriba a la derecha; después tomas o subes la foto. MiniMundos Color: te llega por e-mail el enlace a su app para pintar.",
   },
   {
     q: "¿Y si no me gusta?",
@@ -659,7 +660,7 @@ function LandingPage() {
             <p className="text-sm font-bold text-brand">Opcional</p>
             <h3 className="mt-1 font-display text-2xl font-semibold text-balance sm:text-3xl">Súmale más en el pago, con un clic.</h3>
             <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-muted-foreground">
-              No los necesitas para jugar. Aparecen en la página de pago y los activas en la app con el código de compra que te llega por e-mail.
+              No los necesitas para jugar. Los sumas en la página de pago y te llegan por e-mail junto con tu kit.
             </p>
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               {EXTRAS.map((x) => (
