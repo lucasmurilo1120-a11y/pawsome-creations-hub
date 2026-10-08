@@ -1,0 +1,37 @@
+name: build-check
+on:
+  push:
+    branches: [ci-build]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: install
+        run: bun install 2>&1 | tail -40 > install.log; echo "exit=${PIPESTATUS[0]}" >> install.log; cat install.log
+      - name: build
+        run: |
+          set +e
+          bun run build > build.log 2>&1
+          echo "BUILD_EXIT=$?" >> build.log
+          cat build.log
+      - name: report
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import re
+          def enc(s): return s.replace('%','%25').replace('\r','').replace('\n','%0A')
+          for name in ['install.log','build.log']:
+              try: txt=open(name,encoding='utf-8',errors='replace').read()
+              except Exception as e: txt=str(e)
+              txt=re.sub(r'\x1b\[[0-9;]*m','',txt)
+              lines=txt.splitlines()
+              # keep error-ish lines plus the tail
+              err=[l for l in lines if re.search(r'error|Error|ERR|failed|denied|Import protection|✗|BUILD_EXIT|exit=',l)]
+              chunks=['\n'.join(err[:120])[:3500], '\n'.join(lines[-80:])[:3500]]
+              for i,c in enumerate(chunks):
+                  print(f"::error title={name}-{i}::"+enc(c or '(empty)'))
+          PY
