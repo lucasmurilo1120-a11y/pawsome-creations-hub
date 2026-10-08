@@ -76,9 +76,10 @@ try {
   // 3) foto
   await p.getByRole("button", { name: /Crear su personaje con una foto/ }).click();
   await p.getByText("Antes de la foto").waitFor({ timeout: 15000 });
+  await p.waitForTimeout(1500);
   await p.screenshot({ path: `${OUT}/app-antes-de-la-foto.png` });
   await p.fill('input[id^="nombre-"]', "Mateo");
-  await p.getByRole("button", { name: "Niño", exact: true }).click();
+  await p.getByRole("button", { name: "Niño", exact: true }).last().click();
   await p.locator('input[type="checkbox"]').first().check();
   await p.getByRole("button", { name: "Continuar" }).click();
   await p.locator('input[type="file"]:not([capture])').setInputFiles("foto.jpg");
@@ -113,6 +114,18 @@ try {
   // 5) el personaje aparece en "Elige su personaje" y en la vista previa
   await p.evaluate(() => window.scrollTo(0, 0));
   await p.screenshot({ path: `${OUT}/app-arriba.png`, fullPage: false });
+
+  // 5b) enlace /?codigo= con el código del Pack familia en el mismo celular: debe sumar 4
+  await p.goto(`${APP}/?codigo=${codigoFam}`, { waitUntil: "networkidle" });
+  const auto = p.locator('#panel-codigo [role="status"], #panel-codigo [role="alert"]').first();
+  await auto.waitFor({ timeout: 30000 }).catch(() => {});
+  anota("canje:enlace_familia", (await auto.innerText().catch(() => "")).trim());
+  anota("badge", (await p.getByRole("button", { name: /Tengo un código/ }).innerText().catch(() => "")).trim());
+  await p.screenshot({ path: `${OUT}/app-enlace-familia.png` });
+  await p.keyboard.press("Escape");
+  await p.locator("#carita").scrollIntoViewIfNeeded().catch(() => {});
+  await p.waitForTimeout(1000);
+  await p.screenshot({ path: `${OUT}/app-carita-5.png`, fullPage: true });
 
   // 6) mismo código en otro celular: debe decir que ya se usó
   const ctx2 = await browser.newContext(movil);
