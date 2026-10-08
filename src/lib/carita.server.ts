@@ -46,8 +46,23 @@ export type Acceso = { id: string; fotos: number };
 export async function accesoDeToken(token: unknown): Promise<Acceso | null> {
   if (typeof token !== "string" || token.length < 20 || token.length > 80) return null;
   const db = await admin();
-  const { data } = await db.from("accesos").select("id, fotos").eq("token_hash", await sha256(token)).maybeSingle();
-  return (data as Acceso | null) ?? null;
+  const hash = await sha256(token);
+  const { data } = await db.from("accesos").select("id, fotos").eq("token_hash", hash).maybeSingle();
+  if (data) return data as Acceso;
+  // Acceso recuperado en otro navegador con el mismo código (tabla acceso_tokens).
+  const { data: extra } = await db.from("acceso_tokens").select("acceso_id").eq("token_hash", hash).maybeSingle();
+  const id = (extra as { acceso_id: string } | null)?.acceso_id;
+  if (!id) return null;
+  const { data: acc } = await db.from("accesos").select("id, fotos").eq("id", id).maybeSingle();
+  return (acc as Acceso | null) ?? null;
+}
+
+// Mismo código, otro navegador: se entrega un token nuevo para el mismo acceso.
+export async function tokenExtra(accesoId: string, codigoId: number): Promise<string | null> {
+  const db = await admin();
+  const token = aleatorio(40, "abcdefghijkmnpqrstuvwxyz23456789");
+  const { error } = await db.from("acceso_tokens").insert({ token_hash: await sha256(token), acceso_id: accesoId, codigo_id: codigoId });
+  return error ? null : token;
 }
 
 export async function config(clave: string): Promise<string | null> {
