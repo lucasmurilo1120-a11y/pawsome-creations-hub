@@ -5,8 +5,11 @@
 //
 // Dos modos por página (columna verificar_compra):
 //  - false (simple): mientras no está el aviso de Hotmart. Se frena el abuso por
-//    dispositivo/conexión: mientras haya un código vigente se devuelve el mismo, y
-//    una misma conexión no recibe un código nuevo si ya canjeó uno en 30 días.
+//    dispositivo: mientras haya un código vigente se devuelve el mismo, y un mismo
+//    dispositivo no recibe otro si ya canjeó uno en 30 días. La página manda un id
+//    de dispositivo (queda en su localStorage); sin él se usa la conexión (IP).
+//    Por conexión el tope es más alto (5), porque en datos móviles muchas
+//    personas comparten la misma IP (CGNAT) y no hay que bloquear a clientes reales.
 //  - true (con compra): pide el e-mail de la compra y entrega tantos códigos como
 //    unidades compradas (avisadas por el webhook de Hotmart en la tabla compras).
 
@@ -18,20 +21,22 @@ export type ResultadoEmision =
 
 type Plataforma = { id: string; nombre: string; fotos: number; clave_hotmart: string; verificar_compra: boolean; minutos_validez: number };
 
-async function crearCodigo(p: Plataforma, ip: string, compraId: number | null) {
+const TOPE_POR_CONEXION = 5;
+
+async function crearCodigo(p: Plataforma, ip: string, compraId: number | null, dispositivo: string | null = null) {
   const db = await admin();
   const expira = new Date(Date.now() + p.minutos_validez * 60_000).toISOString();
   for (let i = 0; i < 5; i++) {
     const codigo = aleatorio(6);
     const { error } = await db
       .from("codigos")
-      .insert({ codigo, plataforma: p.id, fotos: p.fotos, expira, ip_hash: ip, compra_id: compraId });
+      .insert({ codigo, plataforma: p.id, fotos: p.fotos, expira, ip_hash: ip, compra_id: compraId, dispositivo });
     if (!error) return { codigo, expira };
   }
   return null;
 }
 
-export async function emitirCodigo(token: unknown, emailRaw: unknown, ip: string): Promise<ResultadoEmision> {
+export async function emitirCodigo(token: unknown, emailRaw: unknown, ip: string, dispositivoRaw?: unknown): Promise<ResultadoEmision> {
   if (typeof token !== "string" || token.length < 20) return { ok: false, error: "token" };
   const db = await admin();
   const { data: plat } = await db
@@ -96,27 +101,38 @@ export async function emitirCodigo(token: unknown, emailRaw: unknown, ip: string
   }
 
   // Modo simple.
-  const { data: pendiente } = await db
+  const disp =
+    typeof dispositivoRaw === "string" && /^[a-zA-Z0-9-]{16,64}$/.test(dispositivoRaw) ? await sha256(`disp:${dispositivoRaw}`) : null;
+
+  const pendienteQ = db
     .from("codigos")
     .select("codigo, expira")
     .eq("plataforma", p.id)
-    .eq("ip_hash", ip)
     .is("usado_en", null)
     .gt("expira", ahora)
     .order("expira", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .limit(1);
+  const { data: pendiente } = await (disp ? pendienteQ.eq("dispositivo", disp) : pendienteQ.eq("ip_hash", ip)).maybeSingle();
   if (pendiente) return listo(pendiente as { codigo: string; expira: string });
 
-  const { count: canjeados } = await db
-    .from("codigos")
-    .select("id", { count: "exact", head: true })
-    .eq("plataforma", p.id)
-    .eq("ip_hash", ip)
-    .not("usado_en", "is", null)
-    .gte("creado", new Date(Date.now() - 30 * 24 * 60 * 60_000).toISOString());
-  if ((canjeados ?? 0) >= 1) return { ok: false, error: "ya_entregado" };
+  const hace30 = new Date(Date.now() - 30 * 24 * 60 * 60_000).toISOString();
+  const canjeadosPor = async (col: "dispositivo" | "ip_hash", valor: string) => {
+    const { count } = await db
+      .from("codigos")
+      .select("id", { count: "exact", head: true })
+      .eq("plataforma", p.id)
+      .eq(col, valor)
+      .not("usado_en", "is", null)
+      .gte("creado", hace30);
+    return count ?? 0;
+  };
+  if (disp) {
+    if ((await canjeadosPor("dispositivo", disp)) >= 1) return { ok: false, error: "ya_entregado" };
+    if ((await canjeadosPor("ip_hash", ip)) >= TOPE_POR_CONEXION) return { ok: false, error: "ya_entregado" };
+  } else if ((await canjeadosPor("ip_hash", ip)) >= 1) {
+    return { ok: false, error: "ya_entregado" };
+  }
 
-  const nuevo = await crearCodigo(p, ip, null);
+  const nuevo = await crearCodigo(p, ip, null, disp);
   return nuevo ? listo(nuevo) : { ok: false, error: "fallo" };
 }

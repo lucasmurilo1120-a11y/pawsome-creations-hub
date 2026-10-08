@@ -18,7 +18,7 @@ export const Route = createFileRoute("/api/codigo")({
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: CORS }),
       POST: async ({ request }: { request: Request }) => {
-        let body: { token?: unknown; email?: unknown } = {};
+        let body: { token?: unknown; email?: unknown; dispositivo?: unknown } = {};
         try {
           body = (await request.json()) as typeof body;
         } catch {
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/api/codigo")({
         try {
           const { ipHash } = await import("@/lib/carita.server");
           const { emitirCodigo } = await import("@/lib/codigos.server");
-          const r = await emitirCodigo(body.token, body.email, await ipHash(request));
+          const r = await emitirCodigo(body.token, body.email, await ipHash(request), body.dispositivo);
           return json(r, r.ok ? 200 : r.error === "token" ? 401 : 200);
         } catch (e) {
           console.error("[api/codigo]", e);
