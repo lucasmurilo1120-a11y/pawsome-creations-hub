@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Check, Ticket, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { canjearCodigo, type ErrorCanje } from "@/lib/carita.functions";
+import { leerToken } from "@/lib/carita-acceso";
 import { SUPPORT_EMAIL } from "@/lib/papelitos-config";
 
 // Botón "Tengo un código" (arriba a la derecha) con su panel para canjearlo.
@@ -48,13 +49,12 @@ export function CodigoBoton({
     };
   }, [abierto]);
 
-  async function enviar(e: FormEvent) {
-    e.preventDefault();
+  async function canjear(valor: string, tokenActual: string | null = token) {
     if (enviando) return;
     setEnviando(true);
     setResultado(null);
     try {
-      const r = await canjearCodigo({ data: { codigo, token } });
+      const r = await canjearCodigo({ data: { codigo: valor, token: tokenActual } });
       if (r.ok) {
         await onActivado(r.token);
         setCodigo("");
@@ -73,6 +73,29 @@ export function CodigoBoton({
     }
     setEnviando(false);
   }
+
+  function enviar(e: FormEvent) {
+    e.preventDefault();
+    void canjear(codigo);
+  }
+
+  // Enlace desde la página de códigos: /?codigo=ABC123 abre el panel y lo canjea solo.
+  useEffect(() => {
+    try {
+      const url = new URL(window.location.href);
+      const delEnlace = (url.searchParams.get("codigo") ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+      if (!delEnlace) return;
+      url.searchParams.delete("codigo");
+      window.history.replaceState(null, "", url.toString());
+      if (delEnlace.length !== 6) return;
+      setCodigo(delEnlace);
+      setAbierto(true);
+      // El acceso de este celular se lee aquí mismo: al abrir la app todavía no llegó por props.
+      void canjear(delEnlace, leerToken());
+    } catch {
+      /* sin URL: nada que hacer */
+    }
+  }, []); // solo al abrir la app
 
   return (
     <div ref={caja} className="relative">
@@ -132,7 +155,7 @@ export function CodigoBoton({
             <div
               role={resultado.tipo === "error" ? "alert" : "status"}
               className={`mt-3 flex items-start gap-2 rounded-2xl p-3 text-sm leading-relaxed ${
-                resultado.tipo === "ok" ? "bg-mist text-brand-deep" : "bg-destructive/10 text-destructive"
+                resultado.tipo === "ok" ? "bg-success-soft font-medium text-success" : "bg-destructive/10 text-destructive"
               }`}
             >
               {resultado.tipo === "ok" ? <Check className="mt-0.5 size-4 shrink-0" aria-hidden /> : <X className="mt-0.5 size-4 shrink-0" aria-hidden />}
