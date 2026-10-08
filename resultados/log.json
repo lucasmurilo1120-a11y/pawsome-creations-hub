@@ -1,0 +1,81 @@
+[
+  {
+    "k": "pagina-una:codigo",
+    "v": {
+      "codigo": "KEP89D",
+      "errores": []
+    },
+    "t": "2026-10-08T02:41:57.353Z"
+  },
+  {
+    "k": "pagina-una:recarga",
+    "v": "KEP89D",
+    "t": "2026-10-08T02:41:58.399Z"
+  },
+  {
+    "k": "pagina-familia:codigo",
+    "v": {
+      "codigo": "6D6R5S",
+      "errores": []
+    },
+    "t": "2026-10-08T02:42:01.940Z"
+  },
+  {
+    "k": "pagina-familia:recarga",
+    "v": "6D6R5S",
+    "t": "2026-10-08T02:42:03.192Z"
+  },
+  {
+    "k": "canje:incorrecto",
+    "v": "Código incorrecto. Revisa que esté igual al de tu página de códigos.",
+    "t": "2026-10-08T02:42:07.280Z"
+  },
+  {
+    "k": "canje:correcto",
+    "v": "¡Código correcto! Desbloqueaste 1 personaje con su carita.",
+    "t": "2026-10-08T02:42:09.256Z"
+  },
+  {
+    "k": "creacion",
+    "v": {
+      "fin": "error",
+      "segundos": 3
+    },
+    "t": "2026-10-08T02:42:14.404Z"
+  },
+  {
+    "k": "creacion:mensaje",
+    "v": "No salió esta vez\n\nLa creación de personajes está en pausa por unos minutos. Inténtalo de nuevo más tarde.\n\nIntentar con otra foto\nCerrar",
+    "t": "2026-10-08T02:42:14.406Z"
+  },
+  {
+    "k": "imagenes",
+    "v": 0,
+    "t": "2026-10-08T02:42:14.740Z"
+  },
+  {
+    "k": "canje:enlace_familia",
+    "v": "¡Código correcto! Desbloqueaste 4 personajes con su carita.",
+    "t": "2026-10-08T02:42:17.000Z"
+  },
+  {
+    "k": "badge",
+    "v": "Tengo un código\n5",
+    "t": "2026-10-08T02:42:17.003Z"
+  },
+  {
+    "k": "canje:reusado",
+    "v": "Este código ya se usó.",
+    "t": "2026-10-08T02:42:20.861Z"
+  },
+  {
+    "k": "errores_consola",
+    "v": [],
+    "t": "2026-10-08T02:42:20.864Z"
+  },
+  {
+    "k": "codigo_familia_sin_usar",
+    "v": "6D6R5S",
+    "t": "2026-10-08T02:42:20.865Z"
+  }
+]
