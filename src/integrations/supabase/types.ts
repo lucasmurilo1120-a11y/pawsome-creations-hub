@@ -14,45 +14,273 @@ export type Database = {
   }
   public: {
     Tables: {
-      lead_signups: {
+      accesos: {
         Row: {
-          created_at: string
-          email: string
+          creado: string
+          fotos: number
           id: string
-          ip_hash: string
-          plan: string
-          updated_at: string
-          utm_campaign: string | null
-          utm_content: string | null
-          utm_medium: string | null
-          utm_source: string | null
-          utm_term: string | null
+          token_hash: string
         }
         Insert: {
-          created_at?: string
-          email: string
+          creado?: string
+          fotos?: number
           id?: string
-          ip_hash: string
-          plan: string
-          updated_at?: string
-          utm_campaign?: string | null
-          utm_content?: string | null
-          utm_medium?: string | null
-          utm_source?: string | null
-          utm_term?: string | null
+          token_hash: string
         }
         Update: {
-          created_at?: string
-          email?: string
+          creado?: string
+          fotos?: number
           id?: string
+          token_hash?: string
+        }
+        Relationships: []
+      }
+      codigos: {
+        Row: {
+          acceso_id: string | null
+          codigo: string
+          compra_id: number | null
+          creado: string
+          expira: string
+          fotos: number
+          id: number
+          ip_hash: string | null
+          plataforma: string
+          usado_en: string | null
+        }
+        Insert: {
+          acceso_id?: string | null
+          codigo: string
+          compra_id?: number | null
+          creado?: string
+          expira: string
+          fotos: number
+          id?: number
+          ip_hash?: string | null
+          plataforma: string
+          usado_en?: string | null
+        }
+        Update: {
+          acceso_id?: string | null
+          codigo?: string
+          compra_id?: number | null
+          creado?: string
+          expira?: string
+          fotos?: number
+          id?: number
+          ip_hash?: string | null
+          plataforma?: string
+          usado_en?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "codigos_acceso_id_fkey"
+            columns: ["acceso_id"]
+            isOneToOne: false
+            referencedRelation: "accesos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "codigos_compra_id_fkey"
+            columns: ["compra_id"]
+            isOneToOne: false
+            referencedRelation: "compras"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "codigos_plataforma_fkey"
+            columns: ["plataforma"]
+            isOneToOne: false
+            referencedRelation: "plataformas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compras: {
+        Row: {
+          actualizado: string
+          clave: string
+          creado: string
+          email: string
+          estado: string
+          evento: string | null
+          hotmart_product_id: string | null
+          id: number
+          transaccion: string
+          unidades: number
+        }
+        Insert: {
+          actualizado?: string
+          clave: string
+          creado?: string
+          email: string
+          estado?: string
+          evento?: string | null
+          hotmart_product_id?: string | null
+          id?: number
+          transaccion: string
+          unidades?: number
+        }
+        Update: {
+          actualizado?: string
+          clave?: string
+          creado?: string
+          email?: string
+          estado?: string
+          evento?: string | null
+          hotmart_product_id?: string | null
+          id?: number
+          transaccion?: string
+          unidades?: number
+        }
+        Relationships: []
+      }
+      config: {
+        Row: {
+          clave: string
+          valor: string
+        }
+        Insert: {
+          clave: string
+          valor: string
+        }
+        Update: {
+          clave?: string
+          valor?: string
+        }
+        Relationships: []
+      }
+      intentos: {
+        Row: {
+          creado: string
+          exito: boolean
+          id: number
+          ip_hash: string
+          tipo: string
+        }
+        Insert: {
+          creado?: string
+          exito?: boolean
+          id?: number
+          ip_hash: string
+          tipo: string
+        }
+        Update: {
+          creado?: string
+          exito?: boolean
+          id?: number
           ip_hash?: string
-          plan?: string
-          updated_at?: string
-          utm_campaign?: string | null
-          utm_content?: string | null
-          utm_medium?: string | null
-          utm_source?: string | null
-          utm_term?: string | null
+          tipo?: string
+        }
+        Relationships: []
+      }
+      personajes_carita: {
+        Row: {
+          acceso_id: string
+          actualizado: string
+          genero: string
+          intentos: number
+          looks: Json
+          looks_generados: number
+          nombre: string | null
+          slot: number
+        }
+        Insert: {
+          acceso_id: string
+          actualizado?: string
+          genero: string
+          intentos?: number
+          looks?: Json
+          looks_generados?: number
+          nombre?: string | null
+          slot: number
+        }
+        Update: {
+          acceso_id?: string
+          actualizado?: string
+          genero?: string
+          intentos?: number
+          looks?: Json
+          looks_generados?: number
+          nombre?: string | null
+          slot?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "personajes_carita_acceso_id_fkey"
+            columns: ["acceso_id"]
+            isOneToOne: false
+            referencedRelation: "accesos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plataformas: {
+        Row: {
+          clave_hotmart: string
+          fotos: number
+          id: string
+          minutos_validez: number
+          nombre: string
+          token_hash: string
+          verificar_compra: boolean
+        }
+        Insert: {
+          clave_hotmart: string
+          fotos: number
+          id: string
+          minutos_validez?: number
+          nombre: string
+          token_hash: string
+          verificar_compra?: boolean
+        }
+        Update: {
+          clave_hotmart?: string
+          fotos?: number
+          id?: string
+          minutos_validez?: number
+          nombre?: string
+          token_hash?: string
+          verificar_compra?: boolean
+        }
+        Relationships: []
+      }
+      productos_hotmart: {
+        Row: {
+          clave: string
+          hotmart_product_id: string
+          unidades: number
+        }
+        Insert: {
+          clave: string
+          hotmart_product_id: string
+          unidades?: number
+        }
+        Update: {
+          clave?: string
+          hotmart_product_id?: string
+          unidades?: number
+        }
+        Relationships: []
+      }
+      pruebas_ia: {
+        Row: {
+          creado: string
+          id: number
+          imagen: string | null
+          nota: string | null
+        }
+        Insert: {
+          creado?: string
+          id?: number
+          imagen?: string | null
+          nota?: string | null
+        }
+        Update: {
+          creado?: string
+          id?: number
+          imagen?: string | null
+          nota?: string | null
         }
         Relationships: []
       }
@@ -61,7 +289,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      guardar_look_carita: {
+        Args: { p_acceso: string; p_look: string; p_path: string; p_slot: number }
+        Returns: undefined
+      }
+      sumar_fotos: {
+        Args: { p_acceso: string; p_n: number }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
