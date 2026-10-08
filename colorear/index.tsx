@@ -34,7 +34,9 @@ export const Route = createFileRoute("/")({
 });
 
 type Character = "nino" | "nina" | "nino2" | "nina2";
-type ThemeKey = "ninguno" | "superheroe" | "pirata" | "astronauta" | "mago" | "guerreiro" | "realeza";
+type ThemeKey =
+  | "ninguno" | "superheroe" | "pirata" | "astronauta" | "mago" | "guerreiro" | "realeza"
+  | "bombero" | "dinos" | "chef" | "hada" | "bailarina" | "dragones" | "buzo" | "futbolista" | "jardinera" | "doctora";
 
 const CHARACTERS: { key: Character; label: string }[] = [
   { key: "nino", label: "Niño" },
@@ -43,22 +45,52 @@ const CHARACTERS: { key: Character; label: string }[] = [
   { key: "nina2", label: "Niña 2" },
 ];
 
-const THEMES: { key: ThemeKey; label: string }[] = [
-  { key: "ninguno", label: "Normal" },
-  { key: "superheroe", label: "Superhéroe" },
-  { key: "pirata", label: "Pirata" },
-  { key: "astronauta", label: "Astronauta" },
-  { key: "mago", label: "Mago/Bruja" },
-  { key: "guerreiro", label: "Guerrero" },
-  { key: "realeza", label: "Realeza" },
-];
+// 7 looks propios por personaje (los mismos del kit): no se repiten entre personajes.
+const LOOKS: Record<Character, { key: ThemeKey; label: string }[]> = {
+  nino: [
+    { key: "ninguno", label: "Normal" },
+    { key: "superheroe", label: "Superhéroe" },
+    { key: "pirata", label: "Pirata" },
+    { key: "astronauta", label: "Astronauta" },
+    { key: "bombero", label: "Bombero" },
+    { key: "dinos", label: "Explorador" },
+    { key: "chef", label: "Chef" },
+  ],
+  nina: [
+    { key: "ninguno", label: "Normal" },
+    { key: "superheroe", label: "Superheroína" },
+    { key: "mago", label: "Maga" },
+    { key: "guerreiro", label: "Caballera" },
+    { key: "realeza", label: "Princesa" },
+    { key: "hada", label: "Hada" },
+    { key: "bailarina", label: "Bailarina" },
+  ],
+  nino2: [
+    { key: "ninguno", label: "Normal" },
+    { key: "superheroe", label: "Superhéroe" },
+    { key: "guerreiro", label: "Caballero" },
+    { key: "realeza", label: "Príncipe" },
+    { key: "dragones", label: "Dragones" },
+    { key: "buzo", label: "Buzo" },
+    { key: "futbolista", label: "Futbolista" },
+  ],
+  nina2: [
+    { key: "ninguno", label: "Normal" },
+    { key: "superheroe", label: "Superheroína" },
+    { key: "pirata", label: "Capitana" },
+    { key: "mago", label: "Brujita" },
+    { key: "realeza", label: "Princesa" },
+    { key: "jardinera", label: "Jardinera" },
+    { key: "doctora", label: "Doctora" },
+  ],
+};
 
 const file = (c: Character, t: ThemeKey) => `${c}-${t === "ninguno" ? "base" : t}.webp`;
 const lineArt = (c: Character, t: ThemeKey) => `/colorear/${file(c, t)}`;
 const mini = (c: Character, t: ThemeKey) => `/personajes/mini/${file(c, t)}`;
 
 // portada + 7 páginas para colorear + diploma
-const TOTAL_PAGES = 1 + THEMES.length + 1;
+const TOTAL_PAGES = 1 + 7 + 1;
 
 const PAGE_BREAK = { breakAfter: "page", pageBreakAfter: "always" } as const;
 
@@ -72,7 +104,7 @@ function PrintBook({ name, character }: { name: string; character: Character }) 
         <p className="text-base text-muted-foreground">7 looks para pintar con tus colores favoritos.</p>
       </section>
 
-      {THEMES.map((t) => (
+      {LOOKS[character].map((t) => (
         <section key={t.key} style={PAGE_BREAK} className="flex min-h-[250mm] flex-col items-center justify-center gap-5 text-center">
           <p className="text-sm font-semibold tracking-wide text-brand">
             PARA COLOREAR · {t.key === "ninguno" ? "LOOK NORMAL" : t.label.toUpperCase()}
@@ -89,7 +121,7 @@ function PrintBook({ name, character }: { name: string; character: Character }) 
           <h2 className="font-display text-5xl font-semibold text-foreground">Diploma de Artista</h2>
           <p className="text-lg text-muted-foreground">Se otorga con orgullo a</p>
           <p className="font-display text-6xl font-semibold text-brand-deep">{name}</p>
-          <img src={lineArt(character, "realeza")} alt="" className="max-h-[100mm] object-contain" />
+          <img src={lineArt(character, LOOKS[character][4]!.key)} alt="" className="max-h-[100mm] object-contain" />
           <p className="max-w-md text-lg text-foreground">por llenar de color cada página de su libro.</p>
           <p className="mt-4 text-sm text-muted-foreground">Fecha: ____ / ____ / ________</p>
         </div>
@@ -109,7 +141,11 @@ function StepTitle({ n, children }: { n: number; children: ReactNode }) {
 
 function ColoringApp() {
   const [character, setCharacter] = useState<Character>("nino");
-  const [theme, setTheme] = useState<ThemeKey>("superheroe");
+  const [lookElegido, setTheme] = useState<ThemeKey>("superheroe");
+  // Si el personaje nuevo no tiene el look elegido, se muestra su superhéroe.
+  const looks = LOOKS[character];
+  const look = looks.find((l) => l.key === lookElegido) ?? looks[1]!;
+  const theme = look.key;
   const [rawName, setRawName] = useState("");
   const name = formatName(rawName);
   const who = name || (character === "nina" || character === "nina2" ? "Sofía" : "Mateo");
@@ -131,7 +167,7 @@ function ColoringApp() {
               {name ? `El libro para colorear de ${name}` : "Crea el libro para colorear de tu hijo"}
             </h1>
             <p className="mt-3 leading-relaxed text-muted-foreground">
-              Su personaje en los 7 looks, en líneas para pintar, con su nombre en cada página y un diploma de artista al final: {TOTAL_PAGES} páginas listas para imprimir.
+              Su personaje en sus 7 looks, en líneas para pintar, con su nombre en cada página y un diploma de artista al final: {TOTAL_PAGES} páginas listas para imprimir.
             </p>
           </div>
 
@@ -139,7 +175,7 @@ function ColoringApp() {
             <div className="mx-auto w-full max-w-[320px] md:sticky md:top-6 md:mx-0">
               <div className="flex aspect-[5/8] flex-col items-center justify-center gap-2 rounded-3xl bg-surface p-4 text-center shadow-lift">
                 <p className="text-xs font-semibold tracking-wide text-brand">
-                  PARA COLOREAR · {theme === "ninguno" ? "LOOK NORMAL" : THEMES.find((t) => t.key === theme)!.label.toUpperCase()}
+                  PARA COLOREAR · {theme === "ninguno" ? "LOOK NORMAL" : look.label.toUpperCase()}
                 </p>
                 <p className="font-display text-xl font-semibold">Colorea a {who}</p>
                 <img src={lineArt(character, theme)} alt={`Página para colorear de ${who}`} className="min-h-0 flex-1 object-contain" />
@@ -191,7 +227,7 @@ function ColoringApp() {
               <div>
                 <StepTitle n={3}>Mira sus páginas</StepTitle>
                 <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
-                  {THEMES.map((t) => {
+                  {looks.map((t) => {
                     const active = theme === t.key;
                     return (
                       <button
