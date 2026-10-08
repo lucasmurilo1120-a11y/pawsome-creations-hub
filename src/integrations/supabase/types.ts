@@ -41,6 +41,7 @@ export type Database = {
           codigo: string
           compra_id: number | null
           creado: string
+          dispositivo: string | null
           expira: string
           fotos: number
           id: number
@@ -53,6 +54,7 @@ export type Database = {
           codigo: string
           compra_id?: number | null
           creado?: string
+          dispositivo?: string | null
           expira: string
           fotos: number
           id?: number
@@ -65,6 +67,7 @@ export type Database = {
           codigo?: string
           compra_id?: number | null
           creado?: string
+          dispositivo?: string | null
           expira?: string
           fotos?: number
           id?: number
