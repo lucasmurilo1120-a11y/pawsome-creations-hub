@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 
 // Prueba interna de la IA (protegida con clave; el hash está en config.prueba_ia_hash).
 // GET /api/prueba-ia?clave=...&modelos=1            -> lista de modelos de imagen
-// GET /api/prueba-ia?clave=...&modelo=...&foto=URL  -> crea el personaje base con esa foto
+// GET /api/prueba-ia?clave=...&foto=URL&genero=nina&version=v1|v2&ver=1 -> crea el personaje base
+//   (el mismo camino que usa la app; ver=1 devuelve la imagen)
 // El resultado se guarda en public.pruebas_ia. Se puede borrar esta ruta después.
 
 const FOTO_PRUEBA =
@@ -30,26 +31,23 @@ export const Route = createFileRoute("/api/prueba-ia")({
 
         const modelo = url.searchParams.get("modelo") ?? undefined;
         const genero = url.searchParams.get("genero") === "nina" ? "nina" : "nino";
+        const version = url.searchParams.get("version") === "v1" ? "v1" : "v2";
         const foto = url.searchParams.get("foto") ?? FOTO_PRUEBA;
         const inicio = Date.now();
         try {
-          const prompt =
-            "Create a full-body character for a children's paper-doll kit, based on the person in the FIRST image (a photo). " +
-            "Draw it in EXACTLY the same illustration style as the SECOND image: same proportions (big head, big expressive eyes, small body), " +
-            "same clean outline, same soft shading and color palette, same front-facing standing pose with arms slightly open, " +
-            "plain white background and nothing else in the image. Keep the person's real features so the family recognizes them at first sight: " +
-            "face shape, skin tone, eye color and shape, eyebrows, nose, smile, hair color, hair length, hairstyle and texture, glasses, freckles and beard if any. " +
-            "Clothing exactly like the SECOND image. No text.";
+          const { crearBaseDesdeFoto } = await import("@/lib/carita.server");
           const fotoData = await ia.urlADataUrl(foto);
-          const estilo = await ia.urlADataUrl(`${url.origin}/personajes/${genero}-base.webp`);
-          const imagen = await ia.generarImagen(prompt, [fotoData, estilo], modelo);
+          const { imagen, descripcion } = await crearBaseDesdeFoto(fotoData, genero, { modelo, version });
           const seg = ((Date.now() - inicio) / 1000).toFixed(1);
-          const { data } = await db
-            .from("pruebas_ia")
-            .insert({ nota: `ok modelo=${modelo ?? "config"} ${seg}s`, imagen })
-            .select("id")
-            .single();
-          return new Response(`OK prueba ${(data as { id: number } | null)?.id} en ${seg}s con ${modelo ?? "modelo de config"}`, {
+          const nota = `ok ${version} modelo=${modelo ?? "config"} ${seg}s | ${descripcion ?? "sin descripción"}`.slice(0, 1000);
+          const { data } = await db.from("pruebas_ia").insert({ nota, imagen }).select("id").single();
+          if (url.searchParams.get("ver")) {
+            const { bytes, tipo } = ia.dataUrlABytes(imagen);
+            return new Response(bytes.buffer as ArrayBuffer, {
+              headers: { "Content-Type": tipo, "X-Prueba": String((data as { id: number } | null)?.id ?? ""), "X-Nota": encodeURIComponent(nota) },
+            });
+          }
+          return new Response(`OK prueba ${(data as { id: number } | null)?.id}: ${nota}`, {
             headers: { "Content-Type": "text/plain; charset=utf-8" },
           });
         } catch (e) {

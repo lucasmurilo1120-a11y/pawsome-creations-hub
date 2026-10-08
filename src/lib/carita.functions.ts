@@ -165,9 +165,7 @@ export const crearPersonajeBase = createServerFn({ method: "POST" })
       { onConflict: "acceso_id,slot" },
     );
     try {
-      const { generarImagen, urlADataUrl } = await import("@/lib/ia.server");
-      const estilo = await urlADataUrl(s.referencia(data.genero, "base"));
-      const imagen = await generarImagen(s.PROMPT_BASE, [data.foto, estilo]);
+      const { imagen } = await s.crearBaseDesdeFoto(data.foto, data.genero);
       const path = await s.guardarImagen(acceso.id, data.slot, "ninguno", imagen);
       // Una foto nueva reemplaza los looks anteriores de este personaje.
       await db
