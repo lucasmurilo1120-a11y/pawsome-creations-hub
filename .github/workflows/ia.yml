@@ -1,0 +1,36 @@
+name: ia
+on:
+  push:
+    branches: [ci-ia]
+permissions:
+  contents: write
+jobs:
+  ia:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: pruebas
+        run: |
+          mkdir -p r && cd r
+          APP=https://pawsome-creations-hub.lovable.app/api/prueba-ia
+          K=n4smh7uamndcmerpk6ghyf8ru54p
+          RAW=https://raw.githubusercontent.com/lucasmurilo1120-a11y/pawsome-creations-hub
+          curl -sS -i "$APP?clave=$K&modelos=1" > modelos.txt 2>&1 || true
+          prueba() { # nombre foto genero version
+            curl -sS -m 180 -D "$1.headers" -o "$1.png" "$APP?clave=$K&ver=1&foto=$2&genero=$3&version=$4" -w "$1 %{http_code} %{time_total}s\n" >> resumen.txt 2>&1 || echo "$1 fallo" >> resumen.txt
+          }
+          prueba nino-v1 "$RAW/marketing-assets/teste/rosto-menino.jpg" nino v1 &
+          prueba nino-v2 "$RAW/marketing-assets/teste/rosto-menino.jpg" nino v2 &
+          prueba mama1-v1 "$RAW/main/src/assets/testimonio-1.jpg" nina v1 &
+          wait
+          prueba mama1-v2 "$RAW/main/src/assets/testimonio-1.jpg" nina v2 &
+          prueba mama3-v2 "$RAW/main/src/assets/testimonio-3.jpg" nina v2 &
+          wait
+          cat resumen.txt; for h in *.headers; do echo "== $h"; grep -i "x-nota\|content-type\|HTTP/" $h; done
+      - name: publicar
+        if: always()
+        run: |
+          cd r && git init -q && git checkout -q -b ci-ia-${{ github.run_id }}
+          git config user.name ci && git config user.email ci@users.noreply.github.com
+          git add -A && git commit -q -m "ia ${{ github.run_id }}"
+          git push -q "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:ci-ia-${{ github.run_id }}
