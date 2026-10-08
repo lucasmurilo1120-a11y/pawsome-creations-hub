@@ -1,0 +1,96 @@
+[
+  {
+    "k": "pagina-una:codigo",
+    "v": {
+      "codigo": "SEWNV8",
+      "errores": []
+    },
+    "t": "2026-10-08T02:58:29.477Z"
+  },
+  {
+    "k": "pagina-una:recarga",
+    "v": "SEWNV8",
+    "t": "2026-10-08T02:58:30.674Z"
+  },
+  {
+    "k": "pagina-familia:codigo",
+    "v": {
+      "codigo": "WXZ9RY",
+      "errores": []
+    },
+    "t": "2026-10-08T02:58:34.238Z"
+  },
+  {
+    "k": "pagina-familia:recarga",
+    "v": "WXZ9RY",
+    "t": "2026-10-08T02:58:35.459Z"
+  },
+  {
+    "k": "canje:incorrecto",
+    "v": "Código incorrecto. Revisa que esté igual al de tu página de códigos.",
+    "t": "2026-10-08T02:58:40.039Z"
+  },
+  {
+    "k": "canje:correcto",
+    "v": "¡Código correcto! Desbloqueaste 1 personaje con su carita.",
+    "t": "2026-10-08T02:58:42.029Z"
+  },
+  {
+    "k": "creacion",
+    "v": {
+      "fin": "error",
+      "segundos": 3
+    },
+    "t": "2026-10-08T02:58:47.296Z"
+  },
+  {
+    "k": "creacion:mensaje",
+    "v": "No salió esta vez\n\nLa creación de personajes está en pausa. Inténtalo de nuevo más tarde y, si sigue así, escríbenos a lucasmurilo1120@gmail.com. Este intento no se descontó.\n\nIntentar de nuevo\nCerrar",
+    "t": "2026-10-08T02:58:47.298Z"
+  },
+  {
+    "k": "imagenes",
+    "v": 0,
+    "t": "2026-10-08T02:58:47.744Z"
+  },
+  {
+    "k": "canje:enlace_familia",
+    "v": "¡Código correcto! Desbloqueaste 4 personajes con su carita.",
+    "t": "2026-10-08T02:58:49.877Z"
+  },
+  {
+    "k": "badge",
+    "v": "Tengo un código\n5",
+    "t": "2026-10-08T02:58:49.882Z"
+  },
+  {
+    "k": "canje:otro_navegador",
+    "v": "¡Listo! Recuperaste tus personajes en este navegador.",
+    "t": "2026-10-08T02:58:55.188Z"
+  },
+  {
+    "k": "badge_otro_navegador",
+    "v": "Tengo un código\n5",
+    "t": "2026-10-08T02:58:55.192Z"
+  },
+  {
+    "k": "pdf",
+    "v": "ok",
+    "t": "2026-10-08T02:58:57.988Z"
+  },
+  {
+    "k": "aviso_app",
+    "v": "Abre esta página en Chrome o Safari\n\nEl navegador de esta app (Instagram, Facebook u otra) no deja guardar el PDF. Toca los tres puntos de arriba y elige «Abrir en el navegador», o copia el enlace y p",
+    "t": "2026-10-08T02:59:00.240Z"
+  },
+  {
+    "k": "errores_consola",
+    "v": [],
+    "t": "2026-10-08T02:59:00.413Z"
+  },
+  {
+    "k": "codigo_familia_sin_usar",
+    "v": "WXZ9RY",
+    "t": "2026-10-08T02:59:00.414Z"
+  }
+]
