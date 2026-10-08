@@ -1,0 +1,116 @@
+[
+  {
+    "k": "pagina-una:codigo",
+    "v": {
+      "codigo": "5UQFDH",
+      "errores": []
+    },
+    "t": "2026-10-08T03:00:36.616Z"
+  },
+  {
+    "k": "pagina-una:recarga",
+    "v": "5UQFDH",
+    "t": "2026-10-08T03:00:37.756Z"
+  },
+  {
+    "k": "pagina-familia:codigo",
+    "v": {
+      "codigo": "JC5ZG9",
+      "errores": []
+    },
+    "t": "2026-10-08T03:00:40.648Z"
+  },
+  {
+    "k": "pagina-familia:recarga",
+    "v": "JC5ZG9",
+    "t": "2026-10-08T03:00:41.636Z"
+  },
+  {
+    "k": "esquina",
+    "v": {
+      "out": [
+        "<path d=\"M10.646 4.646a.5.5 0 1 1 .707.708L8.707 8l2.646 2.646a.5.5 0 1 1-.707.707L8 8.707l-2.646 2.646a.5.5 0 1 1-.708-.707L7.293 8 4.646 5.354a.5.5 0 1 1 .708-.708L8 7.293l2.646-2.647Z\"></path>",
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" fill=\"none\" viewBox=\"0 0 16 16\" aria-hidden=\"true\">\n\t\t\t<path d=\"M10.646 4.646a.5.5 0 1 1 .707.708L8.707 8l2.646 2.646a.5.5 0 1 1-.707.707L8 8.707l-2.646 2.646a.5.5 0 1 1-.708-.707L7.293 8 4.646 5.354a.5.5 0 1 1 .708-.708L8 7.293l2.646-2.",
+        "<button id=\"lovable-badge-close\" aria-label=\"Dismiss\" title=\"Dismiss\" type=\"button\">\n\t\t<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" fill=\"none\" viewBox=\"0 0 16 16\" aria-hidden=\"true\">\n\t\t\t<path d=\"M10.646 4.646a.5.5 0 1 1 .707.708L8.707 8l2.646 2.646a.5.5 0 1 1-.707.707L8 8.707l-2.6",
+        "<aside id=\"lovable-badge\" role=\"complementary\" dir=\"ltr\" lang=\"en\" aria-label=\"Edit with Lovable\">\n\t<a id=\"lovable-badge-cta\" target=\"_blank\" href=\"https://lovable.dev/projects/lovp_35vbsqjn4z8xmr0q8jr5sjvjky?utm_source=lovable-badge\" rel=\"noopener nofollow\" aria-label=\"Edit with Lovable\">\n\t\t<span i"
+      ],
+      "sombras": [],
+      "body": [
+        "MAIN#.min-h-screen bg-background pb-28 print:hidden sm:pb-0",
+        "DIV#.fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 p-3 backdrop-blur-md print:hidden sm:hidden",
+        "SCRIPT#.",
+        "ASIDE#lovable-badge.",
+        "SCRIPT#."
+      ]
+    },
+    "t": "2026-10-08T03:00:43.273Z"
+  },
+  {
+    "k": "canje:incorrecto",
+    "v": "Código incorrecto. Revisa que esté igual al de tu página de códigos.",
+    "t": "2026-10-08T03:00:44.655Z"
+  },
+  {
+    "k": "canje:correcto",
+    "v": "¡Código correcto! Desbloqueaste 1 personaje con su carita.",
+    "t": "2026-10-08T03:00:46.082Z"
+  },
+  {
+    "k": "creacion",
+    "v": {
+      "fin": "error",
+      "segundos": 3
+    },
+    "t": "2026-10-08T03:00:51.142Z"
+  },
+  {
+    "k": "creacion:mensaje",
+    "v": "No salió esta vez\n\nLa creación de personajes está en pausa. Inténtalo de nuevo más tarde y, si sigue así, escríbenos a lucasmurilo1120@gmail.com. Este intento no se descontó.\n\nIntentar de nuevo\nCerrar",
+    "t": "2026-10-08T03:00:51.144Z"
+  },
+  {
+    "k": "imagenes",
+    "v": 0,
+    "t": "2026-10-08T03:00:51.410Z"
+  },
+  {
+    "k": "canje:enlace_familia",
+    "v": "¡Código correcto! Desbloqueaste 4 personajes con su carita.",
+    "t": "2026-10-08T03:00:53.216Z"
+  },
+  {
+    "k": "badge",
+    "v": "Tengo un código\n5",
+    "t": "2026-10-08T03:00:53.219Z"
+  },
+  {
+    "k": "canje:otro_navegador",
+    "v": "¡Listo! Recuperaste tus personajes en este navegador.",
+    "t": "2026-10-08T03:00:58.070Z"
+  },
+  {
+    "k": "badge_otro_navegador",
+    "v": "Tengo un código\n5",
+    "t": "2026-10-08T03:00:58.072Z"
+  },
+  {
+    "k": "pdf",
+    "v": "ok",
+    "t": "2026-10-08T03:01:00.782Z"
+  },
+  {
+    "k": "aviso_app",
+    "v": "Abre esta página en Chrome o Safari\n\nEl navegador de esta app (Instagram, Facebook u otra) no deja guardar el PDF. Toca los tres puntos de arriba y elige «Abrir en el navegador», o copia el enlace y p",
+    "t": "2026-10-08T03:01:02.626Z"
+  },
+  {
+    "k": "errores_consola",
+    "v": [],
+    "t": "2026-10-08T03:01:02.794Z"
+  },
+  {
+    "k": "codigo_familia_sin_usar",
+    "v": "JC5ZG9",
+    "t": "2026-10-08T03:01:02.794Z"
+  }
+]
