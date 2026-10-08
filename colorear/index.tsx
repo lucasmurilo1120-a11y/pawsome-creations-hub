@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 // Producto extra de Papelitos (order bump): libro para colorear con el nombre del niño.
 const BRAND = "Papelitos";
-const PRODUCT = "Papelitos para colorear";
+const PRODUCT = "MiniMundos Color";
 
 // "  mateo   josé " -> "Mateo José": así el nombre siempre se ve bien impreso.
 function formatName(raw: string): string {
@@ -167,7 +167,7 @@ function ColoringApp() {
               {name ? `El libro para colorear de ${name}` : "Crea el libro para colorear de tu hijo"}
             </h1>
             <p className="mt-3 leading-relaxed text-muted-foreground">
-              Su personaje en sus 7 looks, en líneas para pintar, con su nombre en cada página y un diploma de artista al final: {TOTAL_PAGES} páginas listas para imprimir.
+              Su personaje en sus 7 looks, en líneas para pintar, con su nombre en cada página y un diploma de artista al final: {TOTAL_PAGES} páginas listas para imprimir. Puedes armar un libro con cada uno de los 4 personajes del kit.
             </p>
           </div>
 

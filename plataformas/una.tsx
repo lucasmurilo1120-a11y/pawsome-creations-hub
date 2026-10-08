@@ -34,21 +34,21 @@ export const Route = createFileRoute("/")({
 
 type Respuesta =
   | { ok: true; codigo: string; expira: string; fotos: number; minutos: number; nombre: string }
-  | { ok: false; error: "token" | "pide_email" | "sin_compra" | "agotado" | "ya_entregado" | "limite" | "fallo" };
+  | { ok: false; error: "token" | "pide_email" | "sin_compra" | "agotado" | "ya_entregado" | "limite" | "fallo"; usado?: string };
 
 type Estado =
   | { tipo: "cargando" }
   | { tipo: "codigo"; codigo: string; expira: number; minutos: number }
   | { tipo: "email"; mensaje?: string }
-  | { tipo: "error"; mensaje: string; reintentar: boolean };
+  | { tipo: "error"; mensaje: string; reintentar: boolean; usado?: string | undefined };
 
 const MENSAJES: Record<Exclude<Respuesta, { ok: true }>["error"], string> = {
   token: "Esta página no está activa. Escríbenos y lo resolvemos.",
   pide_email: "",
   sin_compra: "No encontramos una compra con ese e-mail. Revisa que sea el mismo que usaste al pagar.",
-  agotado: "Ya canjeaste todos los códigos de tu compra. Tus personajes están en la app de Papelitos.",
+  agotado: "Ya canjeaste todos los códigos de tu compra. Tus personajes están en la app de Papelitos, en el navegador donde los canjeaste.",
   ya_entregado:
-    "Tu código ya se canjeó. Tus personajes están en la app de Papelitos, en el celular donde lo canjeaste. Si cambiaste de celular o no los ves, escríbenos y te ayudamos.",
+    "Tu código ya se canjeó. Tus personajes están en la app de Papelitos, en el navegador donde lo canjeaste.",
   limite: "Hubo demasiados pedidos seguidos. Espera unos minutos y vuelve a intentar.",
   fallo: "No pudimos generar tu código ahora. Revisa tu conexión y vuelve a intentar.",
 };
@@ -119,9 +119,9 @@ function PaginaCodigo() {
       } else if (r.error === "pide_email") {
         setEstado({ tipo: "email" });
       } else if (r.error === "sin_compra" || r.error === "agotado") {
-        setEstado(r.error === "sin_compra" ? { tipo: "email", mensaje: MENSAJES.sin_compra } : { tipo: "error", mensaje: MENSAJES.agotado, reintentar: false });
+        setEstado(r.error === "sin_compra" ? { tipo: "email", mensaje: MENSAJES.sin_compra } : { tipo: "error", mensaje: MENSAJES.agotado, reintentar: false, usado: r.usado });
       } else {
-        setEstado({ tipo: "error", mensaje: MENSAJES[r.error], reintentar: r.error !== "ya_entregado" && r.error !== "token" });
+        setEstado({ tipo: "error", mensaje: MENSAJES[r.error], reintentar: r.error !== "ya_entregado" && r.error !== "token", usado: r.usado });
       }
     } catch {
       setEstado({ tipo: "error", mensaje: MENSAJES.fallo, reintentar: true });
@@ -206,8 +206,6 @@ function PaginaCodigo() {
               </p>
               <a
                 href={`${APP_URL}/?codigo=${estado.codigo}`}
-                target="_blank"
-                rel="noopener"
                 className="mt-5 inline-flex min-h-14 w-full items-center justify-center rounded-full px-6 text-base font-bold text-white transition-transform active:scale-[0.97]"
                 style={{ background: C.marca }}
               >
@@ -273,6 +271,20 @@ function PaginaCodigo() {
                   Intentar de nuevo
                 </button>
               )}
+              {estado.usado && (
+                <div className="mt-4">
+                  <p className="text-sm" style={{ color: C.gris }}>
+                    ¿No ves tus personajes en este navegador o en otro celular? Usa de nuevo tu código <b style={{ color: C.tinta }}>{estado.usado}</b>: los recupera.
+                  </p>
+                  <a
+                    href={`${APP_URL}/?codigo=${estado.usado}`}
+                    className="mt-3 inline-flex min-h-12 w-full items-center justify-center rounded-full px-6 text-base font-bold text-white"
+                    style={{ background: C.marca }}
+                  >
+                    Recuperar mis personajes
+                  </a>
+                </div>
+              )}
             </div>
           )}
         </section>
@@ -285,8 +297,13 @@ function PaginaCodigo() {
             {[
               <>Toca <b>Usar este código en la app</b>: se abre la app de Papelitos (la misma de tu kit) y el código se canjea solo. Verás un mensaje verde.</>,
               <>¿No se abrió? Toca <b>Copiar código</b>, abre la app con el botón de abajo y, arriba a la derecha, toca <b>Tengo un código</b>, pégalo y toca <b>Canjear</b>.</>,
-              <>Toca <b>Crear su personaje con una foto</b>, elige el estilo (niño o niña) y <b>toma o sube una foto</b> de frente y con buena luz.</>,
-              <>En uno o dos minutos aparece su personaje con sus 7 looks. Elígelo en “Elige su personaje” y descarga su kit.</>,
+              <>Toca <b>Crear su personaje con una foto</b>, elige el estilo (niño o niña), marca la casilla de permiso y toca <b>Continuar</b>.</>,
+              <>Toca <b>Tomar foto</b> o <b>Subir una foto</b> (de frente y con buena luz) y después <b>Crear el personaje</b>.</>,
+              PLATAFORMA.personajes > 1 ? (
+                <>En uno o dos minutos aparece con sus 7 looks. Para los demás, toca <b>Crear con foto</b> en «Personajes con su carita» y repite con cada uno.</>
+              ) : (
+                <>En uno o dos minutos aparece su personaje con sus 7 looks. Elígelo en «Elige su personaje» y descarga su kit.</>
+              ),
             ].map((paso, i) => (
               <li key={i} className="flex gap-3 rounded-2xl bg-white p-4" style={{ border: `1px solid ${C.borde}` }}>
                 <span className="grid size-7 shrink-0 place-items-center rounded-full text-sm font-bold text-white" style={{ background: C.marca }}>
@@ -312,7 +329,7 @@ function PaginaCodigo() {
             • Este código desbloquea <b style={{ color: C.tinta }}>{PLATAFORMA.personajes === 1 ? "1 personaje" : `${PLATAFORMA.personajes} personajes`}</b> con su carita. Vale 15 minutos y se usa una sola vez.
           </p>
           <p>• La foto se usa solo para crear el dibujo y no se guarda.</p>
-          <p>• Tus personajes quedan en el celular donde canjeaste el código. En la app puedes copiar tu enlace para abrirlos en otro dispositivo.</p>
+          <p>• Tus personajes quedan en el navegador donde canjeaste el código. Para abrirlos en otro, copia tu enlace en la app o vuelve a usar este mismo código.</p>
           <p>
             • ¿Algo no funcionó? Escríbenos a <span className="font-semibold select-all" style={{ color: C.tinta }}>{SOPORTE}</span>.
           </p>
