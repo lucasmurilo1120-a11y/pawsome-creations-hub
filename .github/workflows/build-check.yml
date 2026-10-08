@@ -18,13 +18,32 @@ jobs:
           bun run build > build.log 2>&1
           echo "BUILD_EXIT=$?" >> build.log
           cat build.log
+      - name: smoke
+        if: always()
+        run: |
+          set +e
+          ls -la .output .output/server | head -40 > smoke.log 2>&1
+          cat .output/server/wrangler.json >> smoke.log 2>&1
+          (cd .output && timeout 120 npx -y wrangler@4 dev --port 8787 --config server/wrangler.json > ../wrangler.log 2>&1 &)
+          for i in $(seq 1 40); do curl -s -o /dev/null http://127.0.0.1:8787/ && break; sleep 2; done
+          for path in "/" "/api/codigo" "/api/prueba-ia?clave=x" "/api/hotmart" "/personajes/nino-bombero.webp"; do
+            echo "== GET $path" >> smoke.log
+            curl -s -o body.txt -w "%{http_code}\n" "http://127.0.0.1:8787$path" >> smoke.log
+            head -c 300 body.txt >> smoke.log; echo >> smoke.log
+          done
+          echo "== POST /api/codigo" >> smoke.log
+          curl -s -X POST -H "content-type: application/json" -d '{"token":"x"}' -w "\n%{http_code}\n" http://127.0.0.1:8787/api/codigo >> smoke.log
+          echo "== OPTIONS /api/codigo" >> smoke.log
+          curl -s -X OPTIONS -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8787/api/codigo >> smoke.log
+          tail -40 wrangler.log >> smoke.log
+          cat smoke.log
       - name: report
         if: always()
         run: |
           python3 - <<'PY'
           import re
           def enc(s): return s.replace('%','%25').replace('\r','').replace('\n','%0A')
-          for name in ['install.log','build.log']:
+          for name in ['smoke.log','build.log']:
               try: txt=open(name,encoding='utf-8',errors='replace').read()
               except Exception as e: txt=str(e)
               txt=re.sub(r'\x1b\[[0-9;]*m','',txt)
