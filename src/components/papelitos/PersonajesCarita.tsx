@@ -3,7 +3,7 @@ import { Copy, Plus, Trash2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CrearConFoto, completarLooksCarita } from "@/components/papelitos/CrearConFoto";
 import { borrarPersonajeCarita, looksCarita, type PersonajeCarita } from "@/lib/carita.functions";
-import { enlaceDeAcceso } from "@/lib/carita.client";
+import { enlaceDeAcceso } from "@/lib/carita-acceso";
 import { CHECKOUT_PACK_FAMILIA, MAX_INTENTOS_POR_FOTO } from "@/lib/papelitos-config";
 
 // Panel "Con su carita": un lugar por cada personaje desbloqueado con código.

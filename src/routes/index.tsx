@@ -18,7 +18,7 @@ import {
 } from "@/lib/kit";
 import { CodigoBoton } from "@/components/papelitos/CodigoBoton";
 import { PersonajesCarita } from "@/components/papelitos/PersonajesCarita";
-import { useCarita } from "@/lib/carita.client";
+import { useCarita } from "@/lib/carita-acceso";
 import type { PersonajeCarita } from "@/lib/carita.functions";
 
 // Nombre de la marca en un solo lugar: cambiarlo acá lo cambia en toda la app.
