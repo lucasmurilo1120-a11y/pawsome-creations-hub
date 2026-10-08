@@ -77,7 +77,8 @@ export async function registrarIntento(ip: string, tipo: string, exito: boolean)
 
 // --- Imágenes de "Con su carita" -------------------------------------------------
 
-export const PROMPT_BASE =
+// v1 (oct 2026): la IA copiaba el tono de piel y la cara del personaje de referencia.
+export const PROMPT_BASE_V1 =
   "Create a full-body character for a children's paper-doll kit, based on the person in the FIRST image (a photo). " +
   "Draw it in EXACTLY the same illustration style as the SECOND image: same proportions (big head, big expressive eyes, small body), " +
   "same clean outline, same soft shading and color palette, same front-facing standing pose with arms slightly open, " +
@@ -85,10 +86,43 @@ export const PROMPT_BASE =
   "face shape, skin tone, eye color and shape, eyebrows, nose, smile, hair color, hair length, hairstyle and texture, glasses, freckles and beard if any. " +
   "Clothing exactly like the SECOND image. No text.";
 
+// v2: la segunda imagen es SOLO referencia de estilo y ropa; el parecido sale de la foto
+// (más una descripción de rasgos que la IA hace antes de dibujar).
+export function promptBase(descripcion: string | null): string {
+  return (
+    "Turn the person in the FIRST image (a real photo) into a full-body character for a children's paper-doll kit. " +
+    "The SECOND image is ONLY a style and clothing reference: copy its drawing style (big head, big expressive eyes, small body, " +
+    "clean dark outline, soft cel shading, front-facing standing pose with arms slightly open, plain white background) and its clothes. " +
+    "Do NOT copy the face, skin tone, hair or eye color of the SECOND image. " +
+    "The likeness comes ONLY from the FIRST image: match the person's exact skin tone (lighter or darker, as in the photo), " +
+    "hair color, hair length, hair texture and hairstyle, face shape, eye color and shape, eyebrows, nose, smile, " +
+    "and any glasses, freckles, dimples, beard or mustache, so the family recognizes them at first sight. " +
+    (descripcion ? `Appearance of the person in the FIRST image: ${descripcion} ` : "") +
+    "One character only, nothing else in the image, no text."
+  );
+}
+
 export const PROMPT_LOOK =
   "Dress the character from the FIRST image in the costume shown in the SECOND image. " +
   "Keep the character's face, hair, skin tone and proportions exactly as in the FIRST image, and keep the same illustration style, " +
-  "front-facing standing pose and plain white background. Copy the costume, accessories, props and colors from the SECOND image. No text.";
+  "front-facing standing pose and plain white background. Copy ONLY the costume, accessories, props and colors from the SECOND image: " +
+  "do NOT copy the face, skin tone, hair or eye color of the SECOND image. No text.";
+
+// Foto -> personaje base (lo usan la app y la prueba interna, así se prueba lo mismo que ve el cliente).
+export async function crearBaseDesdeFoto(
+  foto: string,
+  genero: "nino" | "nina",
+  opciones: { modelo?: string | undefined; version?: "v1" | "v2" | undefined } = {},
+): Promise<{ imagen: string; descripcion: string | null }> {
+  const ia = await import("@/lib/ia.server");
+  const estilo = await ia.urlADataUrl(referencia(genero, "base"));
+  if (opciones.version === "v1") {
+    return { imagen: await ia.generarImagen(PROMPT_BASE_V1, [foto, estilo], opciones.modelo), descripcion: null };
+  }
+  const descripcion = await ia.describirPersona(foto).catch(() => null);
+  const imagen = await ia.generarImagen(promptBase(descripcion), [foto, estilo], opciones.modelo);
+  return { imagen, descripcion };
+}
 
 function origenDelPedido(): string {
   const fijo = process.env["APP_ORIGIN"];
