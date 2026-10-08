@@ -1,0 +1,29 @@
+name: e2e
+on:
+  push:
+    branches: [ci-e2e]
+permissions:
+  contents: write
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: deps
+        run: |
+          mkdir -p /tmp/e2e && cp .github/e2e/flujo.mjs /tmp/e2e/ && cd /tmp/e2e
+          npm init -y >/dev/null && npm i playwright@1.49.1 >/dev/null 2>&1 && npx playwright install --with-deps chromium >/dev/null 2>&1
+          curl -sSL -o foto.jpg https://raw.githubusercontent.com/lucasmurilo1120-a11y/pawsome-creations-hub/marketing-assets/teste/rosto-menino.jpg
+          ls -la
+      - name: flujo
+        run: cd /tmp/e2e && node flujo.mjs
+      - name: publicar resultados
+        if: always()
+        run: |
+          cd /tmp/e2e && mkdir -p pub && cp -r resultados pub/ 2>/dev/null; cd pub
+          git init -q && git checkout -q -b ci-results-${{ github.run_id }}
+          git config user.name "ci" && git config user.email "ci@users.noreply.github.com"
+          git add -A && git commit -q -m "Resultados e2e ${{ github.run_id }}"
+          git push -q "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:ci-results-${{ github.run_id }}
+          echo "::notice title=resultados::ci-results-${{ github.run_id }}"
