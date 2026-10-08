@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { Camera, Download, Printer, Sparkles } from "lucide-react";
+import { Camera, Copy, Download, Printer, Sparkles, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +18,7 @@ import {
 } from "@/lib/kit";
 import { CodigoBoton } from "@/components/papelitos/CodigoBoton";
 import { PersonajesCarita } from "@/components/papelitos/PersonajesCarita";
-import { useCarita } from "@/lib/carita-acceso";
+import { enlaceDeAcceso, useCarita } from "@/lib/carita-acceso";
 import type { PersonajeCarita } from "@/lib/carita.functions";
 
 // Nombre de la marca en un solo lugar: cambiarlo acá lo cambia en toda la app.
@@ -142,8 +142,15 @@ function PrintKit({ name, hero }: { name: string; hero: Hero }) {
             {t.key === "ninguno" ? "LOOK NORMAL" : t.label.toUpperCase()}
           </p>
           <h2 className="font-display text-3xl font-semibold text-foreground">{name}</h2>
-          <img src={img(hero, t.key)} alt="" className="max-h-[200mm] object-contain" />
-          <p className="text-sm text-muted-foreground">Recorta siguiendo el borde del dibujo.</p>
+          <div className="flex flex-col items-center">
+            <img src={img(hero, t.key)} alt="" className="max-h-[178mm] object-contain" />
+            {/* Base para que se pare: se recorta junto con el personaje y se dobla hacia atrás. */}
+            <div className="w-[64mm] border-t-2 border-dashed border-foreground/60" />
+            <div className="flex h-[20mm] w-[64mm] items-center justify-center rounded-b-lg border-2 border-t-0 border-foreground/40 px-3 text-center text-[9pt] leading-tight text-muted-foreground">
+              Base · dobla hacia atrás por la línea punteada
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground">Recorta por el borde del dibujo sin separar la base de abajo. Dobla la base hacia atrás y se para solo.</p>
         </section>
       ))}
 
@@ -311,8 +318,34 @@ function CreatorApp() {
     window.setTimeout(() => document.getElementById("carita")?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
   }
 
-  function imprimir() {
+  // Navegadores dentro de apps (Instagram, Facebook, TikTok…) no abren el diálogo para guardar el PDF.
+  const [dentroDeApp, setDentroDeApp] = useState(false);
+  const [avisoApp, setAvisoApp] = useState(false);
+  const [enlaceCopiado, setEnlaceCopiado] = useState(false);
+  useEffect(() => {
+    const ua = navigator.userAgent || "";
+    setDentroDeApp(/Instagram|FBAN|FBAV|FB_IAB|FBIOS|Line\/|MicroMessenger|Snapchat|TikTok|musical_ly|BytedanceWebview|; wv\)/i.test(ua));
+  }, []);
+
+  function imprimir(forzar = false) {
+    if (dentroDeApp && !forzar) {
+      setAvisoApp(true);
+      return;
+    }
+    setAvisoApp(false);
     window.setTimeout(() => window.print(), 60);
+  }
+
+  async function copiarEnlaceApp() {
+    // Con el acceso incluido, sus personajes con carita también aparecen en el otro navegador.
+    const enlace = carita.token ? enlaceDeAcceso(carita.token) : window.location.origin;
+    try {
+      await navigator.clipboard.writeText(enlace);
+      setEnlaceCopiado(true);
+      setTimeout(() => setEnlaceCopiado(false), 2500);
+    } catch {
+      window.prompt("Copia este enlace y ábrelo en Chrome o Safari:", enlace);
+    }
   }
 
   return (
@@ -435,7 +468,7 @@ function CreatorApp() {
               </div>
             </div>
             <div className="mt-5 flex flex-wrap items-center gap-3">
-              <Button size="lg" className="shadow-cta" disabled={!name} onClick={imprimir}>
+              <Button size="lg" className="shadow-cta" disabled={!name} onClick={() => imprimir()}>
                 <Download className="size-4" />
                 {downloadLabel}
               </Button>
@@ -482,9 +515,32 @@ function CreatorApp() {
         </section>
       </main>
 
+      {avisoApp && (
+        <div role="dialog" aria-label="Abrir en el navegador" className="fixed inset-x-3 bottom-20 z-50 rounded-3xl border border-border bg-surface p-5 shadow-lift print:hidden sm:bottom-6 sm:left-auto sm:right-6 sm:w-[380px]">
+          <div className="flex items-start justify-between gap-3">
+            <p className="font-display text-lg font-semibold text-foreground">Abre esta página en Chrome o Safari</p>
+            <button type="button" onClick={() => setAvisoApp(false)} className="grid size-9 shrink-0 place-items-center rounded-full hover:bg-mist/60" aria-label="Cerrar">
+              <X className="size-4" aria-hidden />
+            </button>
+          </div>
+          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+            El navegador de esta app (Instagram, Facebook u otra) no deja guardar el PDF. Toca los tres puntos de arriba y elige «Abrir en el navegador», o copia el enlace y pégalo en Chrome o Safari.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button size="lg" className="h-12" onClick={copiarEnlaceApp}>
+              <Copy className="size-4" aria-hidden />
+              {enlaceCopiado ? "¡Enlace copiado!" : "Copiar enlace"}
+            </Button>
+            <Button size="lg" variant="ghost" className="h-12" onClick={() => imprimir(true)}>
+              Intentar igual
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Botón fijo en el celular */}
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 p-3 backdrop-blur-md print:hidden sm:hidden">
-        <Button size="lg" className="h-12 w-full shadow-cta" disabled={!name} onClick={imprimir}>
+        <Button size="lg" className="h-12 w-full shadow-cta" disabled={!name} onClick={() => imprimir()}>
           <Download className="size-4" />
           {name ? downloadLabel : "Escribe su nombre para descargar"}
         </Button>

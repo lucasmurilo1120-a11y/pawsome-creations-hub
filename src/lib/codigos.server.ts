@@ -17,7 +17,9 @@ import { admin, aleatorio, sha256 } from "@/lib/carita.server";
 
 export type ResultadoEmision =
   | { ok: true; codigo: string; expira: string; fotos: number; minutos: number; nombre: string }
-  | { ok: false; error: "token" | "pide_email" | "sin_compra" | "agotado" | "ya_entregado" | "limite" | "fallo" };
+  | { ok: false; error: "token" | "pide_email" | "sin_compra" | "agotado" | "ya_entregado" | "limite" | "fallo"; usado?: string | undefined };
+// `usado`: el último código ya canjeado de ese dispositivo (o de esa compra), para que la
+// página lo muestre: pegarlo de nuevo en la app recupera los personajes en otro navegador.
 
 type Plataforma = { id: string; nombre: string; fotos: number; clave_hotmart: string; verificar_compra: boolean; minutos_validez: number };
 
@@ -95,7 +97,17 @@ export async function emitirCodigo(token: unknown, emailRaw: unknown, ip: string
       .select("id", { count: "exact", head: true })
       .in("compra_id", ids)
       .not("usado_en", "is", null);
-    if ((usados ?? 0) >= total) return { ok: false, error: "agotado" };
+    if ((usados ?? 0) >= total) {
+      const { data: ultimo } = await db
+        .from("codigos")
+        .select("codigo")
+        .in("compra_id", ids)
+        .not("usado_en", "is", null)
+        .order("usado_en", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return { ok: false, error: "agotado", usado: (ultimo as { codigo: string } | null)?.codigo };
+    }
     const nuevo = await crearCodigo(p, ip, ids[0]!);
     return nuevo ? listo(nuevo) : { ok: false, error: "fallo" };
   }
@@ -127,7 +139,18 @@ export async function emitirCodigo(token: unknown, emailRaw: unknown, ip: string
     return count ?? 0;
   };
   if (disp) {
-    if ((await canjeadosPor("dispositivo", disp)) >= 1) return { ok: false, error: "ya_entregado" };
+    if ((await canjeadosPor("dispositivo", disp)) >= 1) {
+      const { data: ultimo } = await db
+        .from("codigos")
+        .select("codigo")
+        .eq("plataforma", p.id)
+        .eq("dispositivo", disp)
+        .not("usado_en", "is", null)
+        .order("usado_en", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return { ok: false, error: "ya_entregado", usado: (ultimo as { codigo: string } | null)?.codigo };
+    }
     if ((await canjeadosPor("ip_hash", ip)) >= TOPE_POR_CONEXION) return { ok: false, error: "ya_entregado" };
   } else if ((await canjeadosPor("ip_hash", ip)) >= 1) {
     return { ok: false, error: "ya_entregado" };

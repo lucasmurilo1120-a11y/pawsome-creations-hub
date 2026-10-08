@@ -88,7 +88,8 @@ export const lookDe = (c: Character, k: LookKey): Look => LOOKS[c].find((l) => l
 
 export type Story = { look: LookKey; label: string; title: string; paragraphs: string[] };
 type Texto = { title: string; paragraphs: string[] };
-type Escribir = (name: string, girl: boolean) => Texto;
+// noun = nombre del look en minúscula para ese personaje (maga, brujita, caballera…).
+type Escribir = (name: string, girl: boolean, noun: string) => Texto;
 
 const HISTORIAS: Partial<Record<LookKey, Escribir[]>> = {
   superheroe: [
@@ -143,33 +144,33 @@ const HISTORIAS: Partial<Record<LookKey, Escribir[]>> = {
     }),
   ],
   mago: [
-    (name, girl) => ({
+    (name, girl, noun) => ({
       title: "El hechizo de las estrellas",
       paragraphs: [
         "El libro de hechizos —en realidad, un cuaderno con dibujos de estrellas— decía que esa noche el cielo iba a estar de humor para la magia. Solo hacía falta una varita, un sombrero puntiagudo y mucha concentración.",
         'El primer hechizo era sencillo: "Luces, brillen fuerte". Con la varita en alto, dando una vuelta completa sobre los talones, las luces de verdad parecían titilar un poquito más.',
         "El segundo hechizo era más ambicioso: hacer que la manta del sillón volara como una capa mágica. No funcionó exactamente como en el libro, pero terminó siendo aún mejor: una capa de verdad, lista para la próxima aventura.",
-        `Cuando el reloj marcó la hora de dormir, ${girl ? "la maga" : "el mago"} ${name} guardó la varita bajo la almohada. Mañana habría más estrellas que encender, y ninguna magia es tan poderosa como la de una buena noche de sueño.`,
+        `Cuando el reloj marcó la hora de dormir, ${girl ? "la" : "el"} ${noun} ${name} guardó la varita bajo la almohada. Mañana habría más estrellas que encender, y ninguna magia es tan poderosa como la de una buena noche de sueño.`,
       ],
     }),
-    (name, girl) => ({
+    (name, girl, noun) => ({
       title: "La poción de la risa",
       paragraphs: [
         `En la cocina del castillo mágico, ${name} preparaba la poción más difícil del libro: la poción de la risa. Los ingredientes eran raros: una pizca de polvo de estrellas, una cucharada de luz de luna y tres cosquillas.`,
         `Pero faltaba el ingrediente final, y estaba escondido: una sonrisa sincera. ${name} buscó en el armario, debajo de la mesa, dentro del sombrero... pero la sonrisa no aparecía.`,
-        `Entonces ${girl ? "la maga" : "el mago"} se miró en el espejo, vio el sombrero torcido y el pelo despeinado, y se echó a reír de verdad. La sonrisa cayó directo dentro del caldero.`,
+        `Entonces ${girl ? "la" : "el"} ${noun} se miró en el espejo, vio el sombrero torcido y el pelo despeinado, y se echó a reír de verdad. La sonrisa cayó directo dentro del caldero.`,
         `La poción brilló, burbujeó y llenó el castillo de risas. Desde ese día, ${name} sabe que la mejor magia siempre estuvo adentro.`,
       ],
     }),
   ],
   guerreiro: [
-    (name, girl) => ({
+    (name, girl, noun) => ({
       title: girl ? "La guardiana de la muralla de almohadas" : "El guardián de la muralla de almohadas",
       paragraphs: [
         `El castillo era la sala de juegos, y esa tarde alguien tenía que protegerlo. Se escuchaban pasos pesados del otro lado de la puerta, y la guardia del reino estaba formada por una sola persona: ${name}.`,
         `Con el escudo en alto y el casco bien ajustado, ${name} levantó una muralla de almohadas, una sobre otra, hasta que quedó más alta que el sillón. Cada almohada era un ladrillo, y cada ladrillo, una promesa de valentía.`,
-        `Los pasos se acercaron, la puerta crujió... y apareció el gato, que solo quería dormir en la torre más blanda. ${name} lo pensó un segundo: ${girl ? "una guerrera" : "un guerrero"} de verdad también sabe cuándo bajar la espada.`,
-        `Le hizo un lugar en lo alto de la muralla, y el reino quedó a salvo: protegido por ${girl ? "una guerrera valiente" : "un guerrero valiente"} y por un gato muy dormido.`,
+        `Los pasos se acercaron, la puerta crujió... y apareció el gato, que solo quería dormir en la torre más blanda. ${name} lo pensó un segundo: ${girl ? "una" : "un"} ${noun} de verdad también sabe cuándo bajar la espada.`,
+        `Le hizo un lugar en lo alto de la muralla, y el reino quedó a salvo: protegido por ${girl ? "una" : "un"} ${noun} valiente y por un gato muy dormido.`,
       ],
     }),
     (name) => ({
@@ -441,7 +442,7 @@ export function buildStories(name: string, character: Character): Story[] {
   return PLAN[character].map(([look, i]) => {
     const escribir = HISTORIAS[look]![i]!;
     const label = look === "ninguno" ? "Aventura libre" : lookDe(character, look).label;
-    return { look, label, ...escribir(name, girl) };
+    return { look, label, ...escribir(name, girl, label.toLowerCase()) };
   });
 }
 

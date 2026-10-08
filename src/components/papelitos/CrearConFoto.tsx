@@ -21,11 +21,11 @@ type Paso = "permiso" | "foto" | "creando" | "error";
 const MENSAJES: Record<ErrorCarita, string> = {
   rechazada: "No pudimos crear el personaje con esta foto. Prueba con otra: de frente, con buena luz y sin otras personas.",
   limite: `Ya usaste los ${MAX_INTENTOS_POR_FOTO} intentos de este personaje. Si necesitas ayuda, escríbenos a ${SUPPORT_EMAIL}.`,
-  ocupado: "Hay muchas familias creando personajes ahora. Inténtalo de nuevo en unos minutos.",
-  sin_credito: "La creación de personajes está en pausa por unos minutos. Inténtalo de nuevo más tarde.",
+  ocupado: "Hay muchas familias creando personajes ahora. Inténtalo de nuevo en unos minutos. Este intento no se descontó.",
+  sin_credito: `La creación de personajes está en pausa. Inténtalo de nuevo más tarde y, si sigue así, escríbenos a ${SUPPORT_EMAIL}. Este intento no se descontó.`,
   sin_acceso: "Este personaje no está desbloqueado en este celular. Canjea tu código arriba a la derecha.",
   sin_base: "Algo salió mal al guardar el personaje. Inténtalo de nuevo.",
-  fallo: "Algo salió mal. Inténtalo de nuevo en un momento.",
+  fallo: "Algo salió mal. Inténtalo de nuevo en un momento. Este intento no se descontó.",
 };
 
 async function prepararFoto(archivo: File): Promise<string> {
@@ -280,9 +280,9 @@ export function CrearConFoto({
                 Completar los looks que faltan
               </Button>
             )}
-            {!progreso.base && error !== "limite" && error !== "sin_acceso" && intentosRestantes > 1 && (
+            {!progreso.base && error !== "limite" && error !== "sin_acceso" && intentosRestantes > 0 && (
               <Button size="lg" className="h-12" onClick={() => setPaso("foto")}>
-                Intentar con otra foto
+                {error === "rechazada" ? "Intentar con otra foto" : "Intentar de nuevo"}
               </Button>
             )}
             <Button size="lg" variant="ghost" className="h-12" onClick={onCerrar}>

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Check, Ticket, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { canjearCodigo, type ErrorCanje } from "@/lib/carita.functions";
-import { leerToken } from "@/lib/carita-acceso";
+import { enlaceDeAcceso, leerToken } from "@/lib/carita-acceso";
 import { SUPPORT_EMAIL } from "@/lib/papelitos-config";
 
 // Botón "Tengo un código" (arriba a la derecha) con su panel para canjearlo.
@@ -30,7 +30,8 @@ export function CodigoBoton({
   const [abierto, setAbierto] = useState(false);
   const [codigo, setCodigo] = useState("");
   const [enviando, setEnviando] = useState(false);
-  const [resultado, setResultado] = useState<{ tipo: "ok"; texto: string } | { tipo: "error"; texto: string } | null>(null);
+  const [resultado, setResultado] = useState<{ tipo: "ok"; texto: string; token: string } | { tipo: "error"; texto: string } | null>(null);
+  const [enlaceCopiado, setEnlaceCopiado] = useState(false);
   const caja = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
 
@@ -60,10 +61,12 @@ export function CodigoBoton({
         setCodigo("");
         setResultado({
           tipo: "ok",
-          texto:
-            r.sumadas > 0
+          token: r.token,
+          texto: r.recuperado
+            ? "¡Listo! Recuperaste tus personajes en este navegador."
+            : r.sumadas > 0
               ? `¡Código correcto! Desbloqueaste ${r.sumadas} ${r.sumadas === 1 ? "personaje" : "personajes"} con su carita.`
-              : "Este código ya estaba activado en este celular.",
+              : "Este código ya estaba activado en este navegador.",
         });
       } else {
         setResultado({ tipo: "error", texto: MENSAJES[r.error] });
@@ -161,6 +164,28 @@ export function CodigoBoton({
               {resultado.tipo === "ok" ? <Check className="mt-0.5 size-4 shrink-0" aria-hidden /> : <X className="mt-0.5 size-4 shrink-0" aria-hidden />}
               <span>{resultado.texto}</span>
             </div>
+          )}
+          {resultado?.tipo === "ok" && (
+            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+              Tus personajes quedan en este navegador. Para abrirlos en otro,{" "}
+              <button
+                type="button"
+                className="font-semibold text-brand underline underline-offset-2"
+                onClick={async () => {
+                  const enlace = enlaceDeAcceso(resultado.token);
+                  try {
+                    await navigator.clipboard.writeText(enlace);
+                    setEnlaceCopiado(true);
+                    setTimeout(() => setEnlaceCopiado(false), 2000);
+                  } catch {
+                    window.prompt("Copia tu enlace de acceso:", enlace);
+                  }
+                }}
+              >
+                {enlaceCopiado ? "¡enlace copiado!" : "copia tu enlace"}
+              </button>{" "}
+              o vuelve a pegar este mismo código.
+            </p>
           )}
           {(resultado?.tipo === "ok" || fotos > 0) && (
             <Button

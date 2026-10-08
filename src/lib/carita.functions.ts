@@ -21,7 +21,12 @@ export type PersonajeCarita = {
 };
 
 export type ErrorCanje = "formato" | "incorrecto" | "vencido" | "usado" | "demasiados" | "fallo";
-export type ResultadoCanje = { ok: true; token: string; fotos: number; sumadas: number } | { ok: false; error: ErrorCanje };
+export type ResultadoCanje =
+  | { ok: true; token: string; fotos: number; sumadas: number; recuperado?: boolean }
+  | { ok: false; error: ErrorCanje };
+
+// Un código ya canjeado sirve para recuperar los personajes en otro navegador durante este plazo.
+const DIAS_RECUPERACION = 60;
 
 export type ErrorCarita = "sin_acceso" | "limite" | "sin_credito" | "ocupado" | "rechazada" | "fallo" | "sin_base";
 type Resultado = { ok: true } | { ok: false; error: ErrorCarita };
@@ -72,8 +77,18 @@ export const canjearCodigo = createServerFn({ method: "POST" })
 
     let acceso = await s.accesoDeToken(data.token);
     if (c.usado_en) {
-      // Mismo celular canjeando dos veces: no es error.
+      // Mismo navegador canjeando dos veces: no es error.
       if (acceso && c.acceso_id === acceso.id) return { ok: true, token: data.token!, fotos: acceso.fotos, sumadas: 0 };
+      // Otro navegador u otro celular sin acceso: recupera los personajes de ese código.
+      const reciente = Date.now() - new Date(c.usado_en).getTime() < DIAS_RECUPERACION * 24 * 60 * 60_000;
+      if (!acceso && c.acceso_id && reciente) {
+        const { data: original } = await db.from("accesos").select("id, fotos").eq("id", c.acceso_id).maybeSingle();
+        const nuevo = original ? await s.tokenExtra(c.acceso_id, c.id) : null;
+        if (nuevo) {
+          await s.registrarIntento(ip, "canje", true);
+          return { ok: true, token: nuevo, fotos: (original as { fotos: number }).fotos, sumadas: 0, recuperado: true };
+        }
+      }
       return fallo("usado");
     }
     if (new Date(c.expira).getTime() < Date.now()) return fallo("vencido");
@@ -159,7 +174,8 @@ export const crearPersonajeBase = createServerFn({ method: "POST" })
     const intentos = (fila as { intentos: number } | null)?.intentos ?? 0;
     if (intentos >= MAX_INTENTOS_POR_FOTO) return { ok: false, error: "limite" };
 
-    // El intento se cuenta antes de llamar a la IA (si falla a mitad, igual cuenta).
+    // El intento se cuenta antes de llamar a la IA (así dos pedidos a la vez no se saltan el tope);
+    // si la IA o el servidor fallan, se devuelve más abajo.
     await db.from("personajes_carita").upsert(
       { acceso_id: acceso.id, slot: data.slot, nombre: data.nombre || null, genero: data.genero, intentos: intentos + 1, actualizado: new Date().toISOString() },
       { onConflict: "acceso_id,slot" },
@@ -175,7 +191,12 @@ export const crearPersonajeBase = createServerFn({ method: "POST" })
         .eq("slot", data.slot);
       return { ok: true };
     } catch (e) {
-      return errorDeIA(e);
+      const r = errorDeIA(e);
+      // Solo una foto rechazada gasta el intento; si falló la IA o el servidor, se devuelve.
+      if (!r.ok && r.error !== "rechazada") {
+        await db.from("personajes_carita").update({ intentos }).eq("acceso_id", acceso.id).eq("slot", data.slot);
+      }
+      return r;
     }
   });
 

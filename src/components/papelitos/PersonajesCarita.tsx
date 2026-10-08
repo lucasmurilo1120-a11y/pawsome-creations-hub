@@ -114,7 +114,7 @@ export function PersonajesCarita({
 
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-mist/50 p-4">
         <p className="min-w-0 flex-1 text-sm leading-relaxed text-muted-foreground">
-          Tus personajes quedan guardados en este celular. Para verlos en otro dispositivo, guarda tu enlace de acceso.
+          Tus personajes quedan guardados en este navegador. Para verlos en otro navegador o celular, copia tu enlace o vuelve a pegar tu código en «Tengo un código».
         </p>
         <Button size="sm" variant="outline" className="h-10" onClick={copiarEnlace}>
           <Copy className="size-4" aria-hidden />

@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      acceso_tokens: {
+        Row: {
+          acceso_id: string
+          codigo_id: number | null
+          creado: string
+          token_hash: string
+        }
+        Insert: {
+          acceso_id: string
+          codigo_id?: number | null
+          creado?: string
+          token_hash: string
+        }
+        Update: {
+          acceso_id?: string
+          codigo_id?: number | null
+          creado?: string
+          token_hash?: string
+        }
+        Relationships: []
+      }
       accesos: {
         Row: {
           creado: string
