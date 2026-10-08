@@ -5,6 +5,9 @@
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODELO_POR_DEFECTO = "google/gemini-3.1-flash-image-preview";
+// Si el modelo elegido deja de existir, se reintenta una vez con este (nombre oficial
+// de la lista del gateway). En la prueba del 8 oct dibujó peor el estilo, por eso es respaldo.
+const MODELO_RESPALDO = "google/gemini-3.1-flash-image";
 const MODELO_TEXTO_POR_DEFECTO = "google/gemini-2.5-flash";
 
 export class ErrorIA extends Error {
@@ -30,24 +33,31 @@ async function modeloImagen(): Promise<string> {
 export async function generarImagen(prompt: string, imagenes: string[], modelo?: string): Promise<string> {
   const key = process.env["LOVABLE_API_KEY"];
   if (!key) throw new ErrorIA("fallo", "Falta LOVABLE_API_KEY");
+  const elegido = modelo ?? (await modeloImagen());
 
-  const res = await fetch(GATEWAY, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: modelo ?? (await modeloImagen()),
-      modalities: ["image", "text"],
-      messages: [
-        {
-          role: "user",
-          content: [
-            { type: "text", text: prompt },
-            ...imagenes.map((url) => ({ type: "image_url", image_url: { url } })),
-          ],
-        },
-      ],
-    }),
-  });
+  const pedir = (m: string) =>
+    fetch(GATEWAY, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: m,
+        modalities: ["image", "text"],
+        messages: [
+          {
+            role: "user",
+            content: [{ type: "text", text: prompt }, ...imagenes.map((url) => ({ type: "image_url", image_url: { url } }))],
+          },
+        ],
+      }),
+    });
+
+  let res = await pedir(elegido);
+  // Modelo inexistente o dado de baja: un reintento con el de respaldo.
+  if ((res.status === 400 || res.status === 404) && elegido !== MODELO_RESPALDO) {
+    const detalle = (await res.text()).slice(0, 300);
+    console.error(`[ia] ${elegido} respondió ${res.status}: ${detalle}. Reintento con ${MODELO_RESPALDO}`);
+    res = await pedir(MODELO_RESPALDO);
+  }
 
   if (res.status === 402) throw new ErrorIA("sin_credito", "Sin crédito de IA");
   if (res.status === 429) throw new ErrorIA("limite", "Demasiadas solicitudes");
