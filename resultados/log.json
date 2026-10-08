@@ -1,0 +1,76 @@
+[
+  {
+    "k": "pagina-una:codigo",
+    "v": {
+      "codigo": "M57PRB",
+      "errores": []
+    },
+    "t": "2026-10-08T02:34:49.881Z"
+  },
+  {
+    "k": "pagina-una:recarga",
+    "v": "M57PRB",
+    "t": "2026-10-08T02:34:50.780Z"
+  },
+  {
+    "k": "pagina-familia:codigo",
+    "v": {
+      "codigo": "7ZJSDK",
+      "errores": []
+    },
+    "t": "2026-10-08T02:34:53.511Z"
+  },
+  {
+    "k": "pagina-familia:recarga",
+    "v": "7ZJSDK",
+    "t": "2026-10-08T02:34:54.456Z"
+  },
+  {
+    "k": "canje:incorrecto",
+    "v": "Código incorrecto. Revisa que esté igual al de tu página de códigos.",
+    "t": "2026-10-08T02:34:57.300Z"
+  },
+  {
+    "k": "canje:correcto",
+    "v": "¡Código correcto! Desbloqueaste 1 personaje con su carita.",
+    "t": "2026-10-08T02:34:58.287Z"
+  },
+  {
+    "k": "creacion",
+    "v": {
+      "fin": "listo",
+      "segundos": 56
+    },
+    "t": "2026-10-08T02:35:56.658Z"
+  },
+  {
+    "k": "imagenes",
+    "v": 7,
+    "t": "2026-10-08T02:35:57.252Z"
+  },
+  {
+    "k": "canje:enlace_familia",
+    "v": "¡Código correcto! Desbloqueaste 4 personajes con su carita.",
+    "t": "2026-10-08T02:36:01.364Z"
+  },
+  {
+    "k": "badge",
+    "v": "Tengo un código\n5",
+    "t": "2026-10-08T02:36:01.369Z"
+  },
+  {
+    "k": "canje:reusado",
+    "v": "Este código ya se usó.",
+    "t": "2026-10-08T02:36:05.362Z"
+  },
+  {
+    "k": "errores_consola",
+    "v": [],
+    "t": "2026-10-08T02:36:05.366Z"
+  },
+  {
+    "k": "codigo_familia_sin_usar",
+    "v": "7ZJSDK",
+    "t": "2026-10-08T02:36:05.366Z"
+  }
+]
