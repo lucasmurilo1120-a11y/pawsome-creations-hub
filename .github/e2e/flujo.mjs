@@ -60,6 +60,14 @@ try {
   p.on("pageerror", (e) => errores.push(String(e)));
   await p.goto(APP, { waitUntil: "networkidle" });
   await p.screenshot({ path: `${OUT}/app-inicio.png` });
+  anota("esquina", await p.evaluate(() => {
+    const el = document.elementFromPoint(window.innerWidth - 22, window.innerHeight - 22);
+    const out = [];
+    let n = el;
+    for (let i = 0; n && i < 4; i++, n = n.parentElement) out.push(n.outerHTML.slice(0, 300));
+    const sh = [...document.querySelectorAll("*")].filter((e) => e.shadowRoot).map((e) => e.tagName);
+    return { out, sombras: sh, body: [...document.body.children].map((c) => c.tagName + "#" + c.id + "." + c.className).slice(0, 12) };
+  }));
 
   // 1) código incorrecto
   anota("canje:incorrecto", await canjear(p, "ABC234"));
