@@ -127,12 +127,38 @@ try {
   await p.waitForTimeout(1000);
   await p.screenshot({ path: `${OUT}/app-carita-5.png`, fullPage: true });
 
-  // 6) mismo código en otro celular: debe decir que ya se usó
+  // 6) mismo código en otro navegador: recupera los personajes
   const ctx2 = await browser.newContext(movil);
   const p2 = await ctx2.newPage();
   await p2.goto(APP, { waitUntil: "networkidle" });
-  anota("canje:reusado", await canjear(p2, codigoUna ?? ""));
+  anota("canje:otro_navegador", await canjear(p2, codigoUna ?? ""));
+  anota("badge_otro_navegador", (await p2.getByRole("button", { name: /Tengo un código/ }).innerText().catch(() => "")).trim());
   await ctx2.close();
+  // 7) PDF del kit (medios de impresión) con un nombre
+  try {
+    const ctx3 = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    const p3 = await ctx3.newPage();
+    await p3.goto(APP, { waitUntil: "networkidle" });
+    await p3.fill("#hero-name", "Valentina");
+    await p3.getByRole("button", { name: "Niña", exact: true }).first().click();
+    await p3.waitForTimeout(800);
+    await p3.emulateMedia({ media: "print" });
+    await p3.pdf({ path: `${OUT}/kit-valentina.pdf`, format: "A4", printBackground: true });
+    anota("pdf", "ok");
+    await ctx3.close();
+  } catch (e) { anota("pdf_error", String(e).slice(0, 300)); }
+  // 8) navegador de Instagram: el botón del PDF muestra el aviso
+  try {
+    const ctx4 = await browser.newContext({ ...movil, userAgent: "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/129.0 Mobile Safari/537.36 Instagram 350.0.0.0" });
+    const p4 = await ctx4.newPage();
+    await p4.goto(APP, { waitUntil: "networkidle" });
+    await p4.fill("#hero-name", "Mateo");
+    await p4.locator("div.fixed button").filter({ hasText: /Descargar/ }).first().click();
+    await p4.waitForTimeout(800);
+    anota("aviso_app", (await p4.locator('[role="dialog"][aria-label="Abrir en el navegador"]').innerText().catch(() => "sin aviso")).slice(0, 200));
+    await p4.screenshot({ path: `${OUT}/app-aviso-instagram.png` });
+    await ctx4.close();
+  } catch (e) { anota("aviso_error", String(e).slice(0, 300)); }
   anota("errores_consola", errores.slice(0, 20));
   anota("codigo_familia_sin_usar", codigoFam);
 } catch (e) {
