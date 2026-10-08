@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { CrearConFoto, completarLooksCarita } from "@/components/papelitos/CrearConFoto";
 import type { PersonajeCarita } from "@/lib/acceso";
 import { checkoutConEmail, MAX_INTENTOS_POR_FOTO, PACK_FAMILIA } from "@/lib/papelitos-config";
-import { borrarPersonajeCarita, LOOKS_CARITA } from "@/lib/personaje.functions";
+import { borrarPersonajeCarita, looksCarita } from "@/lib/personaje.functions";
 
 // Panel "Con su carita": un lugar por cada foto comprada. "Con su carita" da 1 foto
 // y el Pack familia suma 4 más (hermanos, mamá, papá, abuelos...).
@@ -24,12 +24,12 @@ export function PersonajesCarita({
   const [abierto, setAbierto] = useState<number | null>(null);
   const [ocupado, setOcupado] = useState<number | null>(null);
   const porSlot = new Map(personajes.map((p) => [p.slot, p]));
-  const creados = personajes.filter((p) => p.imagenes.ninguno).length;
+  const creados = personajes.filter((p) => p.imagenes["ninguno"]).length;
   const pack = checkoutConEmail(PACK_FAMILIA.checkout, email);
 
   async function completar(slot: number, p: PersonajeCarita) {
     setOcupado(slot);
-    await completarLooksCarita(slot, LOOKS_CARITA.filter((l) => !p.imagenes[l]), () => {});
+    await completarLooksCarita(slot, looksCarita(p.genero).filter((l) => !p.imagenes[l]), () => {});
     await onCambio();
     setOcupado(null);
   }
@@ -51,8 +51,8 @@ export function PersonajesCarita({
       <ul className="mt-4 space-y-3">
         {Array.from({ length: fotos }, (_, slot) => {
           const p = porSlot.get(slot);
-          const listo = Boolean(p?.imagenes.ninguno);
-          const faltan = p ? LOOKS_CARITA.filter((l) => !p.imagenes[l]).length : LOOKS_CARITA.length;
+          const listo = Boolean(p?.imagenes["ninguno"]);
+          const faltan = p ? looksCarita(p.genero).filter((l) => !p.imagenes[l]).length : 6;
           const sinIntentos = (p?.intentos ?? 0) >= MAX_INTENTOS_POR_FOTO;
           return (
             <li key={slot} className="rounded-2xl border border-border p-3">
@@ -67,7 +67,7 @@ export function PersonajesCarita({
                 <div className="flex items-center gap-3">
                   <div className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-xl bg-mist/60">
                     {listo ? (
-                      <img src={p!.imagenes.ninguno} alt="" className="size-full object-contain" />
+                      <img src={p!.imagenes["ninguno"]} alt="" className="size-full object-contain" />
                     ) : (
                       <Plus className="size-6 text-muted-foreground" aria-hidden />
                     )}

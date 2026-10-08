@@ -1,40 +1,34 @@
+import { LOOKS, type Character, type LookKey } from "@/lib/kit";
 import { BRAND, ESCENAS_LISTAS } from "@/lib/papelitos-config";
 
 // MiniMundos Color (extra).
 // - Con ESCENAS_LISTAS: portada con su nombre + 16 escenas para pintar (cada una con
 //   su guía a color en la esquina) + diploma de artista = 18 páginas.
-// - Sin las escenas todavía: portada + 7 looks del personaje en líneas + diploma = 9 páginas.
+// - Sin las escenas todavía: portada + los 7 looks propios del personaje en líneas + diploma = 9 páginas.
 
-export type PersonajeEstandar = "nino" | "nina" | "nino2" | "nina2";
-export type LookKey = "ninguno" | "superheroe" | "pirata" | "astronauta" | "mago" | "guerreiro" | "realeza";
+export type PersonajeEstandar = Character;
+export type { LookKey };
 
-export const LOOKS_COLOREAR: { key: LookKey; label: string }[] = [
-  { key: "ninguno", label: "Normal" },
-  { key: "superheroe", label: "Superhéroe" },
-  { key: "pirata", label: "Pirata" },
-  { key: "astronauta", label: "Astronauta" },
-  { key: "mago", label: "Mago/Bruja" },
-  { key: "guerreiro", label: "Guerrero" },
-  { key: "realeza", label: "Realeza" },
-];
+// Libro anterior (mientras no estén las escenas): los 7 looks propios del personaje en líneas.
+export const looksColorear = (c: PersonajeEstandar) => LOOKS[c];
 
 // Las 16 escenas, en el orden de los prompts de la "Fábrica de Personagens".
 export const ESCENAS: { titulo: string; personaje: PersonajeEstandar }[] = [
   { titulo: "El superhéroe salva al gatito", personaje: "nino" },
   { titulo: "El pirata y su barco", personaje: "nino" },
   { titulo: "Astronauta en la Luna", personaje: "nino" },
-  { titulo: "El príncipe y su castillo", personaje: "nino" },
+  { titulo: "El valle de los dinosaurios", personaje: "nino" },
   { titulo: "La princesa en el jardín real", personaje: "nina" },
   { titulo: "El hada del bosque", personaje: "nina" },
-  { titulo: "La capitana en la isla del tesoro", personaje: "nina" },
+  { titulo: "La caballera y su castillo", personaje: "nina" },
   { titulo: "La bailarina en el escenario", personaje: "nina" },
   { titulo: "El domador de dragones", personaje: "nino2" },
   { titulo: "El buzo en el fondo del mar", personaje: "nino2" },
-  { titulo: "El mago en la biblioteca mágica", personaje: "nino2" },
+  { titulo: "El príncipe en el gran baile", personaje: "nino2" },
   { titulo: "¡Gol!", personaje: "nino2" },
   { titulo: "La brujita y su caldero", personaje: "nina2" },
-  { titulo: "La sirena en la laguna", personaje: "nina2" },
-  { titulo: "Exploradora en la estación espacial", personaje: "nina2" },
+  { titulo: "La capitana en la isla del tesoro", personaje: "nina2" },
+  { titulo: "La clínica de los peluches", personaje: "nina2" },
   { titulo: "La jardinera y las mariposas", personaje: "nina2" },
 ];
 
@@ -42,7 +36,7 @@ const num = (i: number) => String(i + 1).padStart(2, "0");
 export const escenaColor = (i: number) => `/colorear/escenas/escena-${num(i)}.webp`;
 export const escenaLineas = (i: number) => `/colorear/escenas/escena-${num(i)}-lineas.webp`;
 
-export const PAGINAS_COLOREAR = ESCENAS_LISTAS ? ESCENAS.length + 2 : LOOKS_COLOREAR.length + 2;
+export const PAGINAS_COLOREAR = ESCENAS_LISTAS ? ESCENAS.length + 2 : 7 + 2;
 
 export const lineArt = (c: PersonajeEstandar, t: LookKey) => `/colorear/${c}-${t === "ninguno" ? "base" : t}.webp`;
 
@@ -112,7 +106,7 @@ function LibroLooks({ name, personaje }: { name: string; personaje: PersonajeEst
         <p className="text-base text-muted-foreground">7 looks para pintar con tus colores favoritos.</p>
       </section>
 
-      {LOOKS_COLOREAR.map((t) => (
+      {looksColorear(personaje).map((t) => (
         <section key={t.key} style={PAGE_BREAK} className="flex min-h-[250mm] flex-col items-center justify-center gap-5 text-center">
           <p className="text-sm font-semibold tracking-wide text-brand">
             PARA COLOREAR · {t.key === "ninguno" ? "LOOK NORMAL" : t.label.toUpperCase()}
@@ -123,7 +117,7 @@ function LibroLooks({ name, personaje }: { name: string; personaje: PersonajeEst
         </section>
       ))}
 
-      <Diploma name={name} img={lineArt(personaje, "realeza")} />
+      <Diploma name={name} img={lineArt(personaje, looksColorear(personaje)[4]!.key)} />
     </div>
   );
 }

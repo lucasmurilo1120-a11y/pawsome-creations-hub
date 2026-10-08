@@ -3,7 +3,8 @@ import { Camera, Loader2, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MAX_INTENTOS_POR_FOTO, SUPPORT_EMAIL } from "@/lib/papelitos-config";
 import type { PersonajeCarita } from "@/lib/acceso";
-import { crearLookCarita, crearPersonajeBase, LOOKS_CARITA, type Genero, type LookCarita } from "@/lib/personaje.functions";
+import { lookDe } from "@/lib/kit";
+import { crearLookCarita, crearPersonajeBase, looksCarita, type Genero, type LookCarita } from "@/lib/personaje.functions";
 
 // Flujo de UNA foto: permiso -> foto -> creación.
 // La foto se achica a 768 px en el propio celular (eso además borra los datos de
@@ -20,15 +21,6 @@ const MENSAJES: Record<ErrorClave, string> = {
   sin_compra: "Esta foto no está activa en tu cuenta. Si acabas de pagar, espera un minuto y actualiza.",
   sin_base: "Algo salió mal al guardar el personaje. Inténtalo de nuevo.",
   fallo: "Algo salió mal. Inténtalo de nuevo en un momento.",
-};
-
-const NOMBRES_LOOK: Record<LookCarita, string> = {
-  superheroe: "Superhéroe",
-  pirata: "Pirata",
-  astronauta: "Astronauta",
-  mago: "Mago/Bruja",
-  guerreiro: "Guerrero",
-  realeza: "Realeza",
 };
 
 async function prepararFoto(archivo: File): Promise<string> {
@@ -83,7 +75,7 @@ export function CrearConFoto({
   onCerrar,
 }: {
   slot: number;
-  existente?: PersonajeCarita;
+  existente?: PersonajeCarita | undefined;
   onListo: () => void;
   onCerrar: () => void;
 }) {
@@ -133,7 +125,7 @@ export function CrearConFoto({
       setPaso("error");
       return;
     }
-    await completar(LOOKS_CARITA, []);
+    await completar(looksCarita(genero), []);
   }
 
   return (
@@ -243,9 +235,9 @@ export function CrearConFoto({
           <p className="mt-2 text-sm text-muted-foreground">Tarda alrededor de un minuto. No cierres esta pantalla.</p>
           <ul className="mt-4 space-y-1.5 text-sm">
             <li className={progreso.base ? "text-foreground" : "text-muted-foreground"}>{progreso.base ? "✓" : "…"} El personaje</li>
-            {LOOKS_CARITA.map((l) => (
+            {(genero ? looksCarita(genero) : []).map((l) => (
               <li key={l} className={progreso.looks.includes(l) ? "text-foreground" : "text-muted-foreground"}>
-                {progreso.looks.includes(l) ? "✓" : "…"} Look {NOMBRES_LOOK[l]}
+                {progreso.looks.includes(l) ? "✓" : "…"} Look {genero ? lookDe(genero, l).label : ""}
               </li>
             ))}
           </ul>
@@ -257,11 +249,11 @@ export function CrearConFoto({
           <p className="font-display text-xl font-semibold text-foreground">No salió esta vez</p>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{MENSAJES[error]}</p>
           <div className="mt-4 flex flex-wrap gap-2">
-            {progreso.base && error !== "limite" && error !== "sin_compra" && (
+            {progreso.base && genero && error !== "limite" && error !== "sin_compra" && (
               <Button
                 size="lg"
                 className="h-12"
-                onClick={() => completar(LOOKS_CARITA.filter((l) => !progreso.looks.includes(l)), progreso.looks)}
+                onClick={() => completar(looksCarita(genero).filter((l) => !progreso.looks.includes(l)), progreso.looks)}
               >
                 Completar los looks que faltan
               </Button>
