@@ -1,0 +1,43 @@
+[
+  {
+    "k": "pagina-una:codigo",
+    "v": {
+      "codigo": "KE2YJY",
+      "errores": []
+    },
+    "t": "2026-10-08T02:15:11.035Z"
+  },
+  {
+    "k": "pagina-una:recarga",
+    "v": "KE2YJY",
+    "t": "2026-10-08T02:15:11.981Z"
+  },
+  {
+    "k": "pagina-familia:codigo",
+    "v": {
+      "codigo": "DGAFPB",
+      "errores": []
+    },
+    "t": "2026-10-08T02:15:14.499Z"
+  },
+  {
+    "k": "pagina-familia:recarga",
+    "v": "DGAFPB",
+    "t": "2026-10-08T02:15:15.347Z"
+  },
+  {
+    "k": "canje:incorrecto",
+    "v": "Código incorrecto. Revisa que esté igual al de tu página de códigos.",
+    "t": "2026-10-08T02:15:18.783Z"
+  },
+  {
+    "k": "canje:correcto",
+    "v": "¡Código correcto! Desbloqueaste 1 personaje con su carita.",
+    "t": "2026-10-08T02:15:19.756Z"
+  },
+  {
+    "k": "excepcion",
+    "v": "Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'Niño', exact: true }) resolved to 2 elements:\n    1) <button type=\"button\" aria-pressed=\"true\" class=\"flex flex-col items-center gap-1 rounded-2xl border-2 bg-surface p-1.5 pb-2 text-xs font-medium transition-[transform,border-color] duration-150 ease-out active:scale-[0.97]  border-brand text-brand-deep\">…</button> aka getByRole('button', { name: 'Niño' }).first()\n    2) <button type=\"button\" aria-pressed=\"false\" class=\"min-h-12 rounded-xl border-2 text-sm font-semibold transition-colors border-border text-foreground\">Niño</button> aka locator('#carita').getByRole('button', { name: 'Niño' })\n\nCall log:\n  - waiting for getByRole('button', { name: 'Niño', exact: true })\n",
+    "t": "2026-10-08T02:15:20.077Z"
+  }
+]
