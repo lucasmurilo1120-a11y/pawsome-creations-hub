@@ -10,33 +10,63 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiCodigoRouteImport } from './routes/api/codigo'
+import { Route as ApiHotmartRouteImport } from './routes/api/hotmart'
+import { Route as ApiPruebaIaRouteImport } from './routes/api/prueba-ia'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCodigoRoute = ApiCodigoRouteImport.update({
+  id: '/api/codigo',
+  path: '/api/codigo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHotmartRoute = ApiHotmartRouteImport.update({
+  id: '/api/hotmart',
+  path: '/api/hotmart',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPruebaIaRoute = ApiPruebaIaRouteImport.update({
+  id: '/api/prueba-ia',
+  path: '/api/prueba-ia',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/codigo': typeof ApiCodigoRoute
+  '/api/hotmart': typeof ApiHotmartRoute
+  '/api/prueba-ia': typeof ApiPruebaIaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/codigo': typeof ApiCodigoRoute
+  '/api/hotmart': typeof ApiHotmartRoute
+  '/api/prueba-ia': typeof ApiPruebaIaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/codigo': typeof ApiCodigoRoute
+  '/api/hotmart': typeof ApiHotmartRoute
+  '/api/prueba-ia': typeof ApiPruebaIaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/api/codigo' | '/api/hotmart' | '/api/prueba-ia'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/api/codigo' | '/api/hotmart' | '/api/prueba-ia'
+  id: '__root__' | '/' | '/api/codigo' | '/api/hotmart' | '/api/prueba-ia'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiCodigoRoute: typeof ApiCodigoRoute
+  ApiHotmartRoute: typeof ApiHotmartRoute
+  ApiPruebaIaRoute: typeof ApiPruebaIaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +78,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/codigo': {
+      id: '/api/codigo'
+      path: '/api/codigo'
+      fullPath: '/api/codigo'
+      preLoaderRoute: typeof ApiCodigoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/hotmart': {
+      id: '/api/hotmart'
+      path: '/api/hotmart'
+      fullPath: '/api/hotmart'
+      preLoaderRoute: typeof ApiHotmartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/prueba-ia': {
+      id: '/api/prueba-ia'
+      path: '/api/prueba-ia'
+      fullPath: '/api/prueba-ia'
+      preLoaderRoute: typeof ApiPruebaIaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiCodigoRoute: ApiCodigoRoute,
+  ApiHotmartRoute: ApiHotmartRoute,
+  ApiPruebaIaRoute: ApiPruebaIaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
