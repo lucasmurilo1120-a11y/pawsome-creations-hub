@@ -1,5 +1,4 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getRequest } from "@tanstack/react-start/server";
 import { LOOKS, type LookKey } from "@/lib/kit";
 import { MAX_INTENTOS_POR_FOTO } from "@/lib/papelitos-config";
 
@@ -31,53 +30,7 @@ const MAX_FOTO_CHARS = 3_000_000; // ~2,2 MB en base64; el celular ya la achica 
 const MAX_SLOT = 39;
 const slotValido = (slot: unknown) => Number.isInteger(slot) && (slot as number) >= 0 && (slot as number) <= MAX_SLOT;
 
-const PROMPT_BASE =
-  "Create a full-body character for a children's paper-doll kit, based on the person in the FIRST image (a photo). " +
-  "Draw it in EXACTLY the same illustration style as the SECOND image: same proportions (big head, big expressive eyes, small body), " +
-  "same clean outline, same soft shading and color palette, same front-facing standing pose with arms slightly open, " +
-  "plain white background and nothing else in the image. Keep the person's real features so the family recognizes them at first sight: " +
-  "face shape, skin tone, eye color and shape, eyebrows, nose, smile, hair color, hair length, hairstyle and texture, glasses, freckles and beard if any. " +
-  "Clothing exactly like the SECOND image. No text.";
-
-const PROMPT_LOOK =
-  "Dress the character from the FIRST image in the costume shown in the SECOND image. " +
-  "Keep the character's face, hair, skin tone and proportions exactly as in the FIRST image, and keep the same illustration style, " +
-  "front-facing standing pose and plain white background. Copy the costume, accessories, props and colors from the SECOND image. No text.";
-
 // --- ayudas -----------------------------------------------------------------
-
-function origenDelPedido(): string {
-  const fijo = process.env["APP_ORIGIN"];
-  if (fijo) return fijo;
-  const url = new URL(getRequest().url);
-  return url.origin;
-}
-
-const referencia = (genero: Genero, look: "base" | LookKey) => `${origenDelPedido()}/personajes/${genero}-${look}.webp`;
-
-async function firmar(paths: string[]): Promise<Map<string, string>> {
-  const mapa = new Map<string, string>();
-  if (!paths.length) return mapa;
-  const { admin } = await import("@/lib/carita.server");
-  const db = await admin();
-  const { data } = await db.storage.from("personajes").createSignedUrls(paths, 60 * 60 * 24);
-  (data ?? []).forEach((d: { path: string | null; signedUrl: string | null }, i: number) => {
-    const p = d.path ?? paths[i];
-    if (p && d.signedUrl) mapa.set(p, d.signedUrl);
-  });
-  return mapa;
-}
-
-async function guardarImagen(accesoId: string, slot: number, look: string, dataUrl: string): Promise<string> {
-  const { admin } = await import("@/lib/carita.server");
-  const { dataUrlABytes } = await import("@/lib/ia.server");
-  const db = await admin();
-  const { bytes, tipo } = dataUrlABytes(dataUrl);
-  const path = `${accesoId}/${slot}/${look}.png`;
-  const { error } = await db.storage.from("personajes").upload(path, bytes, { contentType: tipo, upsert: true });
-  if (error) throw new Error(error.message);
-  return path;
-}
 
 function errorDeIA(e: unknown): Resultado {
   const codigo = (e as { codigo?: string })?.codigo;
@@ -97,7 +50,7 @@ export const canjearCodigo = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<ResultadoCanje> => {
     const s = await import("@/lib/carita.server");
     const db = await s.admin();
-    const ip = await s.ipHash(getRequest());
+    const ip = await s.ipDelPedido();
 
     if ((await s.intentosRecientes(ip, "canje", 60)) >= 10) return { ok: false, error: "demasiados" };
     const fallo = async (error: ErrorCanje): Promise<ResultadoCanje> => {
@@ -167,7 +120,7 @@ export const estadoCarita = createServerFn({ method: "POST" })
       .eq("acceso_id", acceso.id)
       .order("slot");
     const lista = (filas ?? []) as { slot: number; nombre: string | null; genero: Genero; intentos: number; looks: Record<string, string> }[];
-    const url = await firmar(lista.flatMap((f) => Object.values(f.looks ?? {})));
+    const url = await s.firmar(lista.flatMap((f) => Object.values(f.looks ?? {})));
     return {
       ok: true,
       fotos: acceso.fotos,
@@ -213,9 +166,9 @@ export const crearPersonajeBase = createServerFn({ method: "POST" })
     );
     try {
       const { generarImagen, urlADataUrl } = await import("@/lib/ia.server");
-      const estilo = await urlADataUrl(referencia(data.genero, "base"));
-      const imagen = await generarImagen(PROMPT_BASE, [data.foto, estilo]);
-      const path = await guardarImagen(acceso.id, data.slot, "ninguno", imagen);
+      const estilo = await urlADataUrl(s.referencia(data.genero, "base"));
+      const imagen = await generarImagen(s.PROMPT_BASE, [data.foto, estilo]);
+      const path = await s.guardarImagen(acceso.id, data.slot, "ninguno", imagen);
       // Una foto nueva reemplaza los looks anteriores de este personaje.
       await db
         .from("personajes_carita")
@@ -259,9 +212,9 @@ export const crearLookCarita = createServerFn({ method: "POST" })
       const { data: firmada } = await db.storage.from("personajes").createSignedUrl(looks["ninguno"], 600);
       if (!firmada?.signedUrl) return { ok: false, error: "sin_base" };
       const base = await urlADataUrl(firmada.signedUrl);
-      const disfraz = await urlADataUrl(referencia(f.genero, data.look));
-      const imagen = await generarImagen(PROMPT_LOOK, [base, disfraz]);
-      const path = await guardarImagen(acceso.id, data.slot, data.look, imagen);
+      const disfraz = await urlADataUrl(s.referencia(f.genero, data.look));
+      const imagen = await generarImagen(s.PROMPT_LOOK, [base, disfraz]);
+      const path = await s.guardarImagen(acceso.id, data.slot, data.look, imagen);
       await db.rpc("guardar_look_carita", { p_acceso: acceso.id, p_slot: data.slot, p_look: data.look, p_path: path });
       return { ok: true };
     } catch (e) {
