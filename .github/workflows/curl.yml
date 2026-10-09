@@ -7,7 +7,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          for u in https://papelitos-familia.lovable.app https://build-your-world-853.lovable.app https://papelitos-colorear.lovable.app https://papelitos-carita.lovable.app; do
-            h=$(curl -sSL "$u/?t=$RANDOM" -H "cache-control: no-cache")
-            echo "::notice title=$u::usar=$(echo "$h" | grep -c 'Usar este c') escenas16=$(echo "$h" | grep -c '16 escenas') libro=$(echo "$h" | grep -c 'Su libro para colorear') minimundos=$(echo "$h" | grep -c 'MiniMundos Color') papelitosColorear=$(echo "$h" | grep -c 'Papelitos para colorear') bytes=$(echo "$h" | wc -c)"
+          u=https://build-your-world-853.lovable.app
+          for i in $(seq 1 30); do
+            h=$(curl -sSL "$u/?t=$RANDOM$i" -H "cache-control: no-cache")
+            if echo "$h" | grep -q 'Kit completo'; then break; fi
+            sleep 20
           done
+          c() { echo "$h" | grep -o "$1" | wc -l; }
+          echo "::notice title=landing::kitCompleto=$(c 'Kit completo') premium=$(c 'Premium') h19=$(c '19,45') edad=$(c '3 a 8') edades=$(c 'edades') p497=$(c '4,97') p997=$(c '9,97') desde=$(c 'desde US') tuFoto=$(c 'Tu Foto, Tu Personaje') tuFamilia=$(c 'Tu Familia en la Historia') conCarita=$(c 'Con su carita') hotmart=$(c 'pay.hotmart.com/B107823945A') avisame=$(c 'Avísame') masContenido=$(c 'Más contenido') bytes=$(echo "$h" | wc -c)"
+          echo "$h" | grep -o 'href="https://pay.hotmart[^"]*"' | head -3 | while read l; do echo "::notice title=link::$l"; done
