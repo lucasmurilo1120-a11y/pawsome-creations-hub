@@ -56,7 +56,6 @@ const PLANS: {
 // Extras opcionales (order bumps de Hotmart), con los mismos nombres del checkout.
 // Tu Foto, Tu Personaje y Tu Familia en la Historia llegan como una página de
 // códigos (el código se canjea en la app); MiniMundos Color, como su propia app.
-// Sin precios acá: el precio de cada extra se ve en la página de pago.
 const EXTRAS = [
   {
     key: "carita",
