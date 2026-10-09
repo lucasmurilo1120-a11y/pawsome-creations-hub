@@ -12,20 +12,20 @@ import demoSprite from "@/assets/marketing/demo-sprite.webp.asset.json";
 
 // ---------------------------------------------------------------------------
 // Configuración de la oferta: todo lo que cambia la venta está acá arriba.
-// Cuando tengas los links de Hotmart, pégalos en CHECKOUT_URLS y los
-// botones pasan solos de "Avísame" a "Quiero el plan".
+// CHECKOUT_URLS: link del checkout de Hotmart (un solo plan). Si se deja vacío,
+// el botón de compra se cambia por el formulario "Avísame".
 // META_PIXEL_ID: pega el ID numérico de tu píxel de Meta y se activa solo
 // (PageView al entrar, Lead al dejar el e-mail, InitiateCheckout al ir a pagar).
 // ---------------------------------------------------------------------------
 const BRAND = "Papelitos";
-const CHECKOUT_URLS: Record<PlanKey, string> = { basic: "", premium: "" };
+const CHECKOUT_URLS: Record<PlanKey, string> = { basic: "https://pay.hotmart.com/B107823945A?checkoutMode=10" };
 const SUPPORT_EMAIL = "lucasmurilo1120@gmail.com";
 const META_PIXEL_ID = "";
 const SITE_URL = ""; // URL pública del sitio, sin barra final (para la imagen al compartir)
 
 const TOTAL_PAGES = 21; // portada + 7 looks + 12 historias + certificado
 
-type PlanKey = "basic" | "premium";
+type PlanKey = "basic";
 
 const PLANS: {
   key: PlanKey;
@@ -38,10 +38,10 @@ const PLANS: {
 }[] = [
   {
     key: "basic",
-    name: "Básico",
+    name: "Kit completo",
     price: "US$13,51",
     note: "Pago único · Imprímelo las veces que quieras",
-    description: "El kit completo para empezar a jugar hoy.",
+    description: "Todo lo que necesitas para jugar hoy.",
     features: [
       "4 personajes para elegir",
       "7 looks por personaje, distintos en cada uno: de superhéroe a bombero, hada, buzo o doctora",
@@ -49,36 +49,24 @@ const PLANS: {
       "Portada y certificado de héroe con su nombre",
       "Un kit para cada hijo, sin pagar de nuevo",
     ],
-  },
-  {
-    key: "premium",
-    name: "Premium",
-    price: "US$19,45",
-    note: "Pago único · Solo US$5,94 más que el Básico",
-    description: "Todo el Básico y un mundo que sigue creciendo.",
-    features: [
-      "Todo lo del plan Básico",
-      "Personajes y looks nuevos a medida que se lanzan, sin pagar de nuevo",
-      "3 historias nuevas cada 18 días",
-      "Acceso a todas las actualizaciones del kit",
-    ],
     featured: true,
   },
 ];
 
-// Extras opcionales (order bumps de Hotmart). Con su carita llega como una página
-// de códigos (el código se canjea en la app); MiniMundos Color, como su propia app.
+// Extras opcionales (order bumps de Hotmart), con los mismos nombres del checkout.
+// Tu Foto, Tu Personaje y Tu Familia en la Historia llegan como una página de
+// códigos (el código se canjea en la app); MiniMundos Color, como su propia app.
+// Sin precios acá: el precio de cada extra se ve en la página de pago.
 const EXTRAS = [
   {
     key: "carita",
     icon: Camera,
-    name: "Con su carita",
-    price: "US$4,97",
+    name: "Tu Foto, Tu Personaje",
     lead: "Tu hijo, convertido en un personaje más del kit.",
     copy: "Subes 1 foto y la app lo dibuja con su cara, su pelo y sus 7 looks, listo para jugar junto a los demás.",
     bullets: [
-      "Te llega por e-mail tu página de códigos: copias el código y lo pegas en la app",
-      "¿Hermanos, mamá o papá? El Pack familia suma 4 personajes más por US$9,97",
+      "Te llega por e-mail tu página de códigos y con un toque lo activas en la app",
+      "¿Hermanos, mamá, papá o los abuelos? Con Tu Familia en la Historia sumas hasta 4 personajes de la familia",
       "No guardamos la foto: se usa una sola vez para crear el dibujo",
     ],
   },
@@ -86,7 +74,6 @@ const EXTRAS = [
     key: "color",
     icon: Palette,
     name: "MiniMundos Color",
-    price: "US$4,97",
     lead: "Su libro para colorear, con su nombre en cada página.",
     copy: "Su personaje en sus 7 looks, en líneas para pintar: el bombero, la princesa, el buzo, la doctora y más. Puedes armar un libro con cada uno de los 4 personajes: 28 dibujos en total.",
     bullets: ["Portada con su nombre y diploma de artista", "Imprime y pinta las veces que quieras"],
@@ -133,20 +120,16 @@ const FAQ = [
     a: "No. Funciona con cualquier impresora común. Si usas cartulina o papel grueso, los personajes duran mucho más y se mantienen de pie mejor.",
   },
   {
-    q: "¿Para qué edades es?",
-    a: "Para niños de 3 a 8 años. Los más pequeños recortan con ayuda de un adulto y los más grandes pueden leer las historias por su cuenta.",
-  },
-  {
     q: "Tengo más de un hijo. ¿Tengo que pagar dos veces?",
     a: "No. Creas un kit con el nombre de cada hijo y lo imprimes las veces que quieras, por ejemplo cuando los personajes se gasten de tanto jugar.",
   },
   {
-    q: "¿Cómo funciona Con su carita? ¿Qué pasa con la foto?",
+    q: "¿Cómo funciona Tu Foto, Tu Personaje? ¿Qué pasa con la foto?",
     a: "Tomas o subes una foto de frente y con buena luz, y la app usa inteligencia artificial para dibujar a tu hijo en el estilo de Papelitos, con sus 7 looks y sus 12 historias. La foto se usa una sola vez para crear el dibujo y no la guardamos. Si el resultado no te convence, puedes probar con otra foto: tienes hasta 3 intentos por personaje.",
   },
   {
     q: "¿Cómo activo los extras?",
-    a: "Con su carita: junto con tu compra te llega por e-mail el enlace a tu página de códigos. Copia el código, abre la app de Papelitos y pégalo en «Tengo un código», arriba a la derecha; después tomas o subes la foto. MiniMundos Color: te llega por e-mail el enlace a su app para pintar.",
+    a: "Tu Foto, Tu Personaje y Tu Familia en la Historia: junto con tu compra te llega por e-mail el enlace a tu página de códigos. Toca «Usar este código en la app» (o copia el código y pégalo en «Tengo un código», arriba a la derecha de la app) y después tomas o subes la foto. MiniMundos Color: te llega por e-mail el enlace a su app para pintar.",
   },
   {
     q: "¿Y si no me gusta?",
@@ -154,7 +137,7 @@ const FAQ = [
   },
 ];
 
-const META_DESCRIPTION = `Escribe su nombre e imprime su kit de héroe: su personaje en 7 looks, 12 historias donde es el protagonista y su certificado. Para niños de 3 a 8 años.`;
+const META_DESCRIPTION = `Escribe su nombre e imprime su kit de héroe: su personaje en 7 looks, 12 historias donde es el protagonista y su certificado.`;
 
 export const Route = createFileRoute("/")({
   head: () => {
@@ -333,7 +316,7 @@ function PlanAction({ plan, planName, price }: { plan: PlanKey; planName: string
       onClick={() => track("InitiateCheckout", { content_name: `Plan ${planName}`, value: Number(price.replace(/[^\d,]/g, "").replace(",", ".")), currency: "USD" })}
       className="flex min-h-14 w-full items-center justify-center rounded-full bg-brand px-6 text-base font-bold text-primary-foreground shadow-cta transition-[transform,background-color] duration-150 ease-out hover:bg-brand-deep active:scale-[0.97]"
     >
-      Quiero el plan {planName}
+      {CTA_LABEL}
     </a>
   );
 }
@@ -490,7 +473,7 @@ function LandingPage() {
           <span className="font-display text-lg font-semibold">{BRAND}</span>
         </a>
         <a href="#planes" className="inline-flex min-h-11 items-center text-sm font-bold text-brand hover:text-brand-deep">
-          Ver precios
+          Ver precio
         </a>
       </header>
 
@@ -506,8 +489,7 @@ function LandingPage() {
           className="mx-auto w-full max-w-[340px] sm:max-w-[460px] md:order-2 md:max-w-[580px]"
         />
         <div className="md:order-1">
-          <p className="text-sm font-bold text-brand">Para niños de 3 a 8 años</p>
-          <h1 className="mt-2 font-display text-[2.05rem] leading-[1.06] font-semibold text-balance sm:text-5xl lg:text-6xl">
+          <h1 className="font-display text-[2.05rem] leading-[1.06] font-semibold text-balance sm:text-5xl lg:text-6xl">
             Una tarde sin pantallas donde tu hijo es el héroe.
           </h1>
           <p className="mt-3 max-w-xl text-[17px] leading-[1.55] text-muted-foreground sm:mt-5 sm:text-lg sm:leading-relaxed">
@@ -609,13 +591,13 @@ function LandingPage() {
       <section id="planes" className="scroll-mt-4 bg-mist py-12 sm:py-20">
         <div className="mx-auto max-w-6xl px-5">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="font-display text-3xl font-semibold text-balance sm:text-5xl">Elige su kit.</h2>
+            <h2 className="font-display text-3xl font-semibold text-balance sm:text-5xl">Su kit de héroe.</h2>
             <p className="mt-2 text-base text-muted-foreground">Pago único. Sin suscripción. Acceso inmediato.</p>
             <p className="mx-auto mt-3 max-w-xl text-[15px] leading-relaxed text-muted-foreground">
               Un libro personalizado impreso suele costar entre US$30 y US$40 y llega una sola vez. Su kit lo imprimes cuando quieras.
             </p>
           </div>
-          <div className="mx-auto mt-8 grid max-w-4xl gap-5 md:mt-10 md:grid-cols-2 md:items-start">
+          <div className="mx-auto mt-8 max-w-xl md:mt-10">
             {PLANS.map((plan) => (
               <article
                 key={plan.key}
@@ -623,7 +605,6 @@ function LandingPage() {
               >
                 <div className="flex items-center justify-between gap-3">
                   <h3 className="font-display text-2xl font-semibold">{plan.name}</h3>
-                  {plan.featured && <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-bold text-brand-deep">Más contenido</span>}
                 </div>
                 <p className="mt-1 text-[15px] text-muted-foreground">{plan.description}</p>
                 <p className="mt-4 font-display text-5xl font-semibold">{plan.price}</p>
@@ -643,7 +624,7 @@ function LandingPage() {
             ))}
           </div>
 
-          <div className="mx-auto mt-5 flex max-w-4xl items-start gap-4 rounded-3xl border border-brand/20 bg-surface p-5 sm:items-center sm:p-6">
+          <div className="mx-auto mt-5 flex max-w-xl items-start gap-4 rounded-3xl border border-brand/20 bg-surface p-5 sm:items-center sm:p-6">
             <span className="grid size-11 shrink-0 place-items-center rounded-full bg-brand/10">
               <ShieldCheck className="size-6 text-brand" aria-hidden="true" />
             </span>
@@ -670,7 +651,6 @@ function LandingPage() {
                       <x.icon className="size-5 text-brand" aria-hidden="true" />
                     </span>
                     <h4 className="min-w-0 flex-1 font-display text-xl font-semibold">{x.name}</h4>
-                    <p className="shrink-0 rounded-full bg-mist px-3 py-1 text-sm font-bold">+ {x.price}</p>
                   </div>
                   <p className="mt-4 text-base font-bold">{x.lead}</p>
                   <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">{x.copy}</p>
@@ -741,7 +721,7 @@ function LandingPage() {
           href="#planes"
           className="flex h-13 min-h-12 w-full items-center justify-center rounded-full bg-brand text-base font-bold text-primary-foreground shadow-cta transition-transform duration-150 ease-out active:scale-[0.97]"
         >
-          {CTA_LABEL} · desde US$13,51
+          {CTA_LABEL} · US$13,51
         </a>
       </div>
     </main>
