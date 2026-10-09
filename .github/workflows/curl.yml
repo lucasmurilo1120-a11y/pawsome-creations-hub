@@ -1,0 +1,13 @@
+name: curl
+on:
+  push:
+    branches: [ci-curl]
+jobs:
+  c:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          for u in https://papelitos-familia.lovable.app https://build-your-world-853.lovable.app https://papelitos-colorear.lovable.app https://papelitos-carita.lovable.app; do
+            h=$(curl -sSL "$u/?t=$RANDOM" -H "cache-control: no-cache")
+            echo "::notice title=$u::usar=$(echo "$h" | grep -c 'Usar este c') escenas16=$(echo "$h" | grep -c '16 escenas') libro=$(echo "$h" | grep -c 'Su libro para colorear') minimundos=$(echo "$h" | grep -c 'MiniMundos Color') papelitosColorear=$(echo "$h" | grep -c 'Papelitos para colorear') bytes=$(echo "$h" | wc -c)"
+          done
