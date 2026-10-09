@@ -7,12 +7,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          u=https://build-your-world-853.lovable.app
-          for i in $(seq 1 30); do
-            h=$(curl -sSL "$u/?t=$RANDOM$i" -H "cache-control: no-cache")
-            if echo "$h" | grep -q 'Kit completo'; then break; fi
-            sleep 20
-          done
+          sleep 60
+          get() { for i in $(seq 1 24); do h=$(curl -sSL "$1/?t=$RANDOM$i" -H "cache-control: no-cache"); echo "$h" | grep -q "$2" && break; sleep 20; done; }
           c() { echo "$h" | grep -o "$1" | wc -l; }
-          echo "::notice title=landing::kitCompleto=$(c 'Kit completo') premium=$(c 'Premium') h19=$(c '19,45') edad=$(c '3 a 8') edades=$(c 'edades') p497=$(c '4,97') p997=$(c '9,97') desde=$(c 'desde US') tuFoto=$(c 'Tu Foto, Tu Personaje') tuFamilia=$(c 'Tu Familia en la Historia') conCarita=$(c 'Con su carita') hotmart=$(c 'pay.hotmart.com/B107823945A') avisame=$(c 'Avísame') masContenido=$(c 'Más contenido') bytes=$(echo "$h" | wc -c)"
-          echo "$h" | grep -o 'href="https://pay.hotmart[^"]*"' | head -3 | while read l; do echo "::notice title=link::$l"; done
+          get https://build-your-world-853.lovable.app 'MiniMundos'
+          echo "::notice title=landing::mm=$(c 'MiniMundos') papelitos=$(c 'Papelitos') heroMM=$(c 'hero-familia-mm') kitMM=$(c 'kit-paginas-mm') tuFoto=$(c 'Tu Foto, Tu Personaje') testimonios=$(c 'Lo que cuentan') bytes=$(echo "$h" | wc -c)"
+          imgs=$(echo "$h" | grep -o 'https://[^"]*\.webp' | sort -u | head -8 | tr '\n' ' '); echo "::notice title=imgs::$imgs"
+          get https://pawsome-creations-hub.lovable.app 'MiniMundos'
+          echo "::notice title=app::mm=$(c 'MiniMundos') papelitos=$(c 'Papelitos') bytes=$(echo "$h" | wc -c)"
+          js=$(echo "$h" | grep -o '/assets/[^"]*\.js' | sort -u | head -40)
+          all=""; for j in $js; do all="$all$(curl -sS https://pawsome-creations-hub.lovable.app$j)"; done
+          h="$all"; echo "::notice title=appjs::tuFoto=$(c 'Tu Foto, Tu Personaje') tuFamilia=$(c 'Tu Familia en la Historia') conCarita=$(c 'Con su carita o Pack') mm=$(c 'MiniMundos') papelitos=$(c 'Papelitos')"
