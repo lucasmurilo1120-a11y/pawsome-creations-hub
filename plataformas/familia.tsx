@@ -1,27 +1,27 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
-// Página de códigos de Papelitos: Pack familia (4 personajes).
-// Pide un código a la app de Papelitos (vale 15 minutos y se usa una sola vez)
+// Página de códigos de MiniMundos: Tu Familia en la Historia (4 personajes).
+// Pide un código a la app de MiniMundos (vale 15 minutos y se usa una sola vez)
 // y explica qué hacer con él. Cuando el código vence, pide otro sola.
 
 const PLATAFORMA = {
   token: "npcputvbmuy8npybvcz8b7n3ig58",
-  titulo: "Tu código del Pack familia",
+  titulo: "Tu código de «Tu Familia en la Historia»",
   bajada: "Con este código desbloqueas 4 personajes con su carita: hermanos, mamá, papá o los abuelos, cada uno con sus 7 looks.",
   personajes: 4,
 };
-const APP_URL = "https://pawsome-creations-hub.lovable.app"; // la app de Papelitos (donde se canjea el código)
+const APP_URL = "https://pawsome-creations-hub.lovable.app"; // la app de MiniMundos (donde se canjea el código)
 const API_URL = `${APP_URL}/api/codigo`;
 const SOPORTE = "lucasmurilo1120@gmail.com";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: `${PLATAFORMA.titulo} · Papelitos` },
-      { name: "description", content: "Tu código para crear personajes con su carita en la app de Papelitos." },
+      { title: `${PLATAFORMA.titulo} · MiniMundos` },
+      { name: "description", content: "Tu código para crear personajes con foto en la app de MiniMundos." },
       { name: "robots", content: "noindex, nofollow" },
-      { property: "og:title", content: `${PLATAFORMA.titulo} · Papelitos` },
+      { property: "og:title", content: `${PLATAFORMA.titulo} · MiniMundos` },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -46,9 +46,9 @@ const MENSAJES: Record<Exclude<Respuesta, { ok: true }>["error"], string> = {
   token: "Esta página no está activa. Escríbenos y lo resolvemos.",
   pide_email: "",
   sin_compra: "No encontramos una compra con ese e-mail. Revisa que sea el mismo que usaste al pagar.",
-  agotado: "Ya canjeaste todos los códigos de tu compra. Tus personajes están en la app de Papelitos, en el navegador donde los canjeaste.",
+  agotado: "Ya canjeaste todos los códigos de tu compra. Tus personajes están en la app de MiniMundos, en el navegador donde los canjeaste.",
   ya_entregado:
-    "Tu código ya se canjeó. Tus personajes están en la app de Papelitos, en el navegador donde lo canjeaste.",
+    "Tu código ya se canjeó. Tus personajes están en la app de MiniMundos, en el navegador donde lo canjeaste.",
   limite: "Hubo demasiados pedidos seguidos. Espera unos minutos y vuelve a intentar.",
   fallo: "No pudimos generar tu código ahora. Revisa tu conexión y vuelve a intentar.",
 };
@@ -175,7 +175,7 @@ function PaginaCodigo() {
       <div className="mx-auto max-w-xl px-4 pt-6 pb-16">
         <header className="flex items-center justify-between">
           <span style={{ fontFamily: "Fraunces, Georgia, serif" }} className="text-xl font-semibold">
-            Papelitos
+            MiniMundos
           </span>
           <span className="rounded-full px-3 py-1 text-xs font-bold" style={{ background: C.niebla, color: C.marcaOscura }}>
             Página de códigos
@@ -295,7 +295,7 @@ function PaginaCodigo() {
           </h2>
           <ol className="mt-4 space-y-3">
             {[
-              <>Toca <b>Usar este código en la app</b>: se abre la app de Papelitos (la misma de tu kit) y el código se canjea solo. Verás un mensaje verde.</>,
+              <>Toca <b>Usar este código en la app</b>: se abre la app de MiniMundos (la misma de tu kit) y el código se canjea solo. Verás un mensaje verde.</>,
               <>¿No se abrió? Toca <b>Copiar código</b>, abre la app con el botón de abajo y, arriba a la derecha, toca <b>Tengo un código</b>, pégalo y toca <b>Canjear</b>.</>,
               <>Toca <b>Crear su personaje con una foto</b>, elige el estilo (niño o niña), marca la casilla de permiso y toca <b>Continuar</b>.</>,
               <>Toca <b>Tomar foto</b> o <b>Subir una foto</b> (de frente y con buena luz) y después <b>Crear el personaje</b>.</>,
@@ -320,7 +320,7 @@ function PaginaCodigo() {
             className="mt-5 inline-flex min-h-14 w-full items-center justify-center rounded-full px-6 text-base font-bold transition-transform active:scale-[0.97]"
             style={{ border: `2px solid ${C.marca}`, color: C.marcaOscura, background: "white" }}
           >
-            Abrir la app de Papelitos
+            Abrir la app de MiniMundos
           </a>
         </section>
 

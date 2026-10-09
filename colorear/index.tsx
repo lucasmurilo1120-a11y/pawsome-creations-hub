@@ -4,8 +4,8 @@ import { Download, Palette, Printer } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-// Producto extra de Papelitos (order bump): libro para colorear con el nombre del niño.
-const BRAND = "Papelitos";
+// Producto extra de MiniMundos (order bump): libro para colorear con el nombre del niño.
+const BRAND = "MiniMundos";
 const PRODUCT = "MiniMundos Color";
 
 // "  mateo   josé " -> "Mateo José": así el nombre siempre se ve bien impreso.
