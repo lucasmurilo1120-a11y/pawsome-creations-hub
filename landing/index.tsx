@@ -3,11 +3,11 @@ import { useEffect, useState, type FormEvent } from "react";
 import { z } from "zod";
 import { Camera, Palette, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import heroFamilia from "@/assets/marketing/hero-familia.webp.asset.json";
+import heroFamilia from "@/assets/marketing/hero-familia-mm.webp.asset.json";
 import pasoApp from "@/assets/marketing/paso-app.webp.asset.json";
 import pasoRecortar from "@/assets/paso-recortar.jpg.asset.json";
 import pasoJuego from "@/assets/marketing/paso-juego.webp.asset.json";
-import kitPaginas from "@/assets/marketing/kit-paginas-v2.webp.asset.json";
+import kitPaginas from "@/assets/marketing/kit-paginas-mm.webp.asset.json";
 import demoSprite from "@/assets/marketing/demo-sprite.webp.asset.json";
 
 // ---------------------------------------------------------------------------
@@ -17,7 +17,7 @@ import demoSprite from "@/assets/marketing/demo-sprite.webp.asset.json";
 // META_PIXEL_ID: pega el ID numérico de tu píxel de Meta y se activa solo
 // (PageView al entrar, Lead al dejar el e-mail, InitiateCheckout al ir a pagar).
 // ---------------------------------------------------------------------------
-const BRAND = "Papelitos";
+const BRAND = "MiniMundos";
 const CHECKOUT_URLS: Record<PlanKey, string> = { basic: "https://pay.hotmart.com/B107823945A?checkoutMode=10" };
 const SUPPORT_EMAIL = "lucasmurilo1120@gmail.com";
 const META_PIXEL_ID = "";
@@ -112,7 +112,7 @@ const QUE_TRAE = [
 const FAQ = [
   {
     q: "¿Qué recibo y cómo me llega?",
-    a: `Apenas se confirma el pago te llega por e-mail (el de la compra) el acceso a la app de Papelitos. Escribes el nombre de tu hijo, eliges su personaje y descargas su kit en PDF: ${TOTAL_PAGES} páginas con portada, 7 looks, 12 historias con su nombre y su certificado. Es 100% digital: no se envía nada físico y no hay que instalar nada.`,
+    a: `Apenas se confirma el pago te llega por e-mail (el de la compra) el acceso a la app de MiniMundos. Escribes el nombre de tu hijo, eliges su personaje y descargas su kit en PDF: ${TOTAL_PAGES} páginas con portada, 7 looks, 12 historias con su nombre y su certificado. Es 100% digital: no se envía nada físico y no hay que instalar nada.`,
   },
   {
     q: "¿Necesito una impresora especial?",
@@ -124,7 +124,7 @@ const FAQ = [
   },
   {
     q: "¿Cómo funciona Tu Foto, Tu Personaje? ¿Qué pasa con la foto?",
-    a: "Tomas o subes una foto de frente y con buena luz, y la app usa inteligencia artificial para dibujar a tu hijo en el estilo de Papelitos, con sus 7 looks y sus 12 historias. La foto se usa una sola vez para crear el dibujo y no la guardamos. Si el resultado no te convence, puedes probar con otra foto: tienes hasta 3 intentos por personaje.",
+    a: "Tomas o subes una foto de frente y con buena luz, y la app usa inteligencia artificial para dibujar a tu hijo en el estilo de MiniMundos, con sus 7 looks y sus 12 historias. La foto se usa una sola vez para crear el dibujo y no la guardamos. Si el resultado no te convence, puedes probar con otra foto: tienes hasta 3 intentos por personaje.",
   },
   {
     q: "¿Cómo activo los extras?",
@@ -320,6 +320,58 @@ function PlanAction({ plan, planName, price }: { plan: PlanKey; planName: string
   );
 }
 
+// Testimonios reales de clientes (tabla «testimonios» de la base de datos).
+// Solo se muestran los marcados como visibles, máximo 3. Sin testimonios, la sección no aparece.
+type Testimonio = { nombre: string; pais: string | null; texto: string; regalo: boolean };
+type ConsultaTestimonios = {
+  from: (tabla: string) => {
+    select: (columnas: string) => {
+      order: (columna: string, opciones: { ascending: boolean }) => { limit: (n: number) => PromiseLike<{ data: Testimonio[] | null }> };
+    };
+  };
+};
+
+function useTestimonios() {
+  const [lista, setLista] = useState<Testimonio[]>([]);
+  useEffect(() => {
+    let vivo = true;
+    (supabase as unknown as ConsultaTestimonios)
+      .from("testimonios")
+      .select("nombre, pais, texto, regalo")
+      .order("orden", { ascending: true })
+      .limit(3)
+      .then(({ data }) => {
+        if (vivo && data) setLista(data);
+      });
+    return () => {
+      vivo = false;
+    };
+  }, []);
+  return lista;
+}
+
+function Testimonios() {
+  const lista = useTestimonios();
+  if (lista.length === 0) return null;
+  return (
+    <section className="mx-auto max-w-6xl px-5 py-12 sm:py-16">
+      <h2 className="font-display text-2xl font-semibold text-balance sm:text-3xl">Lo que cuentan las familias</h2>
+      <ul className="mt-5 grid gap-3 md:grid-cols-3">
+        {lista.map((t) => (
+          <li key={`${t.nombre}-${t.texto}`} className="min-w-0 rounded-2xl border border-border bg-surface p-4">
+            <p className="text-[15px] leading-relaxed">“{t.texto}”</p>
+            <p className="mt-2 text-sm font-semibold">
+              {t.nombre}
+              {t.pais ? ` · ${t.pais}` : ""}
+            </p>
+            {t.regalo && <p className="mt-0.5 text-xs text-muted-foreground">Recibió el kit de regalo para probarlo</p>}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 // Sprite: 7 columnas (looks) x 4 filas (personajes), celdas de 200x330 px.
 const CELL_W = 200;
 const CELL_H = 330;
@@ -468,7 +520,7 @@ function LandingPage() {
     <main className="min-h-screen overflow-x-hidden bg-paper pb-24 font-body text-ink sm:pb-0">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-2 sm:py-4">
         <a href="#inicio" className="flex min-h-11 items-center gap-2" aria-label={`${BRAND}, inicio`}>
-          <span className="grid size-9 place-items-center rounded-lg bg-brand font-display text-lg font-semibold text-primary-foreground">P</span>
+          <span className="grid size-9 place-items-center rounded-lg bg-brand font-display text-lg font-semibold text-primary-foreground">M</span>
           <span className="font-display text-lg font-semibold">{BRAND}</span>
         </a>
         <a href="#planes" className="inline-flex min-h-11 items-center text-sm font-bold text-brand hover:text-brand-deep">
@@ -568,7 +620,7 @@ function LandingPage() {
           <p className="mt-2 max-w-xl text-base text-muted-foreground">Una impresora común, tijeras y ganas de jugar.</p>
           <ol className="mt-7 grid gap-4 md:mt-10 md:grid-cols-3 md:gap-5">
             {[
-              { title: "Escribe su nombre", copy: "Elige su personaje desde el celular. Toma menos de un minuto.", img: pasoApp.url, w: 960, h: 720, alt: "La app de Papelitos en un celular con el nombre Mateo escrito y su personaje elegido" },
+              { title: "Escribe su nombre", copy: "Elige su personaje desde el celular. Toma menos de un minuto.", img: pasoApp.url, w: 960, h: 720, alt: "La app de MiniMundos en un celular con el nombre Mateo escrito y su personaje elegido" },
               { title: "Imprime y recorta", copy: "Descarga su PDF y usa tu impresora de siempre. En cartulina duran más.", img: pasoRecortar.url, w: 816, h: 816, alt: "Manos recortando un personaje impreso" },
               { title: "Jueguen juntos", copy: "Lean su historia, armen la escena y dejen que la aventura siga.", img: pasoJuego.url, w: 960, h: 720, alt: "Familia sentada en el piso jugando con los personajes de papel" },
             ].map((s, i) => (
@@ -585,6 +637,8 @@ function LandingPage() {
           </ol>
         </div>
       </section>
+
+      <Testimonios />
 
       {/* PLANES + EXTRAS */}
       <section id="planes" className="scroll-mt-4 bg-mist py-12 sm:py-20">
