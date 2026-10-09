@@ -22,7 +22,7 @@ import { enlaceDeAcceso, useCarita } from "@/lib/carita-acceso";
 import type { PersonajeCarita } from "@/lib/carita.functions";
 
 // Nombre de la marca en un solo lugar: cambiarlo acá lo cambia en toda la app.
-const BRAND = "Papelitos";
+const BRAND = "MiniMundos";
 const TAGLINE = "Tu hijo, el héroe de papel";
 
 // "  mateo   josé " -> "Mateo José": así el nombre siempre se ve bien impreso.
@@ -493,7 +493,7 @@ function CreatorApp() {
             </div>
           </div>
 
-          {/* Con su carita: se desbloquea con el código de la página de códigos */}
+          {/* Tu Foto, Tu Personaje y Tu Familia en la Historia: se desbloquean con el código de la página de códigos */}
           <div id="carita" className="mt-10 scroll-mt-4">
             {carita.token && carita.fotos > 0 ? (
               <PersonajesCarita token={carita.token} fotos={carita.fotos} personajes={caritas} onCambio={carita.recargar} />
@@ -505,7 +505,7 @@ function CreatorApp() {
                 <div className="min-w-0 flex-1">
                   <p className="font-display text-xl font-semibold text-foreground">¿Y si el héroe tiene su carita?</p>
                   <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                    Con “Con su carita” subes o tomas una foto y lo dibujamos como un personaje más del kit, con sus 7 looks.
+                    Con «Tu Foto, Tu Personaje» subes o tomas una foto y lo dibujamos como un personaje más del kit, con sus 7 looks.
                     Si lo compraste, copia el código de tu página de códigos y pégalo en <b>Tengo un código</b>, arriba a la derecha.
                   </p>
                 </div>

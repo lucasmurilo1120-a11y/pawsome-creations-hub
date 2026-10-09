@@ -132,7 +132,7 @@ export function CodigoBoton({
             </button>
           </div>
           <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-            Copia el código de tu página de códigos (Con su carita o Pack familia) y pégalo aquí.
+            Copia el código de tu página de códigos (Tu Foto, Tu Personaje o Tu Familia en la Historia) y pégalo aquí.
           </p>
           <form onSubmit={enviar} noValidate className="mt-4 flex gap-2">
             <label htmlFor="codigo-carita" className="sr-only">

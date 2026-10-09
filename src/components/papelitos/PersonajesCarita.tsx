@@ -6,7 +6,7 @@ import { borrarPersonajeCarita, looksCarita, type PersonajeCarita } from "@/lib/
 import { enlaceDeAcceso } from "@/lib/carita-acceso";
 import { CHECKOUT_PACK_FAMILIA, MAX_INTENTOS_POR_FOTO } from "@/lib/papelitos-config";
 
-// Panel "Con su carita": un lugar por cada personaje desbloqueado con código.
+// Panel de Tu Foto, Tu Personaje / Tu Familia en la Historia: un lugar por cada personaje desbloqueado con código.
 export function PersonajesCarita({
   token,
   fotos,
@@ -128,7 +128,7 @@ export function PersonajesCarita({
             <Users className="size-4 text-brand" aria-hidden />
             ¿Y sus hermanos, mamá o papá?
           </p>
-          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">El Pack familia suma 4 personajes más, cada uno con su carita.</p>
+          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">Tu Familia en la Historia suma 4 personajes más, cada uno con su carita.</p>
           <a
             href={CHECKOUT_PACK_FAMILIA}
             className="mt-3 inline-flex h-12 items-center justify-center rounded-md bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-cta"

@@ -50,7 +50,7 @@ export const Route = createFileRoute("/api/hotmart")({
           .select("clave, unidades")
           .eq("hotmart_product_id", productId)
           .maybeSingle();
-        // Producto que no es de Papelitos: se ignora sin error para que Hotmart no reintente.
+        // Producto que no es de MiniMundos: se ignora sin error para que Hotmart no reintente.
         if (!producto) return new Response("producto ignorado", { status: 200 });
 
         const p = producto as { clave: string; unidades: number };

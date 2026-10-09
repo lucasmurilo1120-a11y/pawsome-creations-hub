@@ -1,4 +1,4 @@
-// Emisión de códigos para las páginas de códigos ("Con su carita" y "Pack familia").
+// Emisión de códigos para las páginas de códigos ("Tu Foto, Tu Personaje" y "Tu Familia en la Historia").
 //
 // Cada página tiene un token propio (en la tabla plataformas solo está su hash).
 // Un código: 6 letras/números, vale por `minutos_validez` (15) y se usa UNA vez.
