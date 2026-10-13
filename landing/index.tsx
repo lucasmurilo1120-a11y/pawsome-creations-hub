@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { z } from "zod";
 import { Camera, Palette, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,7 +20,7 @@ import demoSprite from "@/assets/marketing/demo-sprite.webp.asset.json";
 const BRAND = "MiniMundos";
 const CHECKOUT_URLS: Record<PlanKey, string> = { basic: "https://pay.hotmart.com/B107823945A?checkoutMode=10" };
 const SUPPORT_EMAIL = "lucasmurilo1120@gmail.com";
-const META_PIXEL_ID = "";
+const META_PIXEL_ID = "3164583463733404";
 const SITE_URL = ""; // URL pública del sitio, sin barra final (para la imagen al compartir)
 
 const TOTAL_PAGES = 21; // portada + 7 looks + 12 historias + certificado
@@ -403,6 +403,13 @@ function Demo() {
   const shown = name || "tu hijo";
   const labels = LOOK_LABELS[character] ?? LOOK_LABELS[0]!;
   const themeLabel = labels[theme] ?? labels[1]!;
+
+  const viewContentFired = useRef(false);
+  useEffect(() => {
+    if (viewContentFired.current || name.length < 2) return;
+    viewContentFired.current = true;
+    track("ViewContent", { content_name: "Demo con nombre" });
+  }, [name]);
 
   return (
     <section id="pruebalo" className="scroll-mt-4 bg-mist py-12 sm:py-20">
